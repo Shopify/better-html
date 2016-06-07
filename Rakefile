@@ -15,15 +15,16 @@ RDoc::Task.new(:rdoc) do |rdoc|
 end
 
 
+require 'rake/extensiontask'
 
-
+Rake::ExtensionTask.new("better_html_ext")
 
 
 Bundler::GemHelper.install_tasks
 
 require 'rake/testtask'
 
-Rake::TestTask.new(:test) do |t|
+Rake::TestTask.new(:test => :compile) do |t|
   t.libs << 'lib'
   t.libs << 'test'
   t.pattern = 'test/**/*_test.rb'
