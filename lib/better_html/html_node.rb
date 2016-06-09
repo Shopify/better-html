@@ -10,7 +10,7 @@ module BetterHtml
     def format(args)
       args = args.symbolize_keys
       fmt = Formatter.new(@template)
-      interpolator = BetterHtml::Interpolator.new(fmt.parser, true)
+      interpolator = Interpolator.new(fmt.parser, true)
       fmt.format_identifier do |identifier|
         value = args.fetch(identifier.to_sym)
         interpolator.to_safe_value(value, "%{#{identifier}}")
@@ -44,15 +44,15 @@ module BetterHtml
               "<#{@parser.tag_name} #{@parser.attribute_name}=#{@parser.attribute_value}#{identifier}> "\
               "try <#{@parser.tag_name} #{@parser.attribute_name}=\"#{@parser.attribute_value}#{identifier}\">."
             end
-          ERB::Util.html_escape_once(value.to_s).html_safe
+          ERB::Util.html_escape_once(value.to_s)
         elsif @parser.context == :attribute
-          ('"' + ERB::Util.html_escape_once(value.to_s) + '"').html_safe
+          ('"' + ERB::Util.html_escape_once(value.to_s) + '"')
         elsif @parser.context == :tag
           raise DontInterpolateHere, "Do not interpolate in a tag. "\
             "Instead of <#{@parser.tag_name} #{identifier}> please "\
             "try <#{@parser.tag_name} name=#{identifier}>."
         elsif @parser.context == :tag_name
-          if value.is_a?(HtmlNode) || value.html_safe?
+          if value.is_a?(HtmlNode)
             raise UnsafeHtmlError, "Refusing to interpolate HTML from `#{identifier}` "\
               "at: <#{@parser.tag_name}#{identifier}."
           end
@@ -63,16 +63,12 @@ module BetterHtml
 
           value.to_s
         elsif @parser.context == :rawtext
-          ERB::Util.html_escape_once(value.to_s).html_safe
+          ERB::Util.html_escape_once(value.to_s)
         elsif @parser.context == :none
           if value.is_a?(HtmlNode)
-            value.to_s.html_safe
-          elsif value.html_safe?
-            value
+            value.to_s
           else
-            out = "<!-- --------- #{value.class} -->"
-            out << ERB::Util.html_escape_once(value.to_s)
-            out.html_safe
+            ERB::Util.html_escape_once(value.to_s)
           end
         else
           raise InterpolatorError, "Tried to interpolated into unknown location #{@parser.context}."
