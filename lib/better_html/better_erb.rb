@@ -46,9 +46,9 @@ class BetterHtml::BetterErb
         :trim => (self.class.erb_trim_mode == "-")
       ).src
 
-      puts "--------------------"
-      puts "#{generator}"
-      puts "--------------------"
+      #puts "--------------------"
+      #puts "#{generator}"
+      #puts "--------------------"
 
       generator
     end

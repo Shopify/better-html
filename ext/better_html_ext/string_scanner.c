@@ -154,7 +154,6 @@ static int scan_text(struct string_scanner_t *ss)
 
 static int scan_marker(struct string_scanner_t *ss)
 {
-  uint32_t length = 0;
   char *identifier = NULL;
   uint32_t identifier_length = 0;
 
