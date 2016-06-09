@@ -104,6 +104,13 @@ class BetterHtml::HelperTest < ActiveSupport::TestCase
       "<a title=\"foo%{title}\">.", e.message
   end
 
+  test "#format html_safe string is no good" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      html('<a title="%{title}">').format({ title: 'foo'.html_safe })
+    end
+    assert_equal "Cowardly refusing to interpolate the value of %{title} which is marked html_safe.", e.message
+  end
+
   private
 
   def html(template)

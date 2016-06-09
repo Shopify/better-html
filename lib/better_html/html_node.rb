@@ -29,6 +29,12 @@ class BetterHtml::HtmlNode
 
   def format_identifier(args, parser, identifier)
     value = args.fetch(identifier)
+
+    if value.html_safe?
+      raise BetterHtml::UnsafeHtmlError, \
+        "Cowardly refusing to interpolate the value of %{#{identifier}} which is marked html_safe."
+    end
+
     if parser.context == :attribute_value
       unless parser.attribute_quoted?
         raise BetterHtml::DontInterpolateHere, "Do not interpolate without quotes around this "\
