@@ -92,7 +92,7 @@ class BetterHtml::HelperTest < ActiveSupport::TestCase
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
       html('<foo-%{title}-bar>').format({ title: html('foobar') })
     end
-    assert_equal "Refusing to interpolate HTML from `title` at: <foo-%{title}.", e.message
+    assert_equal "Refusing to interpolate HTML from `%{title}` at: <foo-%{title}.", e.message
   end
 
   test "#format inside unquoted attribute" do
