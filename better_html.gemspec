@@ -3,9 +3,6 @@ $:.push File.expand_path("../lib", __FILE__)
 # Maintain your gem's version:
 require "better_html/version"
 
-require 'rake'
-require 'rake/extensiontask'
-
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = "better_html"
@@ -21,7 +18,7 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
   s.require_paths = ["lib", "ext"]
 
+  s.add_development_dependency 'rake', '~> 0'
   s.add_development_dependency 'rake-compiler', '~> 0'
-
-  Rake::ExtensionTask.new('better_html_ext', s)
+  s.add_development_dependency 'activesupport', '~> 4.2.1'
 end
