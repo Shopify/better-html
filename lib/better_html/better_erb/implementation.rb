@@ -6,9 +6,9 @@ class BetterHtml::BetterErb
     end
 
     def add_postamble(src)
-      src << "puts '--------------------';\n"
-      src << "puts @output_buffer.to_s;\n"
-      src << "puts '--------------------';\n"
+      #src << "puts '--------------------';\n"
+      #src << "puts @output_buffer.to_s;\n"
+      #src << "puts '--------------------';\n"
       super
     end
 
