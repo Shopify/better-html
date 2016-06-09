@@ -2,6 +2,10 @@ require 'html_tokenizer'
 require 'active_support/core_ext/hash/keys'
 require 'active_support/core_ext/string/output_safety'
 
+class BetterHtml::HtmlNodeError < RuntimeError; end
+class BetterHtml::DontInterpolateHere < BetterHtml::HtmlNodeError; end
+class BetterHtml::UnsafeHtmlError < BetterHtml::HtmlNodeError; end
+
 class BetterHtml::HtmlNode
   def initialize(template)
     @template = template
@@ -24,10 +28,35 @@ class BetterHtml::HtmlNode
   private
 
   def format_identifier(args, parser, identifier)
+    value = args.fetch(identifier)
     if parser.context == :attribute_value
-      ERB::Util.html_escape_once(args.fetch(identifier))
+      unless parser.attribute_quoted?
+        raise BetterHtml::DontInterpolateHere, "Do not interpolate without quotes around this "\
+          "attribute value. Instead of "\
+          "<#{parser.tag_name} #{parser.attribute_name}=#{parser.attribute_value}%{#{identifier}}> "\
+          "try <#{parser.tag_name} #{parser.attribute_name}=\"#{parser.attribute_value}%{#{identifier}}\">."
+        end
+      ERB::Util.html_escape_once(value.to_s)
+    elsif parser.context == :attribute
+      '"' + ERB::Util.html_escape_once(value.to_s) + '"'
+    elsif parser.context == :tag
+      raise BetterHtml::DontInterpolateHere, "Do not interpolate in a tag. "\
+        "Instead of <#{parser.tag_name} %{#{identifier}}> please try <#{parser.tag_name} name=%{#{identifier}}>."
+    elsif parser.context == :tag_name
+      if value.is_a?(BetterHtml::HtmlNode)
+        raise BetterHtml::UnsafeHtmlError, "Refusing to interpolate HTML from `#{identifier}` at: <#{parser.tag_name}%{#{identifier}}."
+      end
+      if value.is_a?(BetterHtml::HtmlNode) || value.include?('/') || value.include?(' ')
+        raise BetterHtml::UnsafeHtmlError, "Detected / or whitespace interpolated in a tag name around: <#{parser.tag_name}%{#{identifier}}."
+      end
+    elsif parser.context == :none
+      if value.is_a?(BetterHtml::HtmlNode)
+        value.to_s
+      else
+        ERB::Util.html_escape_once(value.to_s)
+      end
     else
-      args.fetch(identifier)
+      parser.context
     end
   end
 
