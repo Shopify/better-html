@@ -193,19 +193,24 @@ void scan_all(struct string_scanner_t *ss)
 static VALUE string_scanner_scan_method(VALUE self, VALUE source)
 {
   struct string_scanner_t *ss = NULL;
+  char *c_source;
+
+  if(NIL_P(source))
+    return Qnil;
 
   Check_Type(source, T_STRING);
   StringScanner_Get_Struct(self, ss);
 
+  c_source = StringValueCStr(source);
   ss->scan.cursor = 0;
-  ss->scan.length = RSTRING_LEN(source);
+  ss->scan.length = strlen(c_source);
 
   ss->scan.string = calloc(1, ss->scan.length+1);
-  strncpy(ss->scan.string, RSTRING_PTR(source), ss->scan.length);
+  strncpy(ss->scan.string, c_source, ss->scan.length);
 
   scan_all(ss);
 
-  return Qnil;
+  return Qtrue;
 }
 
 void Init_better_html_string_scanner(VALUE mBetterHtml)
