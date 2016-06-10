@@ -23,11 +23,11 @@ module BetterHtml
           '"' + CGI.escapeHTML(value.to_s) + '"'
 
         elsif @parser.context == :tag
-          raise DontInterpolateHere, "Do not interpolate in a tag. "\
-            "Instead of <#{@parser.tag_name} #{identifier}> please "\
-            "try <#{@parser.tag_name} name=#{identifier}>."
+          # FIXME: in a <tag ...here...> we never allow interpolation
+          #raise DontInterpolateHere, "Do not interpolate in a tag. "\
+          #  "Instead of <#{@parser.tag_name} #{identifier}> please "\
+          #  "try <#{@parser.tag_name} name=#{identifier}>."
 
-          # in a <tag ...here...> we never allow interpolation
         elsif @parser.context == :tag_name
           if value.include?('/') || value.include?(' ')
             raise UnsafeHtmlError, "Detected / or whitespace interpolated in a "\
