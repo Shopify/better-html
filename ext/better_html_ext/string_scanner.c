@@ -214,7 +214,7 @@ static VALUE string_scanner_scan_method(VALUE self, VALUE source)
   ss->scan.cursor = 0;
   ss->scan.length = strlen(c_source);
 
-  ss->scan.string = REALLOC_N(ss->scan.string, char, ss->scan.length+1);
+  REALLOC_N(ss->scan.string, char, ss->scan.length+1);
   strncpy(ss->scan.string, c_source, ss->scan.length);
 
   scan_all(ss);
