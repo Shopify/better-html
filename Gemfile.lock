@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/EiNSTeiN-/html_tokenizer.git
-  revision: e2bc86e8b5f4301c7d4636bd3f0411fd4e67c4d8
+  revision: 90016433ee8b40d680dbb5e9ac2e3e89e8b10d7f
   specs:
     html_tokenizer (0.0.1)
 

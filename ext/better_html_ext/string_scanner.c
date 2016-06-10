@@ -3,14 +3,6 @@
 
 static VALUE cStringScanner = Qnil;
 
-VALUE text_symbol,
-  percent_symbol,
-  marker_start_symbol,
-  marker_end_symbol,
-  identifier_symbol,
-  malformed_symbol
-;
-
 static void string_scanner_mark(void *ptr)
 {}
 
@@ -63,15 +55,34 @@ void string_scanner_init(struct string_scanner_t *ss)
   return;
 }
 
-static void string_scanner_yield_tag(struct string_scanner_t *ss, VALUE sym, unsigned long int length, void *data)
+VALUE string_scanner_token_type_to_symbol(enum ss_token_type type)
 {
-  rb_yield_values(3, sym, INT2NUM(ss->scan.cursor), INT2NUM(ss->scan.cursor + length));
+  switch(type) {
+  case SS_TOKEN_NONE:
+    return ID2SYM(rb_intern("none"));
+  case SS_TOKEN_TEXT:
+    return ID2SYM(rb_intern("text"));
+  case SS_TOKEN_PERCENT:
+    return ID2SYM(rb_intern("percent"));
+  case SS_TOKEN_MARKER_START:
+    return ID2SYM(rb_intern("marker_start"));
+  case SS_TOKEN_MARKER_END:
+    return ID2SYM(rb_intern("marker_end"));
+  case SS_TOKEN_IDENTIFIER:
+    return ID2SYM(rb_intern("identifier"));
+  case SS_TOKEN_MALFORMED:
+    return ID2SYM(rb_intern("malformed"));
+  }
+}
+static void string_scanner_yield_tag(struct string_scanner_t *ss, enum ss_token_type type, unsigned long int length, void *data)
+{
+  rb_yield_values(3, string_scanner_token_type_to_symbol(type), INT2NUM(ss->scan.cursor), INT2NUM(ss->scan.cursor + length));
 }
 
-static void string_scanner_callback(struct string_scanner_t *ss, VALUE sym, unsigned long int length)
+static void string_scanner_callback(struct string_scanner_t *ss, enum ss_token_type type, unsigned long int length)
 {
   if(ss->f_callback)
-    ss->f_callback(ss, sym, length, ss->callback_data);
+    ss->f_callback(ss, type, length, ss->callback_data);
   ss->scan.cursor += length;
 }
 
@@ -147,16 +158,16 @@ static int scan_text(struct string_scanner_t *ss)
   unsigned long int length = 0;
 
   if(is_percent(&ss->scan)) {
-    string_scanner_callback(ss, percent_symbol, 2);
+    string_scanner_callback(ss, SS_TOKEN_PERCENT, 2);
     return 1;
   }
   else if(is_marker_start(&ss->scan)) {
-    string_scanner_callback(ss, marker_start_symbol, 2);
+    string_scanner_callback(ss, SS_TOKEN_MARKER_START, 2);
     ss->context = SS_MARKER;
     return 1;
   }
   else if(is_text(&ss->scan, &length)) {
-    string_scanner_callback(ss, text_symbol, length);
+    string_scanner_callback(ss, SS_TOKEN_TEXT, length);
     return 1;
   }
   return 0;
@@ -168,12 +179,12 @@ static int scan_marker(struct string_scanner_t *ss)
   unsigned long int identifier_length = 0;
 
   if(is_marker_end(&ss->scan)) {
-    string_scanner_callback(ss, marker_end_symbol, 1);
+    string_scanner_callback(ss, SS_TOKEN_MARKER_END, 1);
     ss->context = SS_TEXT;
     return 1;
   }
   else if(is_identifier(&ss->scan, &identifier, &identifier_length)) {
-    string_scanner_callback(ss, identifier_symbol, identifier_length);
+    string_scanner_callback(ss, SS_TOKEN_IDENTIFIER, identifier_length);
     return 1;
   }
   return 0;
@@ -194,7 +205,7 @@ static void string_scanner_scan_all(struct string_scanner_t *ss)
 {
   while(!eos(&ss->scan) && scan_once(ss)) {}
   if(!eos(&ss->scan)) {
-    string_scanner_callback(ss, malformed_symbol, length_remaining(&ss->scan));
+    string_scanner_callback(ss, SS_TOKEN_MALFORMED, length_remaining(&ss->scan));
   }
   return;
 }
@@ -231,10 +242,4 @@ void Init_better_html_string_scanner(VALUE mBetterHtml)
   rb_define_alloc_func(cStringScanner, string_scanner_allocate);
   rb_define_method(cStringScanner, "initialize", string_scanner_initialize_method, 0);
   rb_define_method(cStringScanner, "scan", string_scanner_scan_method, 1);
-
-  text_symbol = ID2SYM(rb_intern("text"));
-  percent_symbol = ID2SYM(rb_intern("percent"));
-  marker_start_symbol = ID2SYM(rb_intern("marker_start"));
-  marker_end_symbol = ID2SYM(rb_intern("marker_end"));
-  identifier_symbol = ID2SYM(rb_intern("identifier"));
 }
