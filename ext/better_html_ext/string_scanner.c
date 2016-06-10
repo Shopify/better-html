@@ -190,7 +190,7 @@ static int scan_once(struct string_scanner_t *ss)
   return 0;
 }
 
-void scan_all(struct string_scanner_t *ss)
+static void string_scanner_scan_all(struct string_scanner_t *ss)
 {
   while(!eos(&ss->scan) && scan_once(ss)) {}
   if(!eos(&ss->scan)) {
@@ -217,7 +217,7 @@ static VALUE string_scanner_scan_method(VALUE self, VALUE source)
   REALLOC_N(ss->scan.string, char, ss->scan.length+1);
   strncpy(ss->scan.string, c_source, ss->scan.length);
 
-  scan_all(ss);
+  string_scanner_scan_all(ss);
 
   xfree(ss->scan.string);
   ss->scan.string = NULL;

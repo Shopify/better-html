@@ -30,7 +30,6 @@ struct string_scanner_t {
 
 void Init_better_html_string_scanner(VALUE mBetterHtml);
 void string_scanner_init(struct string_scanner_t *tk);
-void scan_all(struct string_scanner_t *tk);
 
 extern const rb_data_type_t string_scanner_data_type;
 #define StringScanner_Get_Struct(obj, sval) TypedData_Get_Struct(obj, struct string_scanner_t, &string_scanner_data_type, sval)
