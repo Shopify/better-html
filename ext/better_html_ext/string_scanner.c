@@ -17,7 +17,8 @@ static void string_scanner_mark(void *ptr)
 static void string_scanner_free(void *ptr)
 {
   struct string_scanner_t *ss = ptr;
-  xfree(ss);
+  if(ss)
+    xfree(ss);
 }
 
 static size_t string_scanner_memsize(const void *ptr)
@@ -36,7 +37,7 @@ const rb_data_type_t string_scanner_data_type = {
 static VALUE string_scanner_allocate(VALUE klass)
 {
   VALUE obj;
-  struct string_scanner_t *ss;
+  struct string_scanner_t *ss = NULL;
 
   obj = TypedData_Make_Struct(klass, struct string_scanner_t, &string_scanner_data_type, ss);
 
@@ -53,12 +54,12 @@ void string_scanner_init(struct string_scanner_t *ss)
   return;
 }
 
-static void string_scanner_yield_tag(struct string_scanner_t *ss, VALUE sym, uint32_t length, void *data)
+static void string_scanner_yield_tag(struct string_scanner_t *ss, VALUE sym, unsigned long int length, void *data)
 {
   rb_yield_values(3, sym, INT2NUM(ss->scan.cursor), INT2NUM(ss->scan.cursor + length));
 }
 
-static void string_scanner_callback(struct string_scanner_t *ss, VALUE sym, uint32_t length)
+static void string_scanner_callback(struct string_scanner_t *ss, VALUE sym, unsigned long int length)
 {
   if(ss->f_callback)
     ss->f_callback(ss, sym, length, ss->callback_data);
@@ -81,14 +82,14 @@ static inline int eos(struct scan_t *scan)
   return scan->cursor >= scan->length;
 }
 
-static inline int length_remaining(struct scan_t *scan)
+static inline unsigned long int length_remaining(struct scan_t *scan)
 {
   return scan->length - scan->cursor;
 }
 
-static int is_text(struct scan_t *scan, uint32_t *length)
+static int is_text(struct scan_t *scan, unsigned long int *length)
 {
-  uint32_t i;
+  unsigned long int i;
 
   *length = 0;
   for(i = scan->cursor;i < scan->length; i++, (*length)++) {
@@ -118,9 +119,9 @@ static inline int is_marker_end(struct scan_t *scan)
     scan->string[scan->cursor] == '}';
 }
 
-static int is_identifier(struct scan_t *scan, const char **identifier, uint32_t *identifier_length)
+static int is_identifier(struct scan_t *scan, const char **identifier, unsigned long int *identifier_length)
 {
-  uint32_t i;
+  unsigned long int i;
 
   *identifier_length = 0;
   *identifier = &scan->string[scan->cursor];
@@ -134,7 +135,7 @@ static int is_identifier(struct scan_t *scan, const char **identifier, uint32_t 
 
 static int scan_text(struct string_scanner_t *ss)
 {
-  uint32_t length = 0;
+  unsigned long int length = 0;
 
   if(is_percent(&ss->scan)) {
     string_scanner_callback(ss, percent_symbol, 2);
@@ -154,8 +155,8 @@ static int scan_text(struct string_scanner_t *ss)
 
 static int scan_marker(struct string_scanner_t *ss)
 {
-  char *identifier = NULL;
-  uint32_t identifier_length = 0;
+  const char *identifier = NULL;
+  unsigned long int identifier_length = 0;
 
   if(is_marker_end(&ss->scan)) {
     string_scanner_callback(ss, marker_end_symbol, 1);
@@ -196,9 +197,11 @@ static VALUE string_scanner_scan_method(VALUE self, VALUE source)
   Check_Type(source, T_STRING);
   StringScanner_Get_Struct(self, ss);
 
-  ss->scan.string = RSTRING_PTR(source);
   ss->scan.cursor = 0;
   ss->scan.length = RSTRING_LEN(source);
+
+  ss->scan.string = calloc(1, ss->scan.length+1);
+  strncpy(ss->scan.string, RSTRING_PTR(source), ss->scan.length);
 
   scan_all(ss);
 

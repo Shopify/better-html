@@ -14,16 +14,16 @@ extern VALUE text_symbol,
 ;
 
 struct scan_t {
-  const char *string;
-  uint32_t cursor;
-  uint32_t length;
+  char *string;
+  unsigned long int cursor;
+  unsigned long int length;
 };
 
 struct string_scanner_t {
   enum string_scanner_context context;
 
   void *callback_data;
-  void (*f_callback)(struct string_scanner_t *ss, VALUE sym, uint32_t length, void *data);
+  void (*f_callback)(struct string_scanner_t *ss, VALUE sym, unsigned long int length, void *data);
 
   struct scan_t scan;
 };
