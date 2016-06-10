@@ -17,8 +17,13 @@ static void string_scanner_mark(void *ptr)
 static void string_scanner_free(void *ptr)
 {
   struct string_scanner_t *ss = ptr;
-  if(ss)
+  if(ss) {
+    if(ss->scan.string) {
+      xfree(ss->scan.string);
+      ss->scan.string = NULL;
+    }
     xfree(ss);
+  }
 }
 
 static size_t string_scanner_memsize(const void *ptr)
@@ -46,6 +51,10 @@ static VALUE string_scanner_allocate(VALUE klass)
 
 void string_scanner_init(struct string_scanner_t *ss)
 {
+  ss->scan.string = NULL;
+  ss->scan.cursor = 0;
+  ss->scan.length = 0;
+
   ss->context = SS_TEXT;
 
   ss->callback_data = NULL;
@@ -205,10 +214,13 @@ static VALUE string_scanner_scan_method(VALUE self, VALUE source)
   ss->scan.cursor = 0;
   ss->scan.length = strlen(c_source);
 
-  ss->scan.string = calloc(1, ss->scan.length+1);
+  ss->scan.string = REALLOC_N(ss->scan.string, char, ss->scan.length+1);
   strncpy(ss->scan.string, c_source, ss->scan.length);
 
   scan_all(ss);
+
+  xfree(ss->scan.string);
+  ss->scan.string = NULL;
 
   return Qtrue;
 }
