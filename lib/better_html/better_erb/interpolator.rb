@@ -19,8 +19,10 @@ module BetterHtml
           CGI.escapeHTML(value.to_s)
 
         elsif @parser.context == :attribute
-                # in a <tag attr=...here...> we always escape and add quotes
-          '"' + CGI.escapeHTML(value.to_s) + '"'
+          raise DontInterpolateHere, "Do not interpolate without quotes around this "\
+            "attribute value. Instead of "\
+            "<#{@parser.tag_name} #{@parser.attribute_name}=#{identifier}> "\
+            "try <#{@parser.tag_name} #{@parser.attribute_name}=\"#{identifier}\">."
 
         elsif @parser.context == :tag
           # FIXME: in a <tag ...here...> we never allow interpolation
@@ -28,6 +30,7 @@ module BetterHtml
           #  "Instead of <#{@parser.tag_name} #{identifier}> please "\
           #  "try <#{@parser.tag_name} name=#{identifier}>."
 
+          value
         elsif @parser.context == :tag_name
           if value.include?('/') || value.include?(' ')
             raise UnsafeHtmlError, "Detected / or whitespace interpolated in a "\
