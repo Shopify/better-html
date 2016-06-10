@@ -43,7 +43,7 @@ module BetterHtml
               "attribute value. Instead of "\
               "<#{@parser.tag_name} #{@parser.attribute_name}=#{@parser.attribute_value}#{identifier}> "\
               "try <#{@parser.tag_name} #{@parser.attribute_name}=\"#{@parser.attribute_value}#{identifier}\">."
-            end
+          end
           ERB::Util.html_escape_once(value.to_s)
         elsif @parser.context == :attribute
           ('"' + ERB::Util.html_escape_once(value.to_s) + '"')

@@ -13,7 +13,7 @@ class BetterHtml::HelperTest < ActiveSupport::TestCase
 
   test "#format non existent key" do
     e = assert_raises(KeyError) do
-      result = html("foo %{nonexistent} baz").format({})
+      html("foo %{nonexistent} baz").format({})
     end
     assert_equal "key not found: :nonexistent", e.message
   end
