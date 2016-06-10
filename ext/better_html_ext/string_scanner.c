@@ -73,7 +73,9 @@ VALUE string_scanner_token_type_to_symbol(enum ss_token_type type)
   case SS_TOKEN_MALFORMED:
     return ID2SYM(rb_intern("malformed"));
   }
+  return Qnil;
 }
+
 static void string_scanner_yield_tag(struct string_scanner_t *ss, enum ss_token_type type, unsigned long int length, void *data)
 {
   rb_yield_values(3, string_scanner_token_type_to_symbol(type), INT2NUM(ss->scan.cursor), INT2NUM(ss->scan.cursor + length));
