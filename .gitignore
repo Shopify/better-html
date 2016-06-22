@@ -1,3 +1,4 @@
+*.bundle
 *.rbc
 capybara-*.html
 .rspec
