@@ -9,7 +9,6 @@ static void string_scanner_mark(void *ptr)
 static void string_scanner_free(void *ptr)
 {
   struct string_scanner_t *ss = ptr;
-  printf("--- string_scanner: string_scanner_free\n");
   if(ss) {
     if(ss->scan.string) {
       xfree(ss->scan.string);
@@ -231,16 +230,10 @@ static VALUE string_scanner_scan_method(VALUE self, VALUE source)
   REALLOC_N(ss->scan.string, char, ss->scan.length+1);
   strncpy(ss->scan.string, c_source, ss->scan.length);
 
-  printf("--- string_scanner: start\n");
-
   string_scanner_scan_all(ss);
-
-  printf("--- string_scanner: end\n");
 
   xfree(ss->scan.string);
   ss->scan.string = NULL;
-
-  printf("--- string_scanner: string xfree\n");
 
   return Qtrue;
 }
