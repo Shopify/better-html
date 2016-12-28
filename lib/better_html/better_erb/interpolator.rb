@@ -48,6 +48,15 @@ module BetterHtml
 
           # in a <script> or something we never interpolate
           value.to_s
+        elsif @parser.context == :comment
+
+          # in a <!-- ...here --> we disallow -->
+          unless value =~ /-->/
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+              "into a html comment around: #{@parser.comment_text}."
+          end
+
+          value
         elsif @parser.context == :none
           if value.is_a?(ValidatedOutputBuffer)
             # in html context, never escape a ValidatedOutputBuffer
@@ -61,7 +70,7 @@ module BetterHtml
             end
           end
         else
-          raise InterpolatorError, "Tried to interpolated into unknown location #{@parser.context}."
+          raise InterpolatorError, "Tried to interpolate into unknown location #{@parser.context}."
         end
       end
 
