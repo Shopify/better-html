@@ -1,3 +1,5 @@
+require 'action_view'
+
 class BetterHtml::BetterErb
   class Implementation < ActionView::Template::Handlers::Erubis
     def add_preamble(src)

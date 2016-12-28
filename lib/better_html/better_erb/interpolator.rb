@@ -65,7 +65,7 @@ module BetterHtml
           else
             # in html context, follow auto_escape rule
             if auto_escape
-              auto_escape_interpolated_argument(value)
+              auto_escape_interpolated_argument(value.to_s).html_safe
             else
               value.to_s
             end
@@ -78,7 +78,7 @@ module BetterHtml
       private
 
       def auto_escape_interpolated_argument(arg)
-        arg.html_safe? ? arg.to_s : CGI.escapeHTML(arg.to_s)
+        arg.html_safe? ? arg : CGI.escapeHTML(arg)
       end
     end
   end
