@@ -52,7 +52,7 @@ module BetterHtml
           value = value.to_s
 
           # in a <!-- ...here --> we disallow -->
-          unless value =~ /-->/
+          if value =~ /-->/
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
               "into a html comment around: #{@parser.comment_text}."
           end
