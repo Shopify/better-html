@@ -27,7 +27,8 @@ class BetterHtml::BetterErb
       # wrong, we can still find an encoding tag
       # (<%# encoding %>) inside the String using a regular
       # expression
-      puts "[GENERATE] #{template.virtual_path} #{template.formats.inspect}"
+
+      puts "[GENERATE] #{template.virtual_path} #{template.identifier.inspect} #{template.handler.inspect} #{template.formats.inspect}"
       template_source = template.source.dup.force_encoding(Encoding::ASCII_8BIT)
 
       erb = template_source.gsub(ActionView::Template::Handlers::ERB::ENCODING_TAG, '')
