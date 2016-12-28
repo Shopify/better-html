@@ -1,4 +1,5 @@
 #include <ruby.h>
+#include "better_html.h"
 #include "string_scanner.h"
 
 static VALUE cStringScanner = Qnil;
@@ -11,9 +12,11 @@ static void string_scanner_free(void *ptr)
   struct string_scanner_t *ss = ptr;
   if(ss) {
     if(ss->scan.string) {
+      DBG_PRINT("ss=%p xfree(ss->scan.string) %p", ss, ss->scan.string);
       xfree(ss->scan.string);
       ss->scan.string = NULL;
     }
+    DBG_PRINT("ss=%p xfree(ss)", ss);
     xfree(ss);
   }
 }
@@ -37,6 +40,7 @@ static VALUE string_scanner_allocate(VALUE klass)
   struct string_scanner_t *ss = NULL;
 
   obj = TypedData_Make_Struct(klass, struct string_scanner_t, &string_scanner_data_type, ss);
+  DBG_PRINT("ss=%p allocate", ss);
 
   return obj;
 }
@@ -93,6 +97,8 @@ static VALUE string_scanner_initialize_method(VALUE self)
   struct string_scanner_t *ss = NULL;
 
   StringScanner_Get_Struct(self, ss);
+  DBG_PRINT("ss=%p initialize", ss);
+
   string_scanner_init(ss);
   ss->f_callback = string_scanner_yield_tag;
 
@@ -232,6 +238,7 @@ static VALUE string_scanner_scan_method(VALUE self, VALUE source)
 
   string_scanner_scan_all(ss);
 
+  DBG_PRINT("ss=%p xfree(ss->scan.string) %p", ss, ss->scan.string);
   xfree(ss->scan.string);
   ss->scan.string = NULL;
 
