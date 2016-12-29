@@ -41,18 +41,22 @@ module BetterHtml
 
           value
         elsif @parser.context == :rawtext
-          value = value.to_s
+          value = auto_escape_interpolated_argument(value.to_s).html_safe
 
           if @parser.tag_name.downcase == 'script' &&
               (value =~ /<!--/ || value =~ /<script/i || value =~ /<\/script/i)
             # https://www.w3.org/TR/html5/scripting-1.html#restrictions-for-contents-of-script-elements
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
               "into a script tag around: <script>#{@parser.rawtext_text}#{identifier}."
+          elsif value =~ /<#{Regexp.escape(@parser.tag_name.downcase)}/i ||
+              value =~ /<\/#{Regexp.escape(@parser.tag_name.downcase)}/i
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+              "into a #{@parser.tag_name.downcase} tag around: <#{@parser.tag_name}>#{@parser.rawtext_text}#{identifier}."
           end
 
           value
         elsif @parser.context == :comment
-          value = value.to_s
+          value = auto_escape_interpolated_argument(value.to_s).html_safe
 
           # in a <!-- ...here --> we disallow -->
           if value =~ /-->/
