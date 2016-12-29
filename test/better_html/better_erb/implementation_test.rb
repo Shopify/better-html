@@ -18,6 +18,39 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       render("<foo><%= bar %><foo>", { bar: '<bar />' })
   end
 
+  test "interpolate non-html_safe inside attribute is escaped" do
+    assert_equal "<a href=\" &#39;&quot;&gt;x \">",
+      render("<a href=\"<%= value %>\">", { value: ' \'">x ' })
+  end
+
+  test "interpolate html_safe inside attribute is magically force-escaped" do
+    assert_equal "<a href=\" &#39;&quot;&gt;x \">",
+      render("<a href=\"<%= value %>\">", { value: ' \'">x '.html_safe })
+  end
+
+  test "interpolate html_safe inside single quoted attribute" do
+    assert_equal "<a href=\' &#39;&quot;&gt;x \'>",
+      render("<a href=\'<%= value %>\'>", { value: ' \'">x '.html_safe })
+  end
+
+  test "interpolate in attribute without quotes" do
+    e = assert_raises(BetterHtml::DontInterpolateHere) do
+      render("<a href=<%= value %>>", { value: "" })
+    end
+    assert_equal "Do not interpolate without quotes around this "\
+      "attribute value. Instead of <a href=<%= your code %>> "\
+      "try <a href=\"<%= your code %>\">.", e.message
+  end
+
+  test "interpolate in attribute after value" do
+    e = assert_raises(BetterHtml::DontInterpolateHere) do
+      render("<a href=something<%= value %>>", { value: "" })
+    end
+    assert_equal "Do not interpolate without quotes around this "\
+      "attribute value. Instead of <a href=something<%= your code %>> "\
+      "try <a href=\"something<%= your code %>\">.", e.message
+  end
+
   private
 
   def render(source, locals)
