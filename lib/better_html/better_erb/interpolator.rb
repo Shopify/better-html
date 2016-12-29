@@ -45,6 +45,7 @@ module BetterHtml
           # in a <script> or something we never escape
           if @parser.tag_name.downcase == 'script' &&
               (value =~ /<!--/ || value =~ /<script/i || value =~ /<\/script/i)
+            # https://www.w3.org/TR/html5/scripting-1.html#restrictions-for-contents-of-script-elements
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
               "into a script tag around: <script>#{@parser.rawtext_text}#{identifier}."
           end
