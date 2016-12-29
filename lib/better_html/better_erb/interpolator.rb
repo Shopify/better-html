@@ -41,7 +41,7 @@ module BetterHtml
           value
         elsif @parser.context == :rawtext
 
-          # in a <script> or something we never interpolate
+          # in a <script> or something we never escape
           value.to_s
         elsif @parser.context == :comment
           value = value.to_s
@@ -49,7 +49,7 @@ module BetterHtml
           # in a <!-- ...here --> we disallow -->
           if value =~ /-->/
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
-              "into a html comment around: #{@parser.comment_text}."
+              "into a html comment around: <!--#{@parser.comment_text}#{identifier}."
           end
 
           value

@@ -80,6 +80,19 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       "into a tag name around: <tag-<%= your code %>.", e.message
   end
 
+  test "interpolate in comment" do
+    assert_equal "<!-- safe -->",
+      render("<!-- <%= value %> -->", { value: "safe" })
+  end
+
+  test "interpolate in comment with end-of-comment" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<!-- <%= value %> -->", { value: "-->" })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a html comment around: <!-- <%= your code %>.", e.message
+  end
+
   private
 
   def render(source, locals)
