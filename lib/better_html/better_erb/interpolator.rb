@@ -42,7 +42,6 @@ module BetterHtml
         elsif @parser.context == :rawtext
           value = value.to_s
 
-          # in a <script> or something we never escape
           if @parser.tag_name.downcase == 'script' &&
               (value =~ /<!--/ || value =~ /<script/i || value =~ /<\/script/i)
             # https://www.w3.org/TR/html5/scripting-1.html#restrictions-for-contents-of-script-elements
@@ -50,7 +49,6 @@ module BetterHtml
               "into a script tag around: <script>#{@parser.rawtext_text}#{identifier}."
           end
 
-          puts "rawtext #{}"
           value
         elsif @parser.context == :comment
           value = value.to_s
