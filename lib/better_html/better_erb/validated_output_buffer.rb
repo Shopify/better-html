@@ -22,11 +22,10 @@ class BetterHtml::BetterErb
 
     def <<(text)
       return if text.nil?
-      as_str = text.to_s
 
       # Appends the result of some erb code being called.
       # Escape the result unless it is marked as html_safe.
-      as_str = @interpolator.to_safe_value(as_str, "<%= your code %>", true)
+      as_str = @interpolator.to_safe_value(text, "<%= your code %>", true)
       @parser.parse(as_str)
 
     rescue => e
@@ -40,11 +39,10 @@ class BetterHtml::BetterErb
 
     def safe_expr_append=(text)
       return if text.nil?
-      as_str = text.to_s
 
       # Same as safe_append= but for a ruby expression.
       # Do not escape the result, it is deemed to be safe already.
-      as_str = @interpolator.to_safe_value(as_str, "<%= your code %>", false)
+      as_str = @interpolator.to_safe_value(text, "<%= your code %>", false)
       @parser.parse(as_str)
 
     rescue => e

@@ -131,11 +131,25 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       "into a script tag around: <script> foo <%= your code %>.", e.message
   end
 
+  test "interpolate html_attributes" do
+    assert_equal "<a foo=\"bar\">",
+      render("<a <%= html_attributes(foo: 'bar') %>>")
+  end
+
+  test "interpolate without html_attributes" do
+    e = assert_raises(BetterHtml::DontInterpolateHere) do
+      render("<a <%= 'foo=\"bar\"' %>>")
+    end
+    assert_equal "Do not interpolate in a tag. Instead "\
+      "of <a <%= your code %>> please try <a <%= html_attributes(attr: value) %>>.", e.message
+  end
+
   private
 
-  def render(source, locals)
+  def render(source, locals={})
     src = BetterHtml::BetterErb::Implementation.new(source).src
     context = OpenStruct.new(locals)
+    context.extend(BetterHtml::Helper)
     context.instance_eval(src)
   end
 end

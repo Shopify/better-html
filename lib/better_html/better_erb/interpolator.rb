@@ -25,12 +25,13 @@ module BetterHtml
             "try <#{@parser.tag_name} #{@parser.attribute_name}=\"#{identifier}\">."
 
         elsif @parser.context == :tag
-          # FIXME: in a <tag ...here...> we never allow interpolation
-          #raise DontInterpolateHere, "Do not interpolate in a tag. "\
-          #  "Instead of <#{@parser.tag_name} #{identifier}> please "\
-          #  "try <#{@parser.tag_name} name=#{identifier}>."
+          unless value.is_a?(BetterHtml::HtmlAttributes)
+            raise DontInterpolateHere, "Do not interpolate in a tag. "\
+              "Instead of <#{@parser.tag_name} #{identifier}> please "\
+              "try <#{@parser.tag_name} <%= html_attributes(attr: value) %>>."
+          end
 
-          value
+          value.to_s
         elsif @parser.context == :tag_name
           value = value.to_s
           unless value =~ /\A[a-z0-9\:\-]+\z/
