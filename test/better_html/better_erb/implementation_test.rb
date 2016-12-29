@@ -93,6 +93,44 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       "into a html comment around: <!-- <%= your code %>.", e.message
   end
 
+  test "interpolate in script tag" do
+    assert_equal "<script> foo safe bar<script>",
+      render("<script> foo <%= value %> bar<script>", { value: "safe" })
+  end
+
+  test "interpolate in script tag with start of comment" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<script> foo <%= value %> bar<script>", { value: "<!--" })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a script tag around: <script> foo <%= your code %>.", e.message
+  end
+
+  test "interpolate in script tag with start of script" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<script> foo <%= value %> bar<script>", { value: "<script" })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a script tag around: <script> foo <%= your code %>.", e.message
+  end
+
+
+  test "interpolate in script tag with start of script case insensitive" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<script> foo <%= value %> bar<script>", { value: "<ScRIpT" })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a script tag around: <script> foo <%= your code %>.", e.message
+  end
+
+  test "interpolate in script tag with end of script" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<script> foo <%= value %> bar<script>", { value: "</script" })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a script tag around: <script> foo <%= your code %>.", e.message
+  end
+
   private
 
   def render(source, locals)

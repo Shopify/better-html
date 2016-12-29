@@ -40,9 +40,17 @@ module BetterHtml
 
           value
         elsif @parser.context == :rawtext
+          value = value.to_s
 
           # in a <script> or something we never escape
-          value.to_s
+          if @parser.tag_name.downcase == 'script' &&
+              (value =~ /<!--/ || value =~ /<script/i || value =~ /<\/script/i)
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+              "into a script tag around: <script>#{@parser.rawtext_text}#{identifier}."
+          end
+
+          puts "rawtext #{}"
+          value
         elsif @parser.context == :comment
           value = value.to_s
 
