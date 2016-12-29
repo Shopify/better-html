@@ -51,6 +51,35 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       "try <a href=\"something<%= your code %>\">.", e.message
   end
 
+  test "interpolate in tag name" do
+    assert_equal "<tag-safe-foo>",
+      render("<tag-<%= value %>-foo>", { value: "safe" })
+  end
+
+  test "interpolate in tag name with space" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<tag-<%= value %>-foo>", { value: "un safe" })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a tag name around: <tag-<%= your code %>.", e.message
+  end
+
+  test "interpolate in tag name with slash" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<tag-<%= value %>-foo>", { value: "un/safe" })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a tag name around: <tag-<%= your code %>.", e.message
+  end
+
+  test "interpolate in tag name with end of tag" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<tag-<%= value %>-foo>", { value: "><script>" })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a tag name around: <tag-<%= your code %>.", e.message
+  end
+
   private
 
   def render(source, locals)

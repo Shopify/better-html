@@ -33,11 +33,6 @@ module BetterHtml
           value
         elsif @parser.context == :tag_name
           value = value.to_s
-          if value.include?('/') || value.include?(' ')
-            raise UnsafeHtmlError, "Detected / or whitespace interpolated in a "\
-              "tag name around: <#{@parser.tag_name}#{identifier}."
-          end
-
           unless value =~ /\A[a-z0-9\:\-]+\z/
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
               "into a tag name around: <#{@parser.tag_name}#{identifier}."
