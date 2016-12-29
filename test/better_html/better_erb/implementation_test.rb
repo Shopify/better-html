@@ -1,6 +1,7 @@
 require 'test_helper'
 require 'ostruct'
 require 'better_html/better_erb'
+require 'json'
 
 class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   test "simple template rendering" do
@@ -92,9 +93,9 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a html comment around: <!-- <%= your code %>.", e.message
   end
-  
+
   test "non html_safe interpolation into comment tag" do
-    assert_equal "<!-- --&lt; -->",
+    assert_equal "<!-- --&gt; -->",
       render("<!-- <%= value %> -->", value: '-->')
   end
 
@@ -119,6 +120,10 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       "into a script tag around: <script> foo <%= your code %>.", e.message
   end
 
+  test "interpolate in script tag with raw interpolation" do
+    assert_equal "<script> x = \"foo\" </script>",
+      render("<script> x = <%== value %> </script>", { value: JSON.dump("foo") })
+  end
 
   test "interpolate in script tag with start of script case insensitive" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do

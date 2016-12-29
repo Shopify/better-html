@@ -41,7 +41,7 @@ module BetterHtml
 
           value
         elsif @parser.context == :rawtext
-          value = auto_escape_interpolated_argument(value.to_s).html_safe
+          value = properly_escaped(value, auto_escape)
 
           if @parser.tag_name.downcase == 'script' &&
               (value =~ /<!--/ || value =~ /<script/i || value =~ /<\/script/i)
@@ -56,7 +56,7 @@ module BetterHtml
 
           value
         elsif @parser.context == :comment
-          value = auto_escape_interpolated_argument(value.to_s).html_safe
+          value = properly_escaped(value, auto_escape)
 
           # in a <!-- ...here --> we disallow -->
           if value =~ /-->/
@@ -66,23 +66,27 @@ module BetterHtml
 
           value
         elsif @parser.context == :none
-          if value.is_a?(ValidatedOutputBuffer)
-            # in html context, never escape a ValidatedOutputBuffer
-            value.to_s
-          else
-            # in html context, follow auto_escape rule
-            if auto_escape
-              auto_escape_interpolated_argument(value.to_s).html_safe
-            else
-              value.to_s
-            end
-          end
+          properly_escaped(value, auto_escape)
         else
           raise InterpolatorError, "Tried to interpolate into unknown location #{@parser.context}."
         end
       end
 
       private
+
+      def properly_escaped(value, auto_escape)
+        if value.is_a?(ValidatedOutputBuffer)
+          # in html context, never escape a ValidatedOutputBuffer
+          value.to_s
+        else
+          # in html context, follow auto_escape rule
+          if auto_escape
+            auto_escape_interpolated_argument(value.to_s).html_safe
+          else
+            value.to_s
+          end
+        end
+      end
 
       def auto_escape_interpolated_argument(arg)
         arg.html_safe? ? arg : CGI.escapeHTML(arg)
