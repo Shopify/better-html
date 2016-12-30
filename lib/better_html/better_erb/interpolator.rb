@@ -81,15 +81,11 @@ module BetterHtml
         else
           # in html context, follow auto_escape rule
           if auto_escape
-            auto_escape_interpolated_argument(value.to_s).html_safe
+            arg.html_safe? ? arg : CGI.escapeHTML(arg)
           else
             value.to_s
           end
         end
-      end
-
-      def auto_escape_interpolated_argument(arg)
-        arg.html_safe? ? arg : CGI.escapeHTML(arg)
       end
     end
   end

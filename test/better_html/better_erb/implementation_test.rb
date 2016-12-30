@@ -39,8 +39,8 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<a href=<%= value %>>", { value: "" })
     end
     assert_equal "Do not interpolate without quotes around this "\
-      "attribute value. Instead of <a href=<%= your code %>> "\
-      "try <a href=\"<%= your code %>\">.", e.message
+      "attribute value. Instead of <a href=<%= value %>> "\
+      "try <a href=\"<%= value %>\">.", e.message
   end
 
   test "interpolate in attribute after value" do
@@ -48,8 +48,8 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<a href=something<%= value %>>", { value: "" })
     end
     assert_equal "Do not interpolate without quotes around this "\
-      "attribute value. Instead of <a href=something<%= your code %>> "\
-      "try <a href=\"something<%= your code %>\">.", e.message
+      "attribute value. Instead of <a href=something<%= value %>> "\
+      "try <a href=\"something<%= value %>\">.", e.message
   end
 
   test "interpolate in tag name" do
@@ -62,7 +62,7 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<tag-<%= value %>-foo>", { value: "un safe" })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
-      "into a tag name around: <tag-<%= your code %>.", e.message
+      "into a tag name around: <tag-<%= value %>>.", e.message
   end
 
   test "interpolate in tag name with slash" do
@@ -70,7 +70,7 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<tag-<%= value %>-foo>", { value: "un/safe" })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
-      "into a tag name around: <tag-<%= your code %>.", e.message
+      "into a tag name around: <tag-<%= value %>>.", e.message
   end
 
   test "interpolate in tag name with end of tag" do
@@ -78,7 +78,7 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<tag-<%= value %>-foo>", { value: "><script>" })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
-      "into a tag name around: <tag-<%= your code %>.", e.message
+      "into a tag name around: <tag-<%= value %>>.", e.message
   end
 
   test "interpolate in comment" do
@@ -91,7 +91,7 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<!-- <%= value %> -->", { value: "-->".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
-      "into a html comment around: <!-- <%= your code %>.", e.message
+      "into a html comment around: <!-- <%= value %>.", e.message
   end
 
   test "non html_safe interpolation into comment tag" do
@@ -109,7 +109,7 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<script> foo <%= value %> bar<script>", { value: "<!--".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
-      "into a script tag around: <script> foo <%= your code %>.", e.message
+      "into a script tag around: <script> foo <%= value %>.", e.message
   end
 
   test "interpolate in script tag with start of script" do
@@ -117,7 +117,7 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<script> foo <%= value %> bar<script>", { value: "<script".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
-      "into a script tag around: <script> foo <%= your code %>.", e.message
+      "into a script tag around: <script> foo <%= value %>.", e.message
   end
 
   test "interpolate in script tag with raw interpolation" do
@@ -130,7 +130,7 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<script> foo <%= value %> bar<script>", { value: "<ScRIpT".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
-      "into a script tag around: <script> foo <%= your code %>.", e.message
+      "into a script tag around: <script> foo <%= value %>.", e.message
   end
 
   test "interpolate in script tag with end of script" do
@@ -138,7 +138,7 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<script> foo <%= value %> bar<script>", { value: "</script".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
-      "into a script tag around: <script> foo <%= your code %>.", e.message
+      "into a script tag around: <script> foo <%= value %>.", e.message
   end
 
   test "interpolate html_attributes" do
@@ -151,7 +151,7 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<a <%= 'foo=\"bar\"' %>>")
     end
     assert_equal "Do not interpolate in a tag. Instead "\
-      "of <a <%= your code %>> please try <a <%= html_attributes(attr: value) %>>.", e.message
+      "of <a <%= 'foo=\"bar\"' %>> please try <a <%= html_attributes(attr: value) %>>.", e.message
   end
 
   test "non html_safe interpolation into rawtext tag" do
@@ -169,7 +169,18 @@ class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
       render("<title><%= value %></title>", value: '</title>'.html_safe)
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
-      "into a title tag around: <title><%= your code %>.", e.message
+      "into a title tag around: <title><%= value %>.", e.message
+  end
+
+  test "interpolate block in middle of tag" do
+    e = assert_raises(BetterHtml::DontInterpolateHere) do
+      render(<<-HTML)
+        <a href="" <%= something do %>
+          foo
+        <% end %>
+      HTML
+    end
+    assert_equal "Block not allowed at this location.", e.message
   end
 
   private

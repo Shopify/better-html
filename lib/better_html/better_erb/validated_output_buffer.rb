@@ -1,68 +1,130 @@
-class BetterHtml::BetterErb
-  class ValidatedOutputBuffer
-    def initialize(buffer)
-      @output = String.new(buffer.to_s)
-      @parser = HtmlTokenizer::Parser.new
-      @interpolator = BetterHtml::BetterErb::Interpolator.new(@parser)
-    end
+module BetterHtml
+  class BetterErb
+    class ValidatedOutputBuffer
+      def initialize(buffer)
+        @output = String.new(buffer.to_s)
+      end
 
-    def safe_append=(text)
-      return if text.nil?
+      def safe_append=(text)
+        return if text.nil?
+      rescue => e
+        puts "#{e.message}"
+        puts "#{e.backtrace.join("\n")}"
+        raise
+      ensure
+        @output << text unless text.nil?
+      end
 
-      # Append html from the template body to the buffer, as-is.
-      @parser.parse(text)
+      def safe_attribute_value_append(context, code, auto_escape, value)
+        return if value.nil?
 
-    rescue => e
-      puts "#{e.message}"
-      puts "#{e.backtrace.join("\n")}"
-      raise
-    ensure
-      @output << text unless text.nil?
-    end
+        unless context[:attribute_quoted]
+          raise DontInterpolateHere, "Do not interpolate without quotes around this "\
+            "attribute value. Instead of "\
+            "<#{context[:tag_name]} #{context[:attribute_name]}=#{context[:attribute_value]}<%=#{code}%>> "\
+            "try <#{context[:tag_name]} #{context[:attribute_name]}=\"#{context[:attribute_value]}<%=#{code}%>\">."
+        end
 
-    def <<(text)
-      return if text.nil?
+        @output << CGI.escapeHTML(value.to_s)
+      end
 
-      # Appends the result of some erb code being called.
-      # Escape the result unless it is marked as html_safe.
-      as_str = @interpolator.to_safe_value(text, "<%= your code %>", true)
-      @parser.parse(as_str)
+      def safe_attribute_append(context, code, auto_escape, value)
+        raise DontInterpolateHere, "Do not interpolate without quotes around this "\
+          "attribute value. Instead of "\
+          "<#{context[:tag_name]} #{context[:attribute_name]}=#{context[:attribute_value]}<%=#{code}%>> "\
+          "try <#{context[:tag_name]} #{context[:attribute_name]}=\"#{context[:attribute_value]}<%=#{code}%>\">."
+      end
 
-    rescue => e
-      puts "#{e.message}"
-      puts "#{e.backtrace.join("\n")}"
-      raise
-    ensure
-      @output << as_str unless as_str.nil?
-    end
-    alias :append= :<<
+      def safe_tag_append(context, code, auto_escape, value)
+        unless value.is_a?(BetterHtml::HtmlAttributes)
+          raise DontInterpolateHere, "Do not interpolate in a tag. "\
+            "Instead of <#{context[:tag_name]} <%=#{code}%>> please "\
+            "try <#{context[:tag_name]} <%= html_attributes(attr: value) %>>."
+        end
 
-    def safe_expr_append=(text)
-      return if text.nil?
+        @output << value.to_s unless value.nil?
+      end
 
-      # Same as safe_append= but for a ruby expression.
-      # Do not escape the result, it is deemed to be safe already.
-      as_str = @interpolator.to_safe_value(text, "<%= your code %>", false)
-      @parser.parse(as_str)
+      def safe_tag_name_append(context, code, auto_escape, value)
+        return if value.nil?
+        value = value.to_s
 
-    rescue => e
-      puts "#{e.message}"
-      puts "#{e.backtrace.join("\n")}"
-      raise
-    ensure
-      @output << as_str unless as_str.nil?
-    end
+        unless value =~ /\A[a-z0-9\:\-]+\z/
+          raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+            "into a tag name around: <#{context[:tag_name]}<%=#{code}%>>."
+        end
 
-    def html_safe?
-      true
-    end
+        @output << value unless value.nil?
+      end
 
-    def html_safe
-      self.class.new(@output)
-    end
+      def safe_rawtext_append(context, code, auto_escape, value)
+        return if value.nil?
 
-    def to_s
-      @output.html_safe
+        value = properly_escaped(value, auto_escape)
+
+        if context[:tag_name].downcase == 'script' &&
+            (value =~ /<!--/ || value =~ /<script/i || value =~ /<\/script/i)
+          # https://www.w3.org/TR/html5/scripting-1.html#restrictions-for-contents-of-script-elements
+          raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+            "into a script tag around: <#{context[:tag_name]}>#{context[:rawtext_text]}<%=#{code}%>."
+        elsif value =~ /<#{Regexp.escape(context[:tag_name].downcase)}/i ||
+            value =~ /<\/#{Regexp.escape(context[:tag_name].downcase)}/i
+          raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+            "into a #{context[:tag_name].downcase} tag around: <#{context[:tag_name]}>#{context[:rawtext_text]}<%=#{code}%>."
+        end
+
+        @output << value
+      end
+
+      def safe_comment_append(context, code, auto_escape, value)
+        return if value.nil?
+        value = properly_escaped(value, auto_escape)
+
+        # in a <!-- ...here --> we disallow -->
+        if value =~ /-->/
+          raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+            "into a html comment around: <!--#{context[:comment_text]}<%=#{code}%>."
+        end
+
+        @output << value
+      end
+
+      def safe_none_append(context, code, auto_escape, value)
+        return if value.nil?
+        @output << properly_escaped(value, auto_escape)
+      end
+
+      def html_safe?
+        true
+      end
+
+      def html_safe
+        self.class.new(@output)
+      end
+
+      def to_s
+        @output.html_safe
+      end
+
+      private
+
+      def properly_escaped(value, auto_escape)
+        if value.is_a?(ValidatedOutputBuffer)
+          # in html context, never escape a ValidatedOutputBuffer
+          value.to_s
+        else
+          # in html context, follow auto_escape rule
+          if auto_escape
+            auto_escape_html_safe_value(value.to_s).html_safe
+          else
+            value.to_s
+          end
+        end
+      end
+
+      def auto_escape_html_safe_value(arg)
+        arg.html_safe? ? arg : CGI.escapeHTML(arg)
+      end
     end
   end
 end
