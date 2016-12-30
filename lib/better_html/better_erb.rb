@@ -1,6 +1,5 @@
 require 'better_html/better_erb/implementation'
 require 'better_html/better_erb/validated_output_buffer'
-require 'better_html/better_erb/interpolator'
 
 class BetterHtml::BetterErb
   cattr_accessor :content_types

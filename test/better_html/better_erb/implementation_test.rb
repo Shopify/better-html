@@ -3,7 +3,7 @@ require 'ostruct'
 require 'better_html/better_erb'
 require 'json'
 
-class BetterHtml::BetterErb::InterpolatorTest < ActiveSupport::TestCase
+class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   test "simple template rendering" do
     assert_equal "<foo>some value<foo>",
       render("<foo><%= bar %><foo>", { bar: 'some value' })
