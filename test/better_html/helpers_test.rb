@@ -1,7 +1,7 @@
 require 'test_helper'
 
-class BetterHtml::HelperTest < ActiveSupport::TestCase
-  include BetterHtml::Helper
+class BetterHtml::HelpersTest < ActiveSupport::TestCase
+  include BetterHtml::Helpers
 
   test "html returns a HtmlNode" do
     assert_equal BetterHtml::HtmlNode, html("test").class

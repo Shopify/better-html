@@ -110,7 +110,7 @@ module BetterHtml
           else
             # in html context, follow auto_escape rule
             if @auto_escape
-              auto_escape_html_safe_value(value.to_s).html_safe
+              auto_escape_html_safe_value(value.to_s)
             else
               value.to_s
             end
@@ -118,7 +118,7 @@ module BetterHtml
         end
 
         def auto_escape_html_safe_value(arg)
-          arg.html_safe? ? arg : CGI.escapeHTML(arg)
+          arg.html_safe? ? arg : CGI.escapeHTML(arg).html_safe
         end
       end
 

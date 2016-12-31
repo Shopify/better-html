@@ -1,4 +1,4 @@
-module BetterHtml::Helper
+module BetterHtml::Helpers
   def html(args)
     BetterHtml::HtmlNode.new(args)
   end

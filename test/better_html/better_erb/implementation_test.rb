@@ -186,9 +186,9 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   test "interpolate with output block is valid syntax" do
     assert_nothing_raised do
       render(<<-HTML)
-        <%= Proc.new do %>
+        <%= capture do %>
           <foo>
-        <% end.call %>
+        <% end %>
       HTML
     end
   end
@@ -196,9 +196,9 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   test "interpolate with statement block is valid syntax" do
     assert_nothing_raised do
       render(<<-HTML)
-        <% Proc.new do %>
+        <% capture do %>
           <foo>
-        <% end.call %>
+        <% end %>
       HTML
     end
   end
@@ -208,12 +208,24 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       render("<div><%= send 'value' %></div>", value: 'foo')
   end
 
+  test "capture works as intended" do
+    output = render(<<-HTML)
+      <%- foo = capture do -%>
+        <foo>
+      <%- end -%>
+      <bar><%= foo %></bar>
+    HTML
+
+    assert_equal "      <bar>        &lt;foo&gt;\n</bar>\n", output
+  end
+
   private
 
   def render(source, locals={})
     src = compile(source)
     context = OpenStruct.new(locals)
-    context.extend(BetterHtml::Helper)
+    context.extend(ActionView::Helpers)
+    context.extend(BetterHtml::Helpers)
     context.instance_eval(src)
   end
 

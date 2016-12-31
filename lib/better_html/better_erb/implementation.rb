@@ -4,12 +4,17 @@ class BetterHtml::BetterErb
   class Implementation < ActionView::Template::Handlers::Erubis
     def initialize(*)
       @parser = HtmlTokenizer::Parser.new
+      @newline_pending = 0
       super
     end
 
     def add_preamble(src)
-      super
-      wrap_buffer(src)
+      class_name = "BetterHtml::BetterErb::ValidatedOutputBuffer"
+      src << "def self.output_buffer=(buffer);"
+      src << "  @output_buffer = #{class_name}.new(buffer) unless buffer.is_a?(#{class_name});"
+      src << "  @output_buffer;"
+      src << "end;"
+      src << "self.output_buffer = (output_buffer.presence || ActionView::OutputBuffer.new);"
     end
 
     def add_text(src, text)
@@ -101,11 +106,6 @@ class BetterHtml::BetterErb
       unless @parser.context == :none
         raise BetterHtml::DontInterpolateHere, "Block not allowed at this location."
       end
-    end
-
-    def wrap_buffer(src)
-      class_name = "BetterHtml::BetterErb::ValidatedOutputBuffer"
-      src << "@output_buffer = #{class_name}.new(@output_buffer) unless @output_buffer.is_a?(#{class_name});"
     end
   end
 end
