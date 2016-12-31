@@ -36,10 +36,15 @@ module BetterHtml
         end
 
         def safe_attribute_append=(value)
-          raise DontInterpolateHere, "Do not interpolate without quotes around this "\
-            "attribute value. Instead of "\
-            "<#{@context[:tag_name]} #{@context[:attribute_name]}=#{@context[:attribute_value]}<%=#{@code}%>> "\
-            "try <#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}<%=#{@code}%>\">."
+          return if value.nil?
+          value = value.to_s
+
+          unless value =~ /\A[a-z0-9\-]*\z/
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+              "into a attribute name around: <#{@context[:tag_name]} #{@context[:attribute_name]}<%=#{@code}%>>."
+          end
+
+          @output << value
         end
 
         def safe_tag_append=(value)
@@ -56,12 +61,12 @@ module BetterHtml
           return if value.nil?
           value = value.to_s
 
-          unless value =~ /\A[a-z0-9\:\-]+\z/
+          unless value =~ /\A[a-z0-9\:\-]*\z/
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
               "into a tag name around: <#{@context[:tag_name]}<%=#{@code}%>>."
           end
 
-          @output << value unless value.nil?
+          @output << value
         end
 
         def safe_rawtext_append=(value)

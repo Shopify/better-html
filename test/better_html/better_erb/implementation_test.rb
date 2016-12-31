@@ -34,13 +34,41 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       render("<a href=\'<%= value %>\'>", { value: ' \'">x '.html_safe })
   end
 
-  test "interpolate in attribute without quotes" do
-    e = assert_raises(BetterHtml::DontInterpolateHere) do
-      render("<a href=<%= value %>>", { value: "" })
+  test "interpolate in attribute name" do
+    assert_equal "<a data-safe-foo>",
+      render("<a data-<%= value %>-foo>", { value: "safe" })
+  end
+
+  test "interpolate in attribute name with unsafe value with spaces" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<a data-<%= value %>-foo>", { value: "un safe" })
     end
-    assert_equal "Do not interpolate without quotes around this "\
-      "attribute value. Instead of <a href=<%= value %>> "\
-      "try <a href=\"<%= value %>\">.", e.message
+    assert_equal "Detected invalid characters as part of the "\
+      "interpolation into a attribute name around: <a data-<%= value %>>.", e.message
+  end
+
+  test "interpolate in attribute name with unsafe value with equal sign" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<a data-<%= value %>-foo>", { value: "un=safe" })
+    end
+    assert_equal "Detected invalid characters as part of the "\
+      "interpolation into a attribute name around: <a data-<%= value %>>.", e.message
+  end
+
+  test "interpolate in attribute name with unsafe value with quote" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<a data-<%= value %>-foo>", { value: "un\"safe" })
+    end
+    assert_equal "Detected invalid characters as part of the "\
+      "interpolation into a attribute name around: <a data-<%= value %>>.", e.message
+  end
+
+  test "interpolate in attribute without quotes" do
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+      render("<a href=<%= value %>>", { value: "un safe" })
+    end
+    assert_equal "Detected invalid characters as part of the "\
+      "interpolation into a attribute name around: <a href<%= value %>>.", e.message
   end
 
   test "interpolate in attribute after value" do
