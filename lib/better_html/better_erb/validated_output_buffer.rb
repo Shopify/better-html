@@ -7,7 +7,7 @@ module BetterHtml
 
       def safe_append=(text)
         return if text.nil?
-        @output << text unless text.nil?
+        @output << text
       end
 
       def calling_context(context, code, auto_escape)
@@ -48,13 +48,15 @@ module BetterHtml
         end
 
         def safe_tag_append=(value)
+          return if value.nil?
+
           unless value.is_a?(BetterHtml::HtmlAttributes)
-            raise DontInterpolateHere, "Do not interpolate in a tag. "\
+            raise DontInterpolateHere, "Do not interpolate #{value.class} in a tag. "\
               "Instead of <#{@context[:tag_name]} <%=#{@code}%>> please "\
               "try <#{@context[:tag_name]} <%= html_attributes(attr: value) %>>."
           end
 
-          @output << value.to_s unless value.nil?
+          @output << value.to_s
         end
 
         def safe_tag_name_append=(value)
