@@ -11,8 +11,7 @@ class BetterHtml::BetterErb
     def add_preamble(src)
       class_name = "BetterHtml::BetterErb::ValidatedOutputBuffer"
       src << "def self.output_buffer=(buffer);"
-      src << "  @output_buffer = #{class_name}.new(buffer) unless buffer.is_a?(#{class_name});"
-      src << "  @output_buffer;"
+      src << "  @output_buffer = buffer.is_a?(#{class_name}) ? buffer : #{class_name}.new(buffer);"
       src << "end;"
       src << "self.output_buffer = (output_buffer.presence || ActionView::OutputBuffer.new);"
     end

@@ -178,7 +178,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     e = assert_raises(BetterHtml::DontInterpolateHere) do
       render("<a <%= 'foo=\"bar\"' %>>")
     end
-    assert_equal "Do not interpolate in a tag. Instead "\
+    assert_equal "Do not interpolate String in a tag. Instead "\
       "of <a <%= 'foo=\"bar\"' %>> please try <a <%= html_attributes(attr: value) %>>.", e.message
   end
 
