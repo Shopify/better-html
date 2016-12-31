@@ -183,12 +183,41 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     assert_equal "Block not allowed at this location.", e.message
   end
 
+  test "interpolate with output block is valid syntax" do
+    assert_nothing_raised do
+      render(<<-HTML)
+        <%= Proc.new do %>
+          <foo>
+        <% end.call %>
+      HTML
+    end
+  end
+
+  test "interpolate with statement block is valid syntax" do
+    assert_nothing_raised do
+      render(<<-HTML)
+        <% Proc.new do %>
+          <foo>
+        <% end.call %>
+      HTML
+    end
+  end
+
+  test "can interpolate method calls without parenthesis" do
+    assert_equal "<div>foo</div>",
+      render("<div><%= send 'value' %></div>", value: 'foo')
+  end
+
   private
 
   def render(source, locals={})
-    src = BetterHtml::BetterErb::Implementation.new(source).src
+    src = compile(source)
     context = OpenStruct.new(locals)
     context.extend(BetterHtml::Helper)
     context.instance_eval(src)
+  end
+
+  def compile(source)
+    BetterHtml::BetterErb::Implementation.new(source).src
   end
 end

@@ -37,19 +37,26 @@ class BetterHtml::BetterErb
       add_expr_auto_escaped(src, code, false)
     end
 
+    def add_stmt(src, code)
+      flush_newline_if_pending(src)
+
+      block_check(src, code) if code =~ BLOCK_EXPR
+      super
+    end
+
     private
 
     def add_expr_auto_escaped(src, code, auto_escape)
       flush_newline_if_pending(src)
 
-      method_name = "safe_#{@parser.context}_append"
-      arguments = "(#{parser_context.inspect}), '#{escape_text(code)}'.freeze, #{auto_escape}, "
+      src << "@output_buffer.calling_context((#{parser_context.inspect}), '#{escape_text(code)}'.freeze, #{auto_escape})"
 
+      method_name = "safe_#{@parser.context}_append"
       if code =~ BLOCK_EXPR
         block_check(src, code)
-        src << "@output_buffer.#{method_name} " << arguments << code
+        src << ".#{method_name}= " << code
       else
-        src << "@output_buffer.#{method_name}(" << arguments << code << ");"
+        src << ".#{method_name}=(" << code << ");"
       end
     end
 
@@ -92,7 +99,7 @@ class BetterHtml::BetterErb
 
     def block_check(src, code)
       unless @parser.context == :none
-        src << "raise BetterHtml::DontInterpolateHere, \"Block not allowed at this location.\";"
+        raise BetterHtml::DontInterpolateHere, "Block not allowed at this location."
       end
     end
 
