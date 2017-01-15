@@ -3,8 +3,10 @@ require 'action_view'
 class BetterHtml::BetterErb
   class Implementation < ActionView::Template::Handlers::Erubis
     def initialize(*)
+      @validator = BetterHtml::Validator.new
       @parser = HtmlTokenizer::Parser.new
       @newline_pending = 0
+      @line_number = 0
       super
     end
 
@@ -16,6 +18,7 @@ class BetterHtml::BetterErb
       return if text.empty?
 
       if text == "\n"
+        @line_number += 1
         @newline_pending += 1
       else
         src << "@output_buffer.safe_append='"
@@ -23,8 +26,10 @@ class BetterHtml::BetterErb
         src << escape_text(text)
         src << "'.freeze;"
 
+        @validator.parse(text, start_line: @line_number)
         @parser.parse(text)
 
+        @line_number += text.count("\n")
         @newline_pending = 0
       end
     end
@@ -40,8 +45,18 @@ class BetterHtml::BetterErb
     def add_stmt(src, code)
       flush_newline_if_pending(src)
 
+      @line_number += code.count("\n")
       block_check(src, code) if code =~ BLOCK_EXPR
       super
+    end
+
+    def src
+      src = super
+      @validator.validate
+      if @validator.errors.any?
+        raise BetterHtml::HtmlError, @validator.errors.join("\n")
+      end
+      src
     end
 
     private
@@ -59,6 +74,7 @@ class BetterHtml::BetterErb
 
       src << "#{wrap_method}(@output_buffer, (#{parser_context.inspect}), '#{escape_text(code)}'.freeze, #{auto_escape})"
 
+      @line_number += code.count("\n")
       method_name = "safe_#{@parser.context}_append"
       if code =~ BLOCK_EXPR
         block_check(src, code)
