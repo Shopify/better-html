@@ -208,7 +208,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
         <% end %>
       HTML
     end
-    assert_equal "Block not allowed at this location.", e.message
+    assert_equal "Block not allowed at 'tag' location:\n something do ", e.message
   end
 
   test "interpolate with output block is valid syntax" do
@@ -237,7 +237,6 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "capture works as intended" do
-    puts "dfsfsdsfdfsd"
     output = render(<<-HTML)
       <%- foo = capture do -%>
         <foo>

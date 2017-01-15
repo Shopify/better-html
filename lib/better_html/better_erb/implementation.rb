@@ -106,7 +106,7 @@ class BetterHtml::BetterErb
     end
 
     def block_check(src, code)
-      unless @parser.context == :none
+      unless @parser.context == :none || @parser.context == :rawtext
         raise BetterHtml::DontInterpolateHere, "Block not allowed at '#{@parser.context}' location:\n#{code}"
       end
     end
