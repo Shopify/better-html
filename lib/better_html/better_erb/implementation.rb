@@ -6,7 +6,7 @@ class BetterHtml::BetterErb
       @validator = BetterHtml::Validator.new
       @parser = HtmlTokenizer::Parser.new
       @newline_pending = 0
-      @line_number = 0
+      @line_number = 1
       super
     end
 
@@ -46,7 +46,7 @@ class BetterHtml::BetterErb
       flush_newline_if_pending(src)
 
       @line_number += code.count("\n")
-      block_check(src, code) if code =~ BLOCK_EXPR
+      block_check(src, code)
       super
     end
 
@@ -123,7 +123,10 @@ class BetterHtml::BetterErb
 
     def block_check(src, code)
       unless @parser.context == :none || @parser.context == :rawtext
-        raise BetterHtml::DontInterpolateHere, "Block not allowed at '#{@parser.context}' location:\n#{code}"
+        s = "Ruby statement not allowed.\n"
+        s << "In '#{@parser.context}' on line #{@line_number}:\n"
+        s << "  #{code.lines.join("\n  ")}"
+        raise BetterHtml::DontInterpolateHere, s
       end
     end
   end

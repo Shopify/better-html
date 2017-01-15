@@ -116,7 +116,7 @@ module BetterHtml
       def validate
         @tokens.each do |token|
           if token.type == :malformed
-            @errors << TokenError.new(self, "Malformed data: #{to_s}")
+            @errors << TokenError.new(self, "Malformed data")
           end
         end
       end
@@ -129,7 +129,7 @@ module BetterHtml
       def validate
         super
         unless @tokens[-1].type == :comment_end
-          @errors << TokenError.new(self, "Unclosed comment tag: #{to_s}")
+          @errors << TokenError.new(self, "Unclosed comment tag")
         end
       end
     end
@@ -152,8 +152,8 @@ module BetterHtml
       end
 
       def to_s
-        s = message
-        s << "for '#{@token.class}' on line #{@token.line_number}\n"
+        s = "#{message}.\n"
+        s << "In '#{@token.class}' on line #{@token.line_number}\n"
         s << "  #{@token.lines.join("\n  ")}\n"
       end
     end

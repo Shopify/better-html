@@ -208,7 +208,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
         <% end %>
       HTML
     end
-    assert_equal "Block not allowed at 'tag' location:\n something do ", e.message
+    assert_equal "Ruby statement not allowed.\nIn 'tag' on line 1:\n   something do ", e.message
   end
 
   test "interpolate with output block is valid syntax" do
