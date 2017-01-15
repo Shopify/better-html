@@ -1,17 +1,8 @@
 module BetterHtml
   class BetterErb
     class ValidatedOutputBuffer
-      def initialize(buffer)
-        @output = String.new(buffer.to_s)
-      end
-
-      def safe_append=(text)
-        return if text.nil?
-        @output << text
-      end
-
-      def calling_context(context, code, auto_escape)
-        Context.new(@output, context, code, auto_escape)
+      def self.wrap(output, context, code, auto_escape)
+        Context.new(output, context, code, auto_escape)
       end
 
       class Context
@@ -32,7 +23,7 @@ module BetterHtml
               "try <#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}<%=#{@code}%>\">."
           end
 
-          @output << CGI.escapeHTML(value.to_s)
+          @output.safe_append= CGI.escapeHTML(value.to_s)
         end
 
         def safe_attribute_append=(value)
@@ -44,7 +35,7 @@ module BetterHtml
               "into a attribute name around: <#{@context[:tag_name]} #{@context[:attribute_name]}<%=#{@code}%>>."
           end
 
-          @output << value
+          @output.safe_append= value
         end
 
         def safe_tag_append=(value)
@@ -56,7 +47,7 @@ module BetterHtml
               "try <#{@context[:tag_name]} <%= html_attributes(attr: value) %>>."
           end
 
-          @output << value.to_s
+          @output.safe_append= value.to_s
         end
 
         def safe_tag_name_append=(value)
@@ -68,7 +59,7 @@ module BetterHtml
               "into a tag name around: <#{@context[:tag_name]}<%=#{@code}%>>."
           end
 
-          @output << value
+          @output.safe_append= value
         end
 
         def safe_rawtext_append=(value)
@@ -87,7 +78,7 @@ module BetterHtml
               "into a #{@context[:tag_name].downcase} tag around: <#{@context[:tag_name]}>#{@context[:rawtext_text]}<%=#{@code}%>."
           end
 
-          @output << value
+          @output.safe_append= value
         end
 
         def safe_comment_append=(value)
@@ -100,12 +91,12 @@ module BetterHtml
               "into a html comment around: <!--#{@context[:comment_text]}<%=#{@code}%>."
           end
 
-          @output << value
+          @output.safe_append= value
         end
 
         def safe_none_append=(value)
           return if value.nil?
-          @output << properly_escaped(value)
+          @output.safe_append= properly_escaped(value)
         end
 
         private

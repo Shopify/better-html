@@ -9,11 +9,7 @@ class BetterHtml::BetterErb
     end
 
     def add_preamble(src)
-      class_name = "BetterHtml::BetterErb::ValidatedOutputBuffer"
-      src << "def output_buffer=(buffer);"
-      src << "  @output_buffer = buffer.is_a?(#{class_name}) ? buffer : #{class_name}.new(buffer);"
-      src << "end;"
-      src << "self.output_buffer = (output_buffer.presence || ActionView::OutputBuffer.new);"
+      src << "@output_buffer = (output_buffer.presence || ActionView::OutputBuffer.new);"
     end
 
     def add_text(src, text)
@@ -50,10 +46,18 @@ class BetterHtml::BetterErb
 
     private
 
+    def class_name
+      "BetterHtml::BetterErb::ValidatedOutputBuffer"
+    end
+
+    def wrap_method
+      "#{class_name}.wrap"
+    end
+
     def add_expr_auto_escaped(src, code, auto_escape)
       flush_newline_if_pending(src)
 
-      src << "@output_buffer.calling_context((#{parser_context.inspect}), '#{escape_text(code)}'.freeze, #{auto_escape})"
+      src << "#{wrap_method}(@output_buffer, (#{parser_context.inspect}), '#{escape_text(code)}'.freeze, #{auto_escape})"
 
       method_name = "safe_#{@parser.context}_append"
       if code =~ BLOCK_EXPR

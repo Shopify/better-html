@@ -237,6 +237,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "capture works as intended" do
+    puts "dfsfsdsfdfsd"
     output = render(<<-HTML)
       <%- foo = capture do -%>
         <foo>
@@ -244,7 +245,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       <bar><%= foo %></bar>
     HTML
 
-    assert_equal "      <bar>        &lt;foo&gt;\n</bar>\n", output
+    assert_equal "      <bar>        <foo>\n</bar>\n", output
   end
 
   private
@@ -254,6 +255,9 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     context = OpenStruct.new(locals)
     context.extend(ActionView::Helpers)
     context.extend(BetterHtml::Helpers)
+    context.class_eval do
+      attr_accessor :output_buffer
+    end
     context.instance_eval(src)
   end
 
