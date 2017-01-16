@@ -63,12 +63,26 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       "interpolation into a attribute name around: <a data-<%= value %>>.", e.message
   end
 
+  test "interpolate after an attribute name without a value" do
+    assert_equal '<a data-foo foo="bar">',
+      render("<a data-foo <%= html_attributes(foo: 'bar') %>>")
+  end
+
+  test "interpolate after an attribute name with equal sign" do
+    e = assert_raises(BetterHtml::DontInterpolateHere) do
+      render("<a data-foo= <%= html_attributes(foo: 'bar') %>>")
+    end
+    assert_equal "Do not interpolate without quotes around this attribute value. "\
+      "Instead of <a data-foo=<%= html_attributes(foo: 'bar') %>> try "\
+      "<a data-foo=\"<%= html_attributes(foo: 'bar') %>\">.", e.message
+  end
+
   test "interpolate in attribute without quotes" do
-    e = assert_raises(BetterHtml::UnsafeHtmlError) do
+    e = assert_raises(BetterHtml::DontInterpolateHere) do
       render("<a href=<%= value %>>", { value: "un safe" })
     end
-    assert_equal "Detected invalid characters as part of the "\
-      "interpolation into a attribute name around: <a href<%= value %>>.", e.message
+    assert_equal "Do not interpolate without quotes around this attribute value. "\
+      "Instead of <a href=<%= value %>> try <a href=\"<%= value %>\">.", e.message
   end
 
   test "interpolate in attribute after value" do

@@ -30,7 +30,7 @@ module BetterHtml
           return if value.nil?
           value = value.to_s
 
-          unless value =~ /\A[a-z0-9\-]*\z/
+          unless @context[:attribute_name_complete] || value =~ /\A[a-z0-9\-]*\z/
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
               "into a attribute name around: <#{@context[:tag_name]} #{@context[:attribute_name]}<%=#{@code}%>>."
           end

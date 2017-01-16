@@ -38,15 +38,16 @@ module BetterHtml
         end
 
         if @parser.context == :attribute_value
-          unless @parser.attribute_quoted?
+          if @parser.attribute_quoted?
+            ERB::Util.html_escape_once(value.to_s)
+          elsif @parser.attribute_value.present?
             raise DontInterpolateHere, "Do not interpolate without quotes around this "\
               "attribute value. Instead of "\
               "<#{@parser.tag_name} #{@parser.attribute_name}=#{@parser.attribute_value}#{identifier}> "\
               "try <#{@parser.tag_name} #{@parser.attribute_name}=\"#{@parser.attribute_value}#{identifier}\">."
+          else
+            ('"' + ERB::Util.html_escape_once(value.to_s) + '"')
           end
-          ERB::Util.html_escape_once(value.to_s)
-        elsif @parser.context == :attribute
-          ('"' + ERB::Util.html_escape_once(value.to_s) + '"')
         elsif @parser.context == :tag
           raise DontInterpolateHere, "Do not interpolate in a tag. "\
             "Instead of <#{@parser.tag_name} #{identifier}> please "\

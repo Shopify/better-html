@@ -96,6 +96,7 @@ class BetterHtml::BetterErb
         {
           tag_name: @parser.tag_name,
           attribute_name: @parser.attribute_name,
+          attribute_name_complete: @parser.attribute_name_complete?,
         }
       elsif @parser.context == :tag
         {
