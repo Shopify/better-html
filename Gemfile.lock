@@ -43,8 +43,6 @@ GEM
     rails-html-sanitizer (1.0.3)
       loofah (~> 2.0)
     rake (11.1.2)
-    rake-compiler (0.9.9)
-      rake
     thread_safe (0.3.5)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
@@ -59,7 +57,6 @@ DEPENDENCIES
   html_tokenizer!
   minitest
   rake
-  rake-compiler (~> 0)
 
 BUNDLED WITH
    1.13.7

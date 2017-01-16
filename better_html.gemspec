@@ -16,10 +16,8 @@ Gem::Specification.new do |s|
 
   s.files = Dir["{app,config,db,lib,ext}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.test_files = Dir["test/**/*"]
-  s.require_paths = ["lib", "ext"]
-  s.extensions    = ['ext/better_html_ext/extconf.rb']
+  s.require_paths = ["lib"]
 
   s.add_development_dependency 'rake', '~> 0'
-  s.add_development_dependency 'rake-compiler', '~> 0'
   s.add_development_dependency 'activesupport', '~> 4.2.1'
 end

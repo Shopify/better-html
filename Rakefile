@@ -14,17 +14,11 @@ RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
-
-require 'rake/extensiontask'
-
-Rake::ExtensionTask.new("better_html_ext")
-
-
 Bundler::GemHelper.install_tasks
 
 require 'rake/testtask'
 
-Rake::TestTask.new(:test => :compile) do |t|
+Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
   t.libs << 'test'
   t.pattern = 'test/**/*_test.rb'
