@@ -1,8 +1,4 @@
 module BetterHtml::Helpers
-  def html(args)
-    BetterHtml::HtmlNode.new(args)
-  end
-
   def html_attributes(args)
     BetterHtml::HtmlAttributes.new(args)
   end
