@@ -3,10 +3,6 @@ require 'test_helper'
 class BetterHtml::HelpersTest < ActiveSupport::TestCase
   include BetterHtml::Helpers
 
-  test "html returns a HtmlNode" do
-    assert_equal BetterHtml::HtmlNode, html("test").class
-  end
-
   test "html_attributes return a HtmlAttributes object" do
     assert_equal BetterHtml::HtmlAttributes, html_attributes(foo: "bar").class
   end
