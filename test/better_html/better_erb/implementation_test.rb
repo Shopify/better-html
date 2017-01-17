@@ -43,8 +43,8 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
       render("<a data-<%= value %>-foo>", { value: "un safe" })
     end
-    assert_equal "Detected invalid characters as part of the "\
-      "interpolation into a attribute name around: <a data-<%= value %>>.", e.message
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a attribute name around 'data-<%= value %>'.", e.message
   end
 
   test "interpolate in attribute name with unsafe value with equal sign" do
@@ -52,7 +52,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       render("<a data-<%= value %>-foo>", { value: "un=safe" })
     end
     assert_equal "Detected invalid characters as part of the "\
-      "interpolation into a attribute name around: <a data-<%= value %>>.", e.message
+      "interpolation into a attribute name around 'data-<%= value %>'.", e.message
   end
 
   test "interpolate in attribute name with unsafe value with quote" do
@@ -60,7 +60,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       render("<a data-<%= value %>-foo>", { value: "un\"safe" })
     end
     assert_equal "Detected invalid characters as part of the "\
-      "interpolation into a attribute name around: <a data-<%= value %>>.", e.message
+      "interpolation into a attribute name around 'data-<%= value %>'.", e.message
   end
 
   test "interpolate after an attribute name without a value" do
@@ -72,17 +72,16 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     e = assert_raises(BetterHtml::DontInterpolateHere) do
       render("<a data-foo= <%= html_attributes(foo: 'bar') %>>")
     end
-    assert_equal "Do not interpolate without quotes around this attribute value. "\
-      "Instead of <a data-foo=<%= html_attributes(foo: 'bar') %>> try "\
-      "<a data-foo=\"<%= html_attributes(foo: 'bar') %>\">.", e.message
+    assert_equal "Do not interpolate without quotes after "\
+      "attribute around 'data-foo=<%= html_attributes(foo: 'bar') %>'.", e.message
   end
 
   test "interpolate in attribute without quotes" do
     e = assert_raises(BetterHtml::DontInterpolateHere) do
       render("<a href=<%= value %>>", { value: "un safe" })
     end
-    assert_equal "Do not interpolate without quotes around this attribute value. "\
-      "Instead of <a href=<%= value %>> try <a href=\"<%= value %>\">.", e.message
+    assert_equal "Do not interpolate without quotes after "\
+      "attribute around 'href=<%= value %>'.", e.message
   end
 
   test "interpolate in attribute after value" do

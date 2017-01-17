@@ -13,29 +13,45 @@ module BetterHtml
           @auto_escape = auto_escape
         end
 
-        def safe_attribute_value_append=(value)
+        def safe_quoted_value_append=(value)
           return if value.nil?
-
-          unless @context[:attribute_quoted]
-            raise DontInterpolateHere, "Do not interpolate without quotes around this "\
-              "attribute value. Instead of "\
-              "<#{@context[:tag_name]} #{@context[:attribute_name]}=#{@context[:attribute_value]}<%=#{@code}%>> "\
-              "try <#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}<%=#{@code}%>\">."
-          end
-
           @output.safe_append= CGI.escapeHTML(value.to_s)
         end
 
-        def safe_attribute_append=(value)
+        def safe_unquoted_value_append=(value)
+          raise DontInterpolateHere, "Do not interpolate without quotes around this "\
+            "attribute value. Instead of "\
+            "<#{@context[:tag_name]} #{@context[:attribute_name]}=#{@context[:attribute_value]}<%=#{@code}%>> "\
+            "try <#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}<%=#{@code}%>\">."
+        end
+
+        def safe_attribute_name_append=(value)
           return if value.nil?
           value = value.to_s
 
-          unless @context[:attribute_name_complete] || value =~ /\A[a-z0-9\-]*\z/
+          unless value =~ /\A[a-z0-9\-]*\z/
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
-              "into a attribute name around: <#{@context[:tag_name]} #{@context[:attribute_name]}<%=#{@code}%>>."
+              "into a attribute name around '#{@context[:attribute_name]}<%=#{@code}%>'."
           end
 
           @output.safe_append= value
+        end
+
+        def safe_after_attribute_name_append=(value)
+          return if value.nil?
+
+          unless value.is_a?(BetterHtml::HtmlAttributes)
+            raise DontInterpolateHere, "Do not interpolate #{value.class} in a tag. "\
+              "Instead of <#{@context[:tag_name]} <%=#{@code}%>> please "\
+              "try <#{@context[:tag_name]} <%= html_attributes(attr: value) %>>."
+          end
+
+          @output.safe_append= value.to_s
+        end
+
+        def safe_after_equal_append=(value)
+          raise DontInterpolateHere, "Do not interpolate without quotes after "\
+            "attribute around '#{@context[:attribute_name]}=<%=#{@code}%>'."
         end
 
         def safe_tag_append=(value)

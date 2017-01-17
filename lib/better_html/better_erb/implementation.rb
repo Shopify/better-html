@@ -1,3 +1,4 @@
+require 'html_tokenizer'
 require 'action_view'
 
 class BetterHtml::BetterErb
@@ -74,24 +75,19 @@ class BetterHtml::BetterErb
     end
 
     def parser_context
-      if @parser.context == :attribute_value
+      if [:quoted_value, :unquoted_value].include?(@parser.context)
         {
           tag_name: @parser.tag_name,
           attribute_name: @parser.attribute_name,
           attribute_value: @parser.attribute_value,
           attribute_quoted: @parser.attribute_quoted?,
         }
-      elsif @parser.context == :attribute
+      elsif [:attribute_name, :after_attribute_name, :after_equal].include?(@parser.context)
         {
           tag_name: @parser.tag_name,
           attribute_name: @parser.attribute_name,
-          attribute_name_complete: @parser.attribute_name_complete?,
         }
-      elsif @parser.context == :tag
-        {
-          tag_name: @parser.tag_name,
-        }
-      elsif @parser.context == :tag_name
+      elsif [:tag, :tag_name, :tag_end].include?(@parser.context)
         {
           tag_name: @parser.tag_name,
         }
@@ -104,7 +100,7 @@ class BetterHtml::BetterErb
         {
           comment_text: @parser.comment_text,
         }
-      elsif @parser.context == :none
+      elsif [:none, :solidus_or_tag_name].include?(@parser.context)
         {}
       else
         raise RuntimeError, "Tried to interpolate into unknown location #{@parser.context}."
