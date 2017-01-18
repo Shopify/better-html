@@ -6,7 +6,6 @@ class BetterHtml::BetterErb
     def initialize(*)
       @parser = HtmlTokenizer::Parser.new
       @newline_pending = 0
-      @line_number = 1
       super
     end
 
@@ -18,7 +17,7 @@ class BetterHtml::BetterErb
       return if text.empty?
 
       if text == "\n"
-        @line_number += 1
+        @parser.parse("\n")
         @newline_pending += 1
       else
         src << "@output_buffer.safe_append='"
@@ -28,7 +27,6 @@ class BetterHtml::BetterErb
 
         @parser.parse(text)
 
-        @line_number += text.count("\n")
         @newline_pending = 0
       end
     end
@@ -44,9 +42,15 @@ class BetterHtml::BetterErb
     def add_stmt(src, code)
       flush_newline_if_pending(src)
 
-      @line_number += code.count("\n")
-      block_check(src, code)
+      block_check(src, "<%#{code}%>")
+      @parser.append_placeholder(code)
       super
+    end
+
+    def src
+      document = super
+      errors_check
+      document
     end
 
     private
@@ -62,16 +66,15 @@ class BetterHtml::BetterErb
     def add_expr_auto_escaped(src, code, auto_escape)
       flush_newline_if_pending(src)
 
-      @line_number += code.count("\n")
-
       src << "#{wrap_method}(@output_buffer, (#{parser_context.inspect}), '#{escape_text(code)}'.freeze, #{auto_escape})"
       method_name = "safe_#{@parser.context}_append"
       if code =~ BLOCK_EXPR
-        block_check(src, code)
+        block_check(src, "<%=#{code}%>")
         src << ".#{method_name}= " << code
       else
         src << ".#{method_name}=(" << code << ");"
       end
+      @parser.append_placeholder("<%=#{code}%>")
     end
 
     def parser_context
@@ -110,10 +113,33 @@ class BetterHtml::BetterErb
     def block_check(src, code)
       unless @parser.context == :none || @parser.context == :rawtext
         s = "Ruby statement not allowed.\n"
-        s << "In '#{@parser.context}' on line #{@line_number}:\n"
-        s << "  #{code.lines.join("\n  ")}"
+        s << "In '#{@parser.context}' on line #{@parser.line_number} column #{@parser.column_number}:\n"
+        prefix = extract_line(@parser.line_number)
+        code = code.lines.first
+        s << "#{prefix}#{code}\n"
+        s << "#{' ' * prefix.size}#{'^' * code.size}"
         raise BetterHtml::DontInterpolateHere, s
       end
+    end
+
+    def errors_check
+      errors = @parser.errors
+      return if errors.empty?
+
+      s = "#{errors.size} error(s) found in HTML document.\n"
+      errors.each do |error|
+        s = "#{error.message}\n"
+        s << "On line #{error.line} column #{error.column}:\n"
+        line = extract_line(error.line)
+        s << "#{line}\n"
+        s << "#{' ' * (error.column)}#{'^' * (line.size - error.column)}"
+      end
+
+      raise BetterHtml::HtmlError, s
+    end
+
+    def extract_line(line)
+      @parser.document.lines[line-1]
     end
   end
 end

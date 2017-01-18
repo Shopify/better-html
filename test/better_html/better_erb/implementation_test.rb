@@ -70,7 +70,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate after an attribute name with equal sign" do
     e = assert_raises(BetterHtml::DontInterpolateHere) do
-      render("<a data-foo= <%= html_attributes(foo: 'bar') %>>")
+      render("<a data-foo= <%= html_attributes(foo: 'bar') %> x>")
     end
     assert_equal "Do not interpolate without quotes after "\
       "attribute around 'data-foo=<%= html_attributes(foo: 'bar') %>'.", e.message
@@ -87,7 +87,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in attribute without quotes" do
     e = assert_raises(BetterHtml::DontInterpolateHere) do
-      render("<a href=<%= value %>>", { value: "un safe" })
+      render("<a href=<%= value %> x>", { value: "un safe" })
     end
     assert_equal "Do not interpolate without quotes after "\
       "attribute around 'href=<%= value %>'.", e.message
@@ -230,7 +230,10 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
         <% end %>
       HTML
     end
-    assert_equal "Ruby statement not allowed.\nIn 'tag' on line 1:\n   something do ", e.message
+    assert_equal "Ruby statement not allowed.\n"\
+      "In 'tag' on line 1 column 19:\n"\
+      "        <a href=\"\" <%= something do %>\n"\
+      "                   ^^^^^^^^^^^^^^^^^^^", e.message
   end
 
   test "interpolate with output block is valid syntax" do
