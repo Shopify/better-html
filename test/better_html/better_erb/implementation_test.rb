@@ -261,6 +261,16 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       render("<div><%= send 'value' %></div>", value: 'foo')
   end
 
+  test "tag names are validated against tag_name_pattern regexp" do
+    e = assert_raises(BetterHtml::HtmlError) do
+      render("<foo~bar></foo~bar>")
+    end
+    assert_equal "Invalid tag name \"foo~bar\" does not match regular expression /\\A[a-z\\-\\:]+\\z/\n"\
+      "On line 1 column 1:\n"\
+      "<foo~bar></foo~bar>\n"\
+      " ^^^^^^^", e.message
+  end
+
   test "capture works as intended" do
     output = render(<<-HTML)
       <%- foo = capture do -%>
@@ -272,20 +282,41 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     assert_equal "      <bar>        <foo>\n</bar>\n", output
   end
 
+  test "validate! raises when tag is not terminated at end of document" do
+    document = compile("<foo")
+    e = assert_raises(BetterHtml::HtmlError) do
+      document.validate!
+    end
+    assert_equal "Detected an open tag at the end of this document.", e.message
+  end
+
+  test "validate! raises when rawtext tag is not terminated at end of document" do
+    document = compile("<script>")
+    e = assert_raises(BetterHtml::HtmlError) do
+      document.validate!
+    end
+    assert_equal "Detected an open tag at the end of this document.", e.message
+  end
+
   private
 
-  def render(source, locals={})
-    src = compile(source)
-    context = OpenStruct.new(locals)
-    context.extend(ActionView::Helpers)
-    context.extend(BetterHtml::Helpers)
-    context.class_eval do
-      attr_accessor :output_buffer
+  class ViewContext < OpenStruct
+    include(ActionView::Helpers)
+    include(BetterHtml::Helpers)
+    attr_accessor :output_buffer
+
+    def get_binding
+      binding
     end
-    context.instance_eval(src)
+  end
+
+  def render(source, locals={})
+    context = ViewContext.new(locals)
+    impl = compile(source)
+    impl.result(context.get_binding)
   end
 
   def compile(source)
-    BetterHtml::BetterErb::Implementation.new(source).src
+    BetterHtml::BetterErb::Implementation.new(source)
   end
 end

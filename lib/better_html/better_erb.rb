@@ -48,13 +48,9 @@ class BetterHtml::BetterErb
         erb,
         :escape => (self.class.escape_whitelist.include? template.type),
         :trim => (self.class.erb_trim_mode == "-")
-      ).src
-
-      #puts "--------------------"
-      #puts "#{generator}"
-      #puts "--------------------"
-
-      generator
+      )
+      generator.validate!
+      generator.src
     end
   end
 end

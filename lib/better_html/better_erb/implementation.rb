@@ -25,7 +25,9 @@ class BetterHtml::BetterErb
         src << escape_text(text)
         src << "'.freeze;"
 
-        @parser.parse(text)
+        @parser.parse(text) do |*args|
+          check_token(*args)
+        end
 
         @newline_pending = 0
       end
@@ -47,10 +49,12 @@ class BetterHtml::BetterErb
       super
     end
 
-    def src
-      document = super
-      errors_check
-      document
+    def validate!
+      check_parser_errors
+
+      unless @parser.context == :none
+        raise BetterHtml::HtmlError, 'Detected an open tag at the end of this document.'
+      end
     end
 
     private
@@ -122,7 +126,7 @@ class BetterHtml::BetterErb
       end
     end
 
-    def errors_check
+    def check_parser_errors
       errors = @parser.errors
       return if errors.empty?
 
@@ -136,6 +140,21 @@ class BetterHtml::BetterErb
       end
 
       raise BetterHtml::HtmlError, s
+    end
+
+    def check_token(type, start, stop, line, column)
+      if type == :tag_name
+        text = @parser.extract(start, stop)
+        unless BetterHtml.config.partial_tag_name_pattern === text
+          s = "Invalid tag name #{text.inspect} does not match "\
+            "regular expression #{BetterHtml.config.partial_tag_name_pattern.inspect}\n"
+          s << "On line #{line} column #{column}:\n"
+          line = extract_line(line)
+          s << "#{line}\n"
+          s << "#{' ' * column}#{'^' * (text.size)}"
+          raise BetterHtml::HtmlError, s
+        end
+      end
     end
 
     def extract_line(line)
