@@ -30,6 +30,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "interpolate html_safe inside single quoted attribute" do
+    BetterHtml.config.stubs(:allow_single_quoted_attributes).returns(true)
     assert_equal "<a href=\' &#39;&quot;&gt;x \'>",
       render("<a href=\'<%= value %>\'>", { value: ' \'">x '.html_safe })
   end
@@ -69,8 +70,9 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "interpolate after an attribute name with equal sign" do
+    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(true)
     e = assert_raises(BetterHtml::DontInterpolateHere) do
-      render("<a data-foo= <%= html_attributes(foo: 'bar') %> x>")
+      render("<a data-foo= <%= html_attributes(foo: 'bar') %>>")
     end
     assert_equal "Do not interpolate without quotes after "\
       "attribute around 'data-foo=<%= html_attributes(foo: 'bar') %>'.", e.message
@@ -86,14 +88,16 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "interpolate in attribute without quotes" do
+    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(true)
     e = assert_raises(BetterHtml::DontInterpolateHere) do
-      render("<a href=<%= value %> x>", { value: "un safe" })
+      render("<a href=<%= value %>>", { value: "un safe" })
     end
     assert_equal "Do not interpolate without quotes after "\
       "attribute around 'href=<%= value %>'.", e.message
   end
 
   test "interpolate in attribute after value" do
+    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(true)
     e = assert_raises(BetterHtml::DontInterpolateHere) do
       render("<a href=something<%= value %>>", { value: "" })
     end
@@ -271,6 +275,52 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       " ^^^^^^^", e.message
   end
 
+  test "attribute names are validated against attribute_name_pattern regexp" do
+    e = assert_raises(BetterHtml::HtmlError) do
+      render("<foo bar_baz=\"1\">")
+    end
+    assert_equal "Invalid attribute name \"bar_baz\" does not match regular expression /\\A[a-z0-9\\-\\:]+\\z/\n"\
+      "On line 1 column 5:\n"\
+      "<foo bar_baz=\"1\">\n"\
+      "     ^^^^^^^", e.message
+  end
+
+  test "single quotes are disallowed when allow_single_quoted_attributes=false" do
+    BetterHtml.config.stubs(:allow_single_quoted_attributes).returns(false)
+    e = assert_raises(BetterHtml::HtmlError) do
+      render("<foo bar='1'>")
+    end
+    assert_equal "Single-quoted attributes are not allowed\n"\
+      "On line 1 column 9:\n"\
+      "<foo bar='1'>\n"\
+      "         ^", e.message
+  end
+
+  test "single quotes are allowed when allow_single_quoted_attributes=true" do
+    BetterHtml.config.stubs(:allow_single_quoted_attributes).returns(true)
+    assert_nothing_raised do
+      render("<foo bar='1'>")
+    end
+  end
+
+  test "unquoted values are disallowed when allow_unquoted_attributes=false" do
+    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(false)
+    e = assert_raises(BetterHtml::HtmlError) do
+      render("<foo bar=1>")
+    end
+    assert_equal "Unquoted attribute values are not allowed\n"\
+      "On line 1 column 9:\n"\
+      "<foo bar=1>\n"\
+      "         ^", e.message
+  end
+
+  test "unquoted values are allowed when allow_unquoted_attributes=true" do
+    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(true)
+    assert_nothing_raised do
+      render("<foo bar=1>")
+    end
+  end
+
   test "capture works as intended" do
     output = render(<<-HTML)
       <%- foo = capture do -%>
@@ -296,6 +346,17 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       document.validate!
     end
     assert_equal "Detected an open tag at the end of this document.", e.message
+  end
+
+  test "validate! raises parsing error for attribute name" do
+    document = compile("<foo bar~baz=\"1\">")
+    e = assert_raises(BetterHtml::HtmlError) do
+      document.validate!
+    end
+    assert_equal "expected whitespace, '>', attribute name or value\n"\
+      "On line 1 column 8:\n"\
+      "<foo bar~baz=\"1\">\n"\
+      "        ^^^^^^^^^", e.message
   end
 
   private

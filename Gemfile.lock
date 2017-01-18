@@ -30,8 +30,11 @@ GEM
     json (1.8.3)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
+    metaclass (0.0.4)
     mini_portile2 (2.1.0)
     minitest (5.9.0)
+    mocha (1.2.1)
+      metaclass (~> 0.0.1)
     nokogiri (1.7.0)
       mini_portile2 (~> 2.1.0)
     rails-deprecated_sanitizer (1.0.3)
@@ -56,6 +59,7 @@ DEPENDENCIES
   better_html!
   html_tokenizer!
   minitest
+  mocha
   rake
 
 BUNDLED WITH

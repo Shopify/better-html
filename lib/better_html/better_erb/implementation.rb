@@ -143,9 +143,10 @@ class BetterHtml::BetterErb
     end
 
     def check_token(type, *args)
-      if type == :tag_name
-        check_tag_name(type, *args)
-      end
+      check_tag_name(type, *args) if type == :tag_name
+      check_attribute_name(type, *args) if type == :attribute_name
+      check_quoted_value(type, *args) if type == :attribute_quoted_value_start
+      check_unquoted_value(type, *args) if type == :attribute_unquoted_value
     end
 
     def check_tag_name(type, start, stop, line, column)
@@ -156,6 +157,34 @@ class BetterHtml::BetterErb
       s = "Invalid tag name #{text.inspect} does not match "\
         "regular expression #{BetterHtml.config.partial_tag_name_pattern.inspect}\n"
       s << build_location(line, column, text.size)
+      raise BetterHtml::HtmlError, s
+    end
+
+    def check_attribute_name(type, start, stop, line, column)
+      text = @parser.extract(start, stop)
+      return if text.upcase == "!DOCTYPE"
+      return if BetterHtml.config.partial_tag_name_pattern === text
+
+      s = "Invalid attribute name #{text.inspect} does not match "\
+        "regular expression #{BetterHtml.config.partial_tag_name_pattern.inspect}\n"
+      s << build_location(line, column, text.size)
+      raise BetterHtml::HtmlError, s
+    end
+
+    def check_quoted_value(type, start, stop, line, column)
+      return if BetterHtml.config.allow_single_quoted_attributes
+      text = @parser.extract(start, stop)
+      return if text == '"'
+
+      s = "Single-quoted attributes are not allowed\n"
+      s << build_location(line, column, text.size)
+      raise BetterHtml::HtmlError, s
+    end
+
+    def check_unquoted_value(type, start, stop, line, column)
+      return if BetterHtml.config.allow_unquoted_attributes
+      s = "Unquoted attribute values are not allowed\n"
+      s << build_location(line, column, stop-start)
       raise BetterHtml::HtmlError, s
     end
 

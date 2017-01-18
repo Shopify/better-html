@@ -2,9 +2,21 @@ require 'active_support/core_ext/hash/keys'
 
 module BetterHtml
   class Config
-    # a tag name that may be partial
+    # regex to validate "foo" in "<foo>"
     cattr_accessor :partial_tag_name_pattern
     self.partial_tag_name_pattern = /\A[a-z0-9\-\:]+\z/
+
+    # regex to validate "bar" in "<foo bar=1>"
+    cattr_accessor :partial_attribute_name_pattern
+    self.partial_attribute_name_pattern = /\A[a-z0-9\-\:]+\z/
+
+    # true if "<foo bar='1'>" is valid syntax
+    cattr_accessor :allow_single_quoted_attributes
+    self.allow_single_quoted_attributes = false
+
+    # true if "<foo bar=1>" is valid syntax
+    cattr_accessor :allow_unquoted_attributes
+    self.allow_unquoted_attributes = false
   end
 
   def self.config
