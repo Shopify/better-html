@@ -265,7 +265,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     e = assert_raises(BetterHtml::HtmlError) do
       render("<foo~bar></foo~bar>")
     end
-    assert_equal "Invalid tag name \"foo~bar\" does not match regular expression /\\A[a-z\\-\\:]+\\z/\n"\
+    assert_equal "Invalid tag name \"foo~bar\" does not match regular expression /\\A[a-z0-9\\-\\:]+\\z/\n"\
       "On line 1 column 1:\n"\
       "<foo~bar></foo~bar>\n"\
       " ^^^^^^^", e.message

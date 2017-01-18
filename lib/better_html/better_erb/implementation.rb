@@ -166,7 +166,7 @@ class BetterHtml::BetterErb
     end
 
     def extract_line(line)
-      @parser.document.lines[line-1]
+      @parser.document.lines[line-1].gsub(/\n$/, '')
     end
   end
 end
