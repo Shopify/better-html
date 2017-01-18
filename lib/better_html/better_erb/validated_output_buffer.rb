@@ -25,6 +25,12 @@ module BetterHtml
             "try <#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}<%=#{@code}%>\">."
         end
 
+        def safe_space_after_attribute_append=(value)
+          raise DontInterpolateHere, "Add a space after this attribute value. Instead of "\
+            "<#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}\"<%=#{@code}%>> "\
+            "try <#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}\" <%=#{@code}%>>."
+        end
+
         def safe_attribute_name_append=(value)
           return if value.nil?
           value = value.to_s

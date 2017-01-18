@@ -75,7 +75,7 @@ class BetterHtml::BetterErb
     end
 
     def parser_context
-      if [:quoted_value, :unquoted_value].include?(@parser.context)
+      if [:quoted_value, :unquoted_value, :space_after_attribute].include?(@parser.context)
         {
           tag_name: @parser.tag_name,
           attribute_name: @parser.attribute_name,

@@ -76,6 +76,15 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
       "attribute around 'data-foo=<%= html_attributes(foo: 'bar') %>'.", e.message
   end
 
+  test "interpolate after an attribute value" do
+    e = assert_raises(BetterHtml::DontInterpolateHere) do
+      render("<a foo=\"xx\"<%= html_attributes(foo: 'bar') %>>")
+    end
+    assert_equal "Add a space after this attribute value. "\
+      "Instead of <a foo=\"xx\"<%= html_attributes(foo: 'bar') %>>"\
+      " try <a foo=\"xx\" <%= html_attributes(foo: 'bar') %>>.", e.message
+  end
+
   test "interpolate in attribute without quotes" do
     e = assert_raises(BetterHtml::DontInterpolateHere) do
       render("<a href=<%= value %>>", { value: "un safe" })
