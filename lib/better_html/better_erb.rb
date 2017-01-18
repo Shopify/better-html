@@ -49,7 +49,7 @@ class BetterHtml::BetterErb
         :escape => (self.class.escape_whitelist.include? template.type),
         :trim => (self.class.erb_trim_mode == "-")
       )
-      generator.validate!
+      generator.validate! if generator.respond_to?(:validate!)
       generator.src
     end
   end
