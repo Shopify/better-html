@@ -142,19 +142,27 @@ class BetterHtml::BetterErb
       raise BetterHtml::HtmlError, s
     end
 
-    def check_token(type, start, stop, line, column)
+    def check_token(type, *args)
       if type == :tag_name
-        text = @parser.extract(start, stop)
-        unless BetterHtml.config.partial_tag_name_pattern === text
-          s = "Invalid tag name #{text.inspect} does not match "\
-            "regular expression #{BetterHtml.config.partial_tag_name_pattern.inspect}\n"
-          s << "On line #{line} column #{column}:\n"
-          line = extract_line(line)
-          s << "#{line}\n"
-          s << "#{' ' * column}#{'^' * (text.size)}"
-          raise BetterHtml::HtmlError, s
-        end
+        check_tag_name(type, *args)
       end
+    end
+
+    def check_tag_name(type, start, stop, line, column)
+      text = @parser.extract(start, stop)
+      return if text.upcase == "!DOCTYPE"
+      return if BetterHtml.config.partial_tag_name_pattern === text
+
+      s = "Invalid tag name #{text.inspect} does not match "\
+        "regular expression #{BetterHtml.config.partial_tag_name_pattern.inspect}\n"
+      s << build_location(line, column, text.size)
+      raise BetterHtml::HtmlError, s
+    end
+
+    def build_location(line, column, length)
+      s = "On line #{line} column #{column}:\n"
+      s << "#{extract_line(line)}\n"
+      s << "#{' ' * column}#{'^' * length}"
     end
 
     def extract_line(line)
