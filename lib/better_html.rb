@@ -4,7 +4,7 @@ module BetterHtml
   class Config
     # a tag name that may be partial
     cattr_accessor :partial_tag_name_pattern
-    self.partial_tag_name_pattern = /\A[a-z\-\:]+\z/
+    self.partial_tag_name_pattern = /\A[a-z0-9\-\:]+\z/
   end
 
   def self.config
