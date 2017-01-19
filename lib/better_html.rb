@@ -8,7 +8,7 @@ module BetterHtml
 
     # regex to validate "bar" in "<foo bar=1>"
     cattr_accessor :partial_attribute_name_pattern
-    self.partial_attribute_name_pattern = /\A[a-z0-9\-\:]+\z/
+    self.partial_attribute_name_pattern = /\A[a-zA-Z0-9\-\:]+\z/
 
     # true if "<foo bar='1'>" is valid syntax
     cattr_accessor :allow_single_quoted_attributes
