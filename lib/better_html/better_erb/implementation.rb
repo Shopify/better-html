@@ -162,11 +162,10 @@ class BetterHtml::BetterErb
 
     def check_attribute_name(type, start, stop, line, column)
       text = @parser.extract(start, stop)
-      return if text.upcase == "!DOCTYPE"
-      return if BetterHtml.config.partial_tag_name_pattern === text
+      return if BetterHtml.config.partial_attribute_name_pattern === text
 
       s = "Invalid attribute name #{text.inspect} does not match "\
-        "regular expression #{BetterHtml.config.partial_tag_name_pattern.inspect}\n"
+        "regular expression #{BetterHtml.config.partial_attribute_name_pattern.inspect}\n"
       s << build_location(line, column, text.size)
       raise BetterHtml::HtmlError, s
     end
