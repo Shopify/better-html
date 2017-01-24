@@ -17,6 +17,10 @@ module BetterHtml
     # true if "<foo bar=1>" is valid syntax
     cattr_accessor :allow_unquoted_attributes
     self.allow_unquoted_attributes = false
+
+    # all methods that return "javascript-safe" strings
+    cattr_accessor :javascript_safe_methods
+    self.javascript_safe_methods = ['to_json']
   end
 
   def self.config
