@@ -279,7 +279,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     e = assert_raises(BetterHtml::HtmlError) do
       render("<foo bar_baz=\"1\">")
     end
-    assert_equal "Invalid attribute name \"bar_baz\" does not match regular expression /\\A[a-z0-9\\-\\:]+\\z/\n"\
+    assert_equal "Invalid attribute name \"bar_baz\" does not match regular expression #{BetterHtml.config.partial_attribute_name_pattern.inspect}\n"\
       "On line 1 column 5:\n"\
       "<foo bar_baz=\"1\">\n"\
       "     ^^^^^^^", e.message
