@@ -21,6 +21,10 @@ module BetterHtml
     # all methods that return "javascript-safe" strings
     cattr_accessor :javascript_safe_methods
     self.javascript_safe_methods = ['to_json']
+
+    # name of all html attributes that may contain javascript
+    cattr_accessor :javascript_attribute_names
+    self.javascript_attribute_names = [/\Aon/i]
   end
 
   def self.config

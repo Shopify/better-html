@@ -58,8 +58,6 @@ module BetterHtml
         '"text/javascript"' == typeattr_value
       end
 
-      JAVASCRIPT_TAG_NAME = /\A(define\z|context\z|eval\z|track\-click\z|data\-track\-|bind(\-|\z)|on|data\-define\z|data\-context\z|data\-eval\z|data\-bind(\-|\z))/mi
-
       def validate_tag(node)
         node.attributes.each do |attr_token|
           attr_name = attr_token.name.map(&:text).join
@@ -82,10 +80,18 @@ module BetterHtml
             add_error(node, value_token, "erb interpolation with '<%= raw(...) %>' inside html attribute is never safe")
           elsif call.method == 'html_safe'
             add_error(node, value_token, "erb interpolation with '<%= (...).html_safe %>' inside html attribute is never safe")
-          elsif JAVASCRIPT_TAG_NAME === attr_name && !BetterHtml.config.javascript_safe_methods.include?(call.method)
+          elsif javascript_attribute_name?(attr_name) && !javascript_safe_method?(call.method)
             add_error(node, value_token, "erb interpolation in javascript attribute must call '(...).to_json'")
           end
         end
+      end
+
+      def javascript_attribute_name?(name)
+        BetterHtml.config.javascript_attribute_names.any?{ |other| other === name }
+      end
+
+      def javascript_safe_method?(name)
+        BetterHtml.config.javascript_safe_methods.include?(name)
       end
 
       def validate_script_tag(node)
@@ -106,7 +112,7 @@ module BetterHtml
           elsif call.method == 'html_safe'
             instance_expr = RubyExpr.new(tree: call.instance)
             validate_script_expression(node, token, instance_expr)
-          elsif !BetterHtml.config.javascript_safe_methods.include?(call.method)
+          elsif !javascript_safe_method?(call.method)
             add_error(node, token, "erb interpolation in javascript tag must call '(...).to_json'")
           end
         end
