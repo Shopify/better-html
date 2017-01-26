@@ -180,7 +180,7 @@ module BetterHtml
 
       def initialize(start, stop, line, column)
         @start = start
-        @end = stop
+        @stop = stop
         @line = line
         @column = column
       end
