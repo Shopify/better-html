@@ -195,7 +195,7 @@ class BetterHtml::BetterErb
 
     def extract_line(line)
       line = @parser.document.lines[line-1]
-      line.gsub(/\n$/, '') if line.present?
+      line.nil? ? "" : line.gsub(/\n$/, '')
     end
   end
 end
