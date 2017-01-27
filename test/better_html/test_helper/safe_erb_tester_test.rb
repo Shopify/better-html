@@ -242,7 +242,7 @@ module BetterHtml
 
       test "script tag without content" do
         errors = parse(<<-EOF).errors
-          <script src="//stats.g.doubleclick.net/dc.js" async="async" data-turbolinks-eval="false"></script>
+          <script type="text/javascript"></script>
         EOF
 
         assert_equal 0, errors.size
