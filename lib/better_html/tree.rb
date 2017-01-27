@@ -31,7 +31,7 @@ module BetterHtml
         when :text, :stmt, :expr_literal, :expr_escaped
           nodes << consume_text(tokens)
         else
-          raise RuntimeError, "Unhandled token #{token.type}"
+          raise RuntimeError, "Unhandled token #{token.type} line #{token.location.line} column #{token.location.column}"
         end
       end
       nodes
