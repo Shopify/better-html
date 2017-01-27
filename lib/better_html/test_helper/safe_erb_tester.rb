@@ -78,7 +78,7 @@ module BetterHtml
       def validate_tag_expression(node, attr_name, value_token)
         expr = RubyExpr.new(code: value_token.code)
 
-        if expr.calls.empty?
+        if javascript_attribute_name?(attr_name) && expr.calls.empty?
           add_error(node, value_token, "erb interpolation in javascript attribute must call '(...).to_json'")
           return
         end
