@@ -289,6 +289,18 @@ module BetterHtml
         assert_predicate errors, :empty?
       end
 
+      test "statements are allowed in text/html tags" do
+        errors = parse(<<-EOF).errors
+          <script type="text/html">
+            <% if condition? %>
+              <div></div>
+            <% end %>
+          </script>
+        EOF
+
+        assert_predicate errors, :empty?
+      end
+
       private
       def parse(data)
         SafeErbTester.new(data)

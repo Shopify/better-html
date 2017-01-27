@@ -39,10 +39,10 @@ module BetterHtml
             if node.name_text == 'script'
               next_node = @tree.nodes[index + 1]
               if next_node.is_a?(BetterHtml::Tree::ContentNode) && !node.closing?
-                if javascript_tag_type?(node)
+                if javascript_tag_type?(node, "text/javascript")
                   validate_script_tag_content(next_node)
                 end
-                validate_no_statements(next_node)
+                validate_no_statements(next_node) unless javascript_tag_type?(node, "text/html")
               end
 
               validate_javascript_tag_type(node) unless node.closing?
@@ -55,9 +55,9 @@ module BetterHtml
         end
       end
 
-      def javascript_tag_type?(node)
+      def javascript_tag_type?(node, which)
         typeattr = node.find_attr('type')
-        typeattr.nil? || typeattr.value_text == '"text/javascript"'
+        typeattr.nil? || typeattr.value_text == "\"#{which}\""
       end
 
       def validate_javascript_tag_type(node)
