@@ -226,6 +226,14 @@ module BetterHtml
         assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.last.message
       end
 
+      test "script tag without content" do
+        errors = parse(<<-EOF).errors
+          <script src="//stats.g.doubleclick.net/dc.js" async="async" data-turbolinks-eval="false"></script>
+        EOF
+
+        assert_equal 0, errors.size
+      end
+
       private
       def parse(data)
         SafeErbTester.new(data)

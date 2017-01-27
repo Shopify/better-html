@@ -37,10 +37,13 @@ module BetterHtml
             tag_name = node.name.map(&:text).join
 
             if tag_name == 'script'
-              if javascript_tag_type?(node) && !node.closing?
-                validate_script_tag(@tree.nodes[index + 1])
+              next_node = @tree.nodes[index + 1]
+              if next_node.is_a?(BetterHtml::Tree::ContentNode)
+                if javascript_tag_type?(node) && !node.closing?
+                  validate_script_tag(next_node)
+                end
+                validate_no_statements(next_node)
               end
-              validate_no_statements(@tree.nodes[index + 1])
             end
           when BetterHtml::Tree::Text
             validate_no_javascript_tag(node)
