@@ -175,6 +175,19 @@ module BetterHtml
         assert_equal "bar", expr.calls.first.method
         assert_equal nil, expr.calls.first.arguments
       end
+
+      test "instance variable" do
+        expr = BetterHtml::TestHelper::RubyExpr.new(code: '@foo')
+        assert_equal 0, expr.calls.size
+      end
+
+      test "instance method on variable" do
+        expr = BetterHtml::TestHelper::RubyExpr.new(code: '@foo.bar')
+        assert_equal 1, expr.calls.size
+        assert_equal [:var_ref, [:@ivar, "@foo", [1, 0]]], expr.calls.first.instance
+        assert_equal "bar", expr.calls.first.method
+        assert_equal nil, expr.calls.first.arguments
+      end
     end
   end
 end

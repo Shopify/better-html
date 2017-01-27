@@ -35,7 +35,9 @@ module BetterHtml
 
       def parse_expr(expr)
         case expr.first
-        when :@ident, :@tstring_content
+        when :var_ref
+          parse_expr(expr[1])
+        when :@ident, :@tstring_content, :@ivar
           expr[1]
         when :paren
           parse_expr(expr[1].first)
