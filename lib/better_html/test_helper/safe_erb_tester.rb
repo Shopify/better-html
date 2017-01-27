@@ -132,7 +132,7 @@ module BetterHtml
 
       def validate_no_statements(node)
         node.content.each do |token|
-          if token.type == :stmt
+          if token.type == :stmt && !(/\A\s*end/m === token.code)
             add_error(node, token, "erb statement not allowed here; did you mean '<%=' ?")
           end
         end

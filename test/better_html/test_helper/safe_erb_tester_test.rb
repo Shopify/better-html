@@ -279,6 +279,18 @@ module BetterHtml
         assert_predicate errors, :empty?
       end
 
+      test "end statements are allowed in script tags" do
+        errors = parse(<<-EOF).errors
+          <script type="test/template">
+            <%= ui_form do %>
+              <div></div>
+            <% end %>
+          </script>
+        EOF
+
+        assert_predicate errors, :empty?
+      end
+
       private
       def parse(data)
         SafeErbTester.new(data)
