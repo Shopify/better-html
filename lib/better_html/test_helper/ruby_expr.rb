@@ -39,6 +39,8 @@ module BetterHtml
           parse_expr(expr[1])
         when :@ident, :@tstring_content, :@ivar
           expr[1]
+        when :aref
+          expr[1]
         when :paren
           parse_expr(expr[1].first)
         when :string_literal

@@ -188,6 +188,11 @@ module BetterHtml
         assert_equal "bar", expr.calls.first.method
         assert_equal nil, expr.calls.first.arguments
       end
+
+      test "index into array" do
+        expr = BetterHtml::TestHelper::RubyExpr.new(code: 'local_assigns[:text_class] if local_assigns[:text_class]')
+        assert_equal 0, expr.calls.size
+      end
     end
   end
 end
