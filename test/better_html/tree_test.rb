@@ -100,6 +100,19 @@ module BetterHtml
       assert_equal ["bar"], attribute.value.map(&:text)
     end
 
+    test "consume attributes without name" do
+      tree = BetterHtml::Tree.new("<div 'thing'>")
+
+      assert_equal 1, tree.nodes.size
+      tag = tree.nodes.first
+      assert_equal BetterHtml::Tree::Tag, tag.class
+      assert_equal 1, tag.attributes.size
+      attribute = tag.attributes.first
+      assert_equal BetterHtml::Tree::Attribute, attribute.class
+      assert_predicate attribute.name, :empty?
+      assert_equal ["'", "thing", "'"], attribute.value.map(&:text)
+    end
+
     test "consume tag attributes nodes quoted value" do
       tree = BetterHtml::Tree.new("<div foo=\"bar\">")
 

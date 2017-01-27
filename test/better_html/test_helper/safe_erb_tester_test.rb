@@ -233,11 +233,9 @@ module BetterHtml
           </script>
         EOF
 
-        assert_equal 2, errors.size
+        assert_equal 1, errors.size
         assert_equal "<%             if foo? \n%>", errors.first.token.text
         assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.first.message
-        assert_equal "<%             end \n%>", errors.last.token.text
-        assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.last.message
       end
 
       test "script tag without content" do

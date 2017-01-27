@@ -95,6 +95,17 @@ module BetterHtml
       node
     end
 
+    def consume_attribute_value(tokens)
+      node = Attribute.new
+      while tokens.any? && [
+          :attribute_quoted_value_start, :attribute_quoted_value,
+          :attribute_quoted_value_end, :attribute_unquoted_value,
+          :stmt, :expr_literal, :expr_escaped].include?(tokens[0].type)
+        node.value << tokens.shift
+      end
+      node
+    end
+
     def consume_equal?(tokens)
       while tokens.any? && [:whitespace, :equal].include?(tokens[0].type)
         return true if tokens.shift.type == :equal
