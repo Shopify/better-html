@@ -76,8 +76,16 @@ module BetterHtml
         assert_equal [[:vcall, [:@ident, "baz", [1, 8]]], [:vcall, [:@ident, "x", [1, 13]]]], expr.calls.first.arguments
       end
 
-      test "call with parameters with conditional" do
+      test "call with parameters with if conditional modifier" do
         expr = BetterHtml::TestHelper::RubyExpr.new(code: "foo(bar) if something?")
+        assert_equal 1, expr.calls.size
+        assert_equal nil, expr.calls.first.instance
+        assert_equal "foo", expr.calls.first.method
+        assert_equal [[:vcall, [:@ident, "bar", [1, 4]]]], expr.calls.first.arguments
+      end
+
+      test "call with parameters with unless conditional modifier" do
+        expr = BetterHtml::TestHelper::RubyExpr.new(code: "foo(bar) unless something?")
         assert_equal 1, expr.calls.size
         assert_equal nil, expr.calls.first.instance
         assert_equal "foo", expr.calls.first.method

@@ -73,7 +73,7 @@ module BetterHtml
           obj
         when :arg_paren
           parse_expr(expr[1])
-        when :if_mod
+        when :if_mod, :unless_mod
           # foo if bar -> bar=expr[1], foo=expr[2]
           parse_expr(expr[2])
         when :ifop
