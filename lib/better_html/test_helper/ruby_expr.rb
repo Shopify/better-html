@@ -37,10 +37,6 @@ module BetterHtml
         case expr.first
         when :var_ref
           parse_expr(expr[1])
-        when :@ident, :@tstring_content, :@ivar
-          expr[1]
-        when :aref
-          expr[1]
         when :paren
           parse_expr(expr[1].first)
         when :string_literal
@@ -77,8 +73,6 @@ module BetterHtml
           obj
         when :arg_paren
           parse_expr(expr[1])
-        when :args_add_block
-          expr[1]
         when :if_mod
           # foo if bar -> bar=expr[1], foo=expr[2]
           parse_expr(expr[2])
@@ -87,7 +81,7 @@ module BetterHtml
           parse_expr(expr[2])
           parse_expr(expr[3])
         else
-          raise ParseError, "Unknown expression: #{expr}"
+          expr[1]
         end
       end
     end
