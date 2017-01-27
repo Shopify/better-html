@@ -12,10 +12,12 @@ module BetterHtml
 
       test "string without interpolation is safe" do
         errors = parse(<<-EOF).errors
-          <a onclick="<%= "something" %>">
+          <a onclick="alert('<%= "something" %>')">
         EOF
 
-        assert_equal [], errors
+        assert_equal 1, errors.size
+        assert_equal '<%= "something" %>', errors.first.token.text
+        assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
       end
 
       test "string with interpolation" do
@@ -173,6 +175,18 @@ module BetterHtml
 
         assert_equal 1, errors.size
         assert_equal '<%= unsafe %>', errors.first.token.text
+        assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
+      end
+
+      test "<script> tag without calls is unsafe" do
+        errors = parse(<<-EOF).errors
+          <script>
+            if (a < 1) { <%= "unsafe" %> }
+          </script>
+        EOF
+
+        assert_equal 1, errors.size
+        assert_equal '<%= "unsafe" %>', errors.first.token.text
         assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
       end
 

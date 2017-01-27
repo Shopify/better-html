@@ -78,6 +78,11 @@ module BetterHtml
       def validate_tag_expression(node, attr_name, value_token)
         expr = RubyExpr.new(code: value_token.code)
 
+        if expr.calls.empty?
+          add_error(node, value_token, "erb interpolation in javascript attribute must call '(...).to_json'")
+          return
+        end
+
         expr.calls.each do |call|
           if call.method == 'raw'
             add_error(node, value_token, "erb interpolation with '<%= raw(...) %>' inside html attribute is never safe")
@@ -108,6 +113,11 @@ module BetterHtml
       end
 
       def validate_script_expression(node, token, expr)
+        if expr.calls.empty?
+          add_error(node, token, "erb interpolation in javascript tag must call '(...).to_json'")
+          return
+        end
+
         expr.calls.each do |call|
           if call.method == 'raw'
             arguments_expr = RubyExpr.new(tree: call.arguments)
