@@ -259,6 +259,26 @@ module BetterHtml
         assert_predicate errors, :empty?
       end
 
+      test "<script> with to_json is safe" do
+        errors = parse(<<-EOF).errors
+          <script>
+            <%= unsafe.to_json %>
+          </script>
+        EOF
+
+        assert_predicate errors, :empty?
+      end
+
+      test "<script> with raw and to_json is safe" do
+        errors = parse(<<-EOF).errors
+          <script>
+            <%= raw unsafe.to_json %>
+          </script>
+        EOF
+
+        assert_predicate errors, :empty?
+      end
+
       private
       def parse(data)
         SafeErbTester.new(data)

@@ -107,17 +107,16 @@ module BetterHtml
           case token.type
           when :expr_literal, :expr_escaped
             expr = RubyExpr.new(code: token.code)
-            validate_script_expression(node, token, expr)
+            if expr.calls.empty?
+              add_error(node, token, "erb interpolation in javascript tag must call '(...).to_json'")
+            else
+              validate_script_expression(node, token, expr)
+            end
           end
         end
       end
 
       def validate_script_expression(node, token, expr)
-        if expr.calls.empty?
-          add_error(node, token, "erb interpolation in javascript tag must call '(...).to_json'")
-          return
-        end
-
         expr.calls.each do |call|
           if call.method == 'raw'
             arguments_expr = RubyExpr.new(tree: call.arguments)
