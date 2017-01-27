@@ -168,7 +168,7 @@ module BetterHtml
 
       test "unsafe erb in <script> tag without type" do
         errors = parse(<<-EOF).errors
-          <script>
+          <script type="text/javascript">
             if (a < 1) { <%= unsafe %> }
           </script>
         EOF
@@ -180,7 +180,7 @@ module BetterHtml
 
       test "<script> tag without calls is unsafe" do
         errors = parse(<<-EOF).errors
-          <script>
+          <script type="text/javascript">
             if (a < 1) { <%= "unsafe" %> }
           </script>
         EOF
@@ -248,7 +248,7 @@ module BetterHtml
 
       test "statement after script regression" do
         errors = parse(<<-EOF).errors
-          <script>
+          <script type="text/javascript">
             foo()
           </script>
           <% if condition? %>
@@ -259,7 +259,7 @@ module BetterHtml
 
       test "<script> with to_json is safe" do
         errors = parse(<<-EOF).errors
-          <script>
+          <script type="text/javascript">
             <%= unsafe.to_json %>
           </script>
         EOF
@@ -269,7 +269,7 @@ module BetterHtml
 
       test "<script> with raw and to_json is safe" do
         errors = parse(<<-EOF).errors
-          <script>
+          <script type="text/javascript">
             <%= raw unsafe.to_json %>
           </script>
         EOF
@@ -279,7 +279,7 @@ module BetterHtml
 
       test "end statements are allowed in script tags" do
         errors = parse(<<-EOF).errors
-          <script type="test/template">
+          <script type="text/template">
             <%= ui_form do %>
               <div></div>
             <% end %>

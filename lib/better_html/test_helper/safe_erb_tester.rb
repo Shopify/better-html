@@ -5,6 +5,8 @@ module BetterHtml
     class SafeErbTester
       attr_reader :errors
 
+      VALID_JAVASCRIPT_TAG_TYPES = ['"text/javascript"', '"text/template"', '"text/html"']
+
       class Error < InterpolatorError
         attr_reader :node, :token
 
@@ -34,16 +36,16 @@ module BetterHtml
           when BetterHtml::Tree::Tag
             validate_tag(node)
 
-            tag_name = node.name.map(&:text).join
-
-            if tag_name == 'script'
+            if node.name_text == 'script'
               next_node = @tree.nodes[index + 1]
               if next_node.is_a?(BetterHtml::Tree::ContentNode) && !node.closing?
                 if javascript_tag_type?(node)
-                  validate_script_tag(next_node)
+                  validate_script_tag_content(next_node)
                 end
                 validate_no_statements(next_node)
               end
+
+              validate_javascript_tag_type(node) unless node.closing?
             end
           when BetterHtml::Tree::Text
             validate_no_javascript_tag(node)
@@ -55,15 +57,21 @@ module BetterHtml
 
       def javascript_tag_type?(node)
         typeattr = node.find_attr('type')
-        return true if typeattr.nil?
-        typeattr_value = typeattr.value.map(&:text).join
+        typeattr.nil? || typeattr.value_text == '"text/javascript"'
+      end
 
-        '"text/javascript"' == typeattr_value
+      def validate_javascript_tag_type(node)
+        typeattr = node.find_attr('type')
+        if typeattr.nil?
+          add_error(node, node.name.first, "midding type attribute for script tag, choose one of #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}")
+        elsif !VALID_JAVASCRIPT_TAG_TYPES.include?(typeattr.value_text)
+          add_error(node, typeattr.value.first, "#{typeattr.value_text} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}")
+        end
       end
 
       def validate_tag(node)
         node.attributes.each do |attr_token|
-          attr_name = attr_token.name.map(&:text).join
+          attr_name = attr_token.name_text
           attr_token.value.each do |value_token|
             case value_token.type
             when :expr_literal
@@ -102,7 +110,7 @@ module BetterHtml
         BetterHtml.config.javascript_safe_methods.include?(name)
       end
 
-      def validate_script_tag(node)
+      def validate_script_tag_content(node)
         node.content.each do |token|
           case token.type
           when :expr_literal, :expr_escaped

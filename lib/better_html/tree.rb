@@ -208,6 +208,10 @@ module BetterHtml
         @attributes = []
       end
 
+      def name_text
+        name.map(&:text).join
+      end
+
       def closing?
         closing
       end
@@ -229,6 +233,14 @@ module BetterHtml
         @name = []
         @value = []
       end
+
+      def name_text
+        name.map(&:text).join
+      end
+
+      def value_text
+        value.map(&:text).join
+      end
     end
 
     class ContentNode
@@ -236,6 +248,10 @@ module BetterHtml
 
       def initialize
         @content = []
+      end
+
+      def content_text
+        content.map(&:text).join
       end
     end
 
