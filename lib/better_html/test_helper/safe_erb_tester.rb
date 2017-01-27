@@ -63,7 +63,7 @@ module BetterHtml
       def validate_javascript_tag_type(node)
         typeattr = node.find_attr('type')
         if typeattr.nil?
-          add_error(node, node.name.first, "midding type attribute for script tag, choose one of #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}")
+          add_error(node, node.name.first, "missing type attribute for script tag, choose one of #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}")
         elsif !VALID_JAVASCRIPT_TAG_TYPES.include?(typeattr.value_text)
           add_error(node, typeattr.value.first, "#{typeattr.value_text} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}")
         end
