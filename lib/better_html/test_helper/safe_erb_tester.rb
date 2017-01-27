@@ -38,8 +38,8 @@ module BetterHtml
 
             if tag_name == 'script'
               next_node = @tree.nodes[index + 1]
-              if next_node.is_a?(BetterHtml::Tree::ContentNode)
-                if javascript_tag_type?(node) && !node.closing?
+              if next_node.is_a?(BetterHtml::Tree::ContentNode) && !node.closing?
+                if javascript_tag_type?(node)
                   validate_script_tag(next_node)
                 end
                 validate_no_statements(next_node)

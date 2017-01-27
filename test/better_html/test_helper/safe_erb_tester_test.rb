@@ -58,14 +58,14 @@ module BetterHtml
         errors = parse(<<-EOF).errors
           <a onclick="method(<%= unsafe.to_json %>)">
         EOF
-        assert_equal [], errors
+        assert_predicate errors, :empty?
       end
 
       test "ternary with safe javascript escaping" do
         errors = parse(<<-EOF).errors
           <a onclick="method(<%= foo ? bar.to_json : j(baz) %>)">
         EOF
-        assert_equal [], errors
+        assert_predicate errors, :empty?
       end
 
       test "ternary with unsafe javascript escaping" do
@@ -82,28 +82,28 @@ module BetterHtml
         errors = parse(<<-EOF).errors
           <a onclick="method('<%= j unsafe %>')">
         EOF
-        assert_equal 0, errors.size
+        assert_predicate errors, :empty?
       end
 
       test "j() is safe in html attribute" do
         errors = parse(<<-EOF).errors
           <a onclick="method('<%= j(unsafe) %>')">
         EOF
-        assert_equal 0, errors.size
+        assert_predicate errors, :empty?
       end
 
       test "escape_javascript is safe in html attribute" do
         errors = parse(<<-EOF).errors
           <a onclick="method(<%= escape_javascript unsafe %>)">
         EOF
-        assert_equal 0, errors.size
+        assert_predicate errors, :empty?
       end
 
       test "escape_javascript() is safe in html attribute" do
         errors = parse(<<-EOF).errors
           <a onclick="method(<%= escape_javascript(unsafe) %>)">
         EOF
-        assert_equal 0, errors.size
+        assert_predicate errors, :empty?
       end
 
       test "html_safe is never safe in html attribute, even non javascript attributes like href" do
@@ -221,7 +221,7 @@ module BetterHtml
           </script>
         EOF
 
-        assert_equal 0, errors.size
+        assert_predicate errors, :empty?
       end
 
       test "statements not allowed in script tags" do
@@ -245,7 +245,18 @@ module BetterHtml
           <script type="text/javascript"></script>
         EOF
 
-        assert_equal 0, errors.size
+        assert_predicate errors, :empty?
+      end
+
+      test "statement after script regression" do
+        errors = parse(<<-EOF).errors
+          <script>
+            foo()
+          </script>
+          <% if condition? %>
+        EOF
+
+        assert_predicate errors, :empty?
       end
 
       private

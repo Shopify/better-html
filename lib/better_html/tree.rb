@@ -1,5 +1,6 @@
 require 'erubis/engine/eruby'
 require 'html_tokenizer'
+require 'ostruct'
 
 module BetterHtml
   class Tree
