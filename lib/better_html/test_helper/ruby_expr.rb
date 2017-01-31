@@ -72,7 +72,7 @@ module BetterHtml
           obj.arguments = parse_expr(expr[2])
           obj
         when :arg_paren
-          parse_expr(expr[1])
+          parse_expr(expr[1]) unless expr[1].nil?
         when :if_mod, :unless_mod
           # foo if bar -> bar=expr[1], foo=expr[2]
           parse_expr(expr[2])
