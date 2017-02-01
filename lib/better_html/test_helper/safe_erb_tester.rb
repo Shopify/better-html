@@ -5,7 +5,7 @@ module BetterHtml
     class SafeErbTester
       attr_reader :errors
 
-      VALID_JAVASCRIPT_TAG_TYPES = ['"text/javascript"', '"text/template"', '"text/html"']
+      VALID_JAVASCRIPT_TAG_TYPES = ['text/javascript', 'text/template', 'text/html']
 
       class Error < InterpolatorError
         attr_reader :node, :token
@@ -57,14 +57,14 @@ module BetterHtml
 
       def javascript_tag_type?(node, which)
         typeattr = node.find_attr('type')
-        value = typeattr&.value_text || "\"text/javascript\""
-        value == "\"#{which}\""
+        value = typeattr&.value_text_without_quotes || "text/javascript"
+        value == which
       end
 
       def validate_javascript_tag_type(node)
         typeattr = node.find_attr('type')
         return if typeattr.nil?
-        if !VALID_JAVASCRIPT_TAG_TYPES.include?(typeattr.value_text)
+        if !VALID_JAVASCRIPT_TAG_TYPES.include?(typeattr.value_text_without_quotes)
           add_error(node, typeattr.value.first, "#{typeattr.value_text} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}")
         end
       end

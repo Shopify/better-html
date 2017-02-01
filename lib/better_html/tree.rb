@@ -241,6 +241,10 @@ module BetterHtml
       def value_text
         value.map(&:text).join
       end
+
+      def value_text_without_quotes
+        value.map{ |s| ["'", '"'].include?(s.text) ? '' : s.text }.join
+      end
     end
 
     class ContentNode
