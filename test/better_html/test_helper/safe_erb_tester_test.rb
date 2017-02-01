@@ -168,7 +168,7 @@ module BetterHtml
 
       test "unsafe erb in <script> tag without type" do
         errors = parse(<<-EOF).errors
-          <script type="text/javascript">
+          <script>
             if (a < 1) { <%= unsafe %> }
           </script>
         EOF
