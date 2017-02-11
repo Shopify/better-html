@@ -16,11 +16,24 @@ class BetterHtml::HelpersTest < ActiveSupport::TestCase
     e = assert_raises(ArgumentError) do
       html_attributes("invalid key": "bar", baz: "qux").to_s
     end
-    assert_equal "attribute names should contain only lowercase letters, numbers, or :-._ symbols", e.message
+    assert_equal "Attribute names must contain only lowercase letters, numbers, or :-._ symbols", e.message
   end
 
-  test "html_attributes escapes html_safe values" do
-    assert_equal 'foo=" &#39;&quot;&gt;&lt; "',
-      html_attributes(foo: " '\">< ".html_safe).to_s
+  test "#html_attributes does not accept incorrectly escaped html_safe values" do
+    e = assert_raises(ArgumentError) do
+      html_attributes('something': 'with "> double quote'.html_safe).to_s
+    end
+    assert_equal "The value provided for attribute 'something' contains a `\"` character which is not allowed. "\
+      "Did you call .html_safe without properly escaping this data?", e.message
+  end
+
+  test "#html_attributes accepts correctly escaped html_safe values" do
+    assert_equal 'something="with &quot;&gt; double quote"',
+      html_attributes('something': CGI.escapeHTML('with "> double quote').html_safe).to_s
+  end
+
+  test "#html_attributes escapes non-html_safe values" do
+    assert_equal 'something="with &quot;&gt; double quote"',
+      html_attributes('something': 'with "> double quote').to_s
   end
 end
