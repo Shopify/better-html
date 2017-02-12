@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/EiNSTeiN-/html_tokenizer.git
-  revision: 1aec33e5535ab3c07e4ea542ebbfd567b0149daf
+  revision: 0a1e1e94e91c3d1aa83449c84c40c4e00be3418e
   specs:
     html_tokenizer (0.0.1)
 
@@ -63,4 +63,4 @@ DEPENDENCIES
   rake
 
 BUNDLED WITH
-   1.14.2
+   1.14.3
