@@ -36,4 +36,14 @@ class BetterHtml::HelpersTest < ActiveSupport::TestCase
     assert_equal 'something="with &quot;&gt; double quote"',
       html_attributes('something': 'with "> double quote').to_s
   end
+
+  test "#html_attributes accepts nil values as value-less attributes" do
+    assert_equal 'data-thing data-other-thing',
+      html_attributes('data-thing': nil, 'data-other-thing': nil).to_s
+  end
+
+  test "#html_attributes empty string value is output" do
+    assert_equal 'data-thing="" data-other-thing=""',
+      html_attributes('data-thing': "", 'data-other-thing': "").to_s
+  end
 end
