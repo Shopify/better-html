@@ -125,8 +125,12 @@ some obvious attacks.
 We wrap the contents of the script tag, including everything between the
 original `<script>` and `</script>`, into a safety check that raises an exception
 if a rogue `</script>` tag is inserted as a result of ruby data being interpolated
-anywhere. The same strategy is applied to other tags which contain non-html data,
-such as `<textarea>`.
+anywhere.
+
+The same strategy is applied to other tags which contain non-html data,
+such as `<textarea>`, including html comments and CDATA tags.
+
+
 
 In addition to this runtime validation, this gem provides test helpers that makes
 it easy to write a test to assert `.to_json` is used in every script tag and
