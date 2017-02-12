@@ -15,7 +15,14 @@ module BetterHtml
 
         def safe_quoted_value_append=(value)
           return if value.nil?
-          @output.safe_append= CGI.escapeHTML(value.to_s)
+          value = properly_escaped(value)
+
+          if value.include?(@context[:quote_character])
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+              "into a quoted attribute value. The value cannot contain the character #{@context[:quote_character]}."
+          end
+
+          @output.safe_append= value
         end
 
         def safe_unquoted_value_append=(value)

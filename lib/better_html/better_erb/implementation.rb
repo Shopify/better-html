@@ -88,6 +88,7 @@ class BetterHtml::BetterErb
           attribute_name: @parser.attribute_name,
           attribute_value: @parser.attribute_value,
           attribute_quoted: @parser.attribute_quoted?,
+          quote_character: @parser.quote_character,
         }
       elsif [:attribute_name, :after_attribute_name, :after_equal].include?(@parser.context)
         {

@@ -25,14 +25,20 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "interpolate html_safe inside attribute is magically force-escaped" do
-    assert_equal "<a href=\" &#39;&quot;&gt;x \">",
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
       render("<a href=\"<%= value %>\">", { value: ' \'">x '.html_safe })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a quoted attribute value. The value cannot contain the character \".", e.message
   end
 
   test "interpolate html_safe inside single quoted attribute" do
     BetterHtml.config.stubs(:allow_single_quoted_attributes).returns(true)
-    assert_equal "<a href=\' &#39;&quot;&gt;x \'>",
+    e = assert_raises(BetterHtml::UnsafeHtmlError) do
       render("<a href=\'<%= value %>\'>", { value: ' \'">x '.html_safe })
+    end
+    assert_equal "Detected invalid characters as part of the interpolation "\
+      "into a quoted attribute value. The value cannot contain the character '.", e.message
   end
 
   test "interpolate in attribute name" do
