@@ -117,8 +117,8 @@ Consider the following ERB template:
 </script>
 ```
 
-In circumstances where `value` may contain a string such as `</script><script>`
-which is a well-known way to achieve XSS in this situation. We make
+In circumstances where `value` may contain input such as `</script><script>`,
+an attacker can easily achieve XSS. We make
 best-effort runtime validations on this value in order to make it safe against
 some obvious attacks.
 
