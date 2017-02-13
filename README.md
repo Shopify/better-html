@@ -102,7 +102,7 @@ Consider the following ERB template
 When `value` is user-controlled, an attacker may achieve XSS quite easily in this
 situation. We wrap `value` in a runtime check that ensures it only contains characters
 that are valid in a attribute name. This excludes `=`, `/` or space, which should
-prevent any risk on injection.
+prevent any risk of injection.
 
 The `html_attributes` helper works the same way, it will raise when attribute names
 contain dangerous characters.
