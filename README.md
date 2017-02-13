@@ -138,7 +138,7 @@ every html attribute which end up being executed as javascript (onclick and simi
 The main goal of this helper is to assert that Ruby data translates into Javascript
 data, but never becomes javascript code.
 
-Simply create a test file and add a test such as this:
+Simply create a test such as this:
 
 ```ruby
 require 'test_helper'
