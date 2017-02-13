@@ -242,7 +242,7 @@ module BetterHtml
       def adjust(text)
         return if text.empty?
         lines = text.split("\n")
-        @line += lines.size - 1
+        @line += lines.size - (text.end_with?("\n") ? 0 : 1)
         @column = lines.last.size
         @length += text.size
       end
