@@ -31,7 +31,7 @@ Not allowed ❌
 <img class=<%= value %>>
 ```
 
-Use interpolation into tag or names.
+Use interpolation into tag or attribute names.
 ```erb
 Allowed ✅
 <img data-<%= value %>="true">
