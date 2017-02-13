@@ -41,6 +41,9 @@ Allowed ✅
 
 Not allowed ❌ (missing space after closing quote)
 <img class="hidden"<%= value %>>
+
+Not allowed ❌
+<img <%= value %>="true">
 ```
 
 Insert conditional attributes using `html_attributes` helper.
@@ -50,9 +53,6 @@ Allowed ✅
 
 Not allowed ❌
 <img <% if condition? %>class="hidden"<% end %>>
-
-Not allowed ❌
-<img <%= value %>="true">
 ```
 
 Only insert expressions (`<%=` or `<%==`) inside script tags, never statements (`<%`)
