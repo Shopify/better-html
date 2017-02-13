@@ -130,7 +130,7 @@ anywhere.
 The same strategy is applied to other tags which contain non-html data,
 such as `<textarea>`, including html comments and CDATA tags.
 
-## ERB Interpolation Safety Tester
+## Testing for valid HTML and ERB
 
 In addition to runtime validation, this gem provides test helpers that makes
 it easy to write a test to assert `.to_json` is used in every script tag and
@@ -138,13 +138,13 @@ every html attribute which end up being executed as javascript (onclick and simi
 The main goal of this helper is to assert that Ruby data translates into Javascript
 data, but never becomes javascript code.
 
-Simply create a test such as this:
+Simply create `test/unit/erb_safety_test.rb` and add code like this:
 
 ```ruby
 require 'test_helper'
 require 'better_html/test_helper/safe_erb_tester'
 
-class EscapingTest < ActiveSupport::TestCase
+class ErbSafetyTest < ActiveSupport::TestCase
   include BetterHtml::TestHelper::SafeErbTester
 
   ERB_GLOB = File.join(Rails.root, 'app/views/**/{*.htm,*.html,*.htm.erb,*.html.erb,*.html+*.erb}')
@@ -152,6 +152,24 @@ class EscapingTest < ActiveSupport::TestCase
   Dir[ERB_GLOB].each do |filename|
     test "missing javascript escapes in #{Pathname.new(filename).relative_path_from(Rails.root)}" do
       assert_erb_safety File.read(filename)
+    end
+  end
+end
+```
+
+You may also want to assert that all `.html.erb` templates are parseable, to avoid deploying
+broken templates to production. Add this code in `test/unit/erb_implementation_test.rb`
+
+```ruby
+require 'test_helper'
+
+class ErbImplementationTest < ActiveSupport::TestCase
+  ERB_GLOB = File.join(Rails.root, 'app/views/**/{*.htm,*.html,*.htm.erb,*.html.erb,*.html+*.erb}')
+
+  Dir[ERB_GLOB].each do |filename|
+    test "html errors in #{Pathname.new(filename).relative_path_from(Rails.root)}" do
+      data = File.read(filename)
+      BetterHtml::BetterErb::Implementation.new(data).validate!
     end
   end
 end
