@@ -30,7 +30,6 @@ class BetterHtml::BetterErb
       filename = template.identifier.split("/").last
       exts = filename.split(".")
       exts = exts[1..exts.length].join(".")
-      puts "[GENERATE] #{template.identifier} #{exts.inspect}"
       template_source = template.source.dup.force_encoding(Encoding::ASCII_8BIT)
 
       erb = template_source.gsub(ActionView::Template::Handlers::ERB::ENCODING_TAG, '')
