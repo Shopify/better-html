@@ -196,55 +196,52 @@ module BetterHtml
       attr_reader :tokens
 
       def initialize(document)
-        @line = 1
-        @column = 0
-        @length = 0
+        @document = ""
         @tokens = []
         super
       end
 
       def add_text(src, text)
         add_token(:text, text)
-        adjust(text)
+        append(text)
       end
 
       def add_stmt(src, code)
         text = "<%#{code}%>"
         add_token(:stmt, text, code)
-        adjust(text)
+        append(text)
       end
 
       def add_expr_literal(src, code)
         text = "<%=#{code}%>"
         add_token(:expr_literal, text, code)
-        adjust(text)
+        append(text)
       end
 
       def add_expr_escaped(src, code)
         text = "<%==#{code}%>"
         add_token(:expr_escaped, text, code)
-        adjust(text)
+        append(text)
       end
 
       private
 
       def add_token(type, text, code = nil)
-        start = @length
+        start = @document.size
         stop = start + text.size
+        lines = @document.split("\n")
+        line = lines.size
+        column = lines.empty? ? 0 : lines.last.size
         @tokens << Token.new(
           type: type,
           text: text,
           code: code,
-          location: Location.new(start, stop, @line, @column)
+          location: Location.new(start, stop, line, column)
         )
       end
 
-      def adjust(text)
-        return if text.empty?
-        lines = text.split("\n")
-        @line += lines.size - (text.end_with?("\n") ? 0 : 1)
-        @column = lines.last.size
-        @length += text.size
+      def append(text)
+        @document << text
       end
     end
 
