@@ -128,7 +128,7 @@ if a rogue `</script>` tag is inserted as a result of ruby data being interpolat
 anywhere.
 
 The same strategy is applied to other tags which contain non-html data,
-such as `<textarea>`, including html comments and CDATA tags.
+such as `<textarea>`, html comments and CDATA tags.
 
 ## Testing for valid HTML and ERB
 
