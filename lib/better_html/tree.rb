@@ -230,7 +230,7 @@ module BetterHtml
         start = @document.size
         stop = start + text.size
         lines = @document.split("\n", -1)
-        line = [lines.size, 1].max
+        line = lines.empty? ? 1 : lines.size
         column = lines.empty? ? 0 : lines.last.size
         @tokens << Token.new(
           type: type,
