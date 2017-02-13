@@ -132,7 +132,7 @@ such as `<textarea>`, including html comments and CDATA tags.
 
 ## ERB Interpolation Safety Tester
 
-In addition to this runtime validation, this gem provides test helpers that makes
+In addition to runtime validation, this gem provides test helpers that makes
 it easy to write a test to assert `.to_json` is used in every script tag and
 every html attribute which end up being executed as javascript (onclick and similar).
 The main goal of this helper is to assert that Ruby data translates into Javascript
