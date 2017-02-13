@@ -3,15 +3,8 @@ require 'better_html/test_helper/ruby_expr'
 module BetterHtml
   module TestHelper
     module SafeErbTester
-      def assert_erb_safety(data)
-        tester = Tester.new(data)
 
-        message = ""
-        tester.errors.each do |e|
-          message << format_erb_safety_error(data, e)
-        end
-
-        message << <<-EOF
+      SAFETY_TIPS = <<-EOF
 -----------
 
 The javascript snippets listed above do not appear to be escaped properly
@@ -33,6 +26,16 @@ Always use raw and to_json together within <script> tags:
 
 -----------
 EOF
+
+      def assert_erb_safety(data, **options)
+        tester = Tester.new(data, **options)
+
+        message = ""
+        tester.errors.each do |e|
+          message << format_erb_safety_error(data, e)
+        end
+
+        message << SAFETY_TIPS
 
         assert_predicate tester.errors, :empty?, message
       end
@@ -70,10 +73,12 @@ EOF
 
         VALID_JAVASCRIPT_TAG_TYPES = ['text/javascript', 'text/template', 'text/html']
 
-        def initialize(data, options={})
+        def initialize(data, **options)
           @data = data
           @errors = []
-          @tree = BetterHtml::Tree.new(data)
+          @options = options.present? ? options.dup : {}
+          @options[:template_language] ||= :html
+          @tree = BetterHtml::Tree.new(data, @options.slice(:template_language))
           validate!
         end
 
@@ -99,7 +104,12 @@ EOF
                 validate_javascript_tag_type(node) unless node.closing?
               end
             when BetterHtml::Tree::Text
-              validate_no_javascript_tag(node)
+              if @tree.template_language == :javascript
+                validate_script_tag_content(node)
+                validate_no_statements(node)
+              else
+                validate_no_javascript_tag(node)
+              end
             when BetterHtml::Tree::CData, BetterHtml::Tree::Comment
               validate_no_statements(node)
             end

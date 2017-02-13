@@ -146,5 +146,21 @@ module BetterHtml
       assert_equal BetterHtml::Tree::Text, tree.nodes.first.class
       assert_equal ["here is ", "<%= some %>", " text"], tree.nodes.first.content.map(&:text)
     end
+
+    test "javascript template parsing works" do
+      tree = BetterHtml::Tree.new("here is <%= some %> text", template_language: :javascript)
+
+      assert_equal 1, tree.nodes.size
+      assert_equal BetterHtml::Tree::Text, tree.nodes.first.class
+      assert_equal ["here is ", "<%= some %>", " text"], tree.nodes.first.content.map(&:text)
+    end
+
+    test "javascript template does not consume html tags" do
+      tree = BetterHtml::Tree.new("<div <%= some %> />", template_language: :javascript)
+
+      assert_equal 1, tree.nodes.size
+      assert_equal BetterHtml::Tree::Text, tree.nodes.first.class
+      assert_equal ["<div ", "<%= some %>", " />"], tree.nodes.first.content.map(&:text)
+    end
   end
 end

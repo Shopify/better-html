@@ -4,11 +4,19 @@ require 'ostruct'
 
 module BetterHtml
   class Tree
-    attr_reader :nodes
+    attr_reader :nodes, :template_language
 
-    def initialize(document)
+    def initialize(document, template_language: :html)
       @document = document
-      @erb = BetterHtml::Tree::ERB.new(@document)
+      @template_language = template_language
+      @erb = case template_language
+      when :html
+        BetterHtml::Tree::HtmlErb.new(@document)
+      when :javascript
+        BetterHtml::Tree::JavascriptErb.new(@document)
+      else
+        raise ArgumentError, "template_language can be :html or :javascript"
+      end
       @nodes = parse!
     end
 
@@ -121,7 +129,7 @@ module BetterHtml
       node
     end
 
-    class ERB < ::Erubis::Eruby
+    class HtmlErb < ::Erubis::Eruby
       attr_reader :tokens
 
       def initialize(document)
@@ -181,6 +189,62 @@ module BetterHtml
           text: @parser.extract(start, stop),
           location: Location.new(start, stop, line, column)
         )
+      end
+    end
+
+    class JavascriptErb < ::Erubis::Eruby
+      attr_reader :tokens
+
+      def initialize(document)
+        @line = 1
+        @column = 0
+        @length = 0
+        @tokens = []
+        super
+      end
+
+      def add_text(src, text)
+        add_token(:text, text)
+        adjust(text)
+      end
+
+      def add_stmt(src, code)
+        text = "<%#{code}%>"
+        add_token(:stmt, text, code)
+        adjust(text)
+      end
+
+      def add_expr_literal(src, code)
+        text = "<%=#{code}%>"
+        add_token(:expr_literal, text, code)
+        adjust(text)
+      end
+
+      def add_expr_escaped(src, code)
+        text = "<%==#{code}%>"
+        add_token(:expr_escaped, text, code)
+        adjust(text)
+      end
+
+      private
+
+      def add_token(type, text, code = nil)
+        start = @length
+        stop = start + text.size
+        @tokens << Token.new(
+          type: type,
+          text: text,
+          code: code,
+          location: Location.new(start, stop, @line, @column)
+        )
+      end
+
+      def adjust(text)
+        return if text.empty?
+        lines = text.lines
+        @line += lines.size
+        @column = lines.last.size
+        @length += text.size
       end
     end
 

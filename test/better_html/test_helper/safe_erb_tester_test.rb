@@ -178,12 +178,32 @@ module BetterHtml
         assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
       end
 
+      test "unsafe erb in javascript template" do
+        errors = parse(<<-JS, template_language: :javascript).errors
+          if (a < 1) { <%= unsafe %> }
+        JS
+
+        assert_equal 1, errors.size
+        assert_equal '<%= unsafe %>', errors.first.token.text
+        assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
+      end
+
       test "<script> tag without calls is unsafe" do
         errors = parse(<<-EOF).errors
           <script type="text/javascript">
             if (a < 1) { <%= "unsafe" %> }
           </script>
         EOF
+
+        assert_equal 1, errors.size
+        assert_equal '<%= "unsafe" %>', errors.first.token.text
+        assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
+      end
+
+      test "javascript template without calls is unsafe" do
+        errors = parse(<<-JS, template_language: :javascript).errors
+          if (a < 1) { <%= "unsafe" %> }
+        JS
 
         assert_equal 1, errors.size
         assert_equal '<%= "unsafe" %>', errors.first.token.text
@@ -238,6 +258,18 @@ module BetterHtml
         assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.first.message
       end
 
+      test "statements not allowed in javascript template" do
+        errors = parse(<<-JS, template_language: :javascript).errors
+          <% if foo %>
+            bla
+          <% end %>
+        JS
+
+        assert_equal 1, errors.size
+        assert_equal "<%           if foo \n%>", errors.first.token.text
+        assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.first.message
+      end
+
       test "script tag without content" do
         errors = parse(<<-EOF).errors
           <script type="text/javascript"></script>
@@ -267,12 +299,28 @@ module BetterHtml
         assert_predicate errors, :empty?
       end
 
+      test "javascript template with to_json is safe" do
+        errors = parse(<<-JS, template_language: :javascript).errors
+          <%= unsafe.to_json %>
+        JS
+
+        assert_predicate errors, :empty?
+      end
+
       test "<script> with raw and to_json is safe" do
         errors = parse(<<-EOF).errors
           <script type="text/javascript">
             <%= raw unsafe.to_json %>
           </script>
         EOF
+
+        assert_predicate errors, :empty?
+      end
+
+      test "javascript template with raw and to_json is safe" do
+        errors = parse(<<-JS, template_language: :javascript).errors
+          <%= raw unsafe.to_json %>
+        JS
 
         assert_predicate errors, :empty?
       end
@@ -302,8 +350,8 @@ module BetterHtml
       end
 
       private
-      def parse(data)
-        SafeErbTester::Tester.new(data)
+      def parse(data, template_language: :html)
+        SafeErbTester::Tester.new(data, template_language: template_language)
       end
     end
   end
