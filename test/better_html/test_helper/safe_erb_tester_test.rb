@@ -303,7 +303,7 @@ module BetterHtml
 
       private
       def parse(data)
-        SafeErbTester.new(data)
+        SafeErbTester::Tester.new(data)
       end
     end
   end
