@@ -229,8 +229,8 @@ module BetterHtml
       def add_token(type, text, code = nil)
         start = @document.size
         stop = start + text.size
-        lines = @document.split("\n")
-        line = lines.size
+        lines = @document.split("\n", -1)
+        line = [lines.size, 1].max
         column = lines.empty? ? 0 : lines.last.size
         @tokens << Token.new(
           type: type,
