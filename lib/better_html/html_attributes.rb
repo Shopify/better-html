@@ -7,7 +7,7 @@ module BetterHtml
     def to_s
       @data.map do |key, value|
         unless key =~ BetterHtml.config.partial_attribute_name_pattern
-          raise ArgumentError, "Attribute names must contain only lowercase letters, numbers, or :-._ symbols"
+          raise ArgumentError, "Attribute names must matche the pattern #{BetterHtml.config.partial_attribute_name_pattern.inspect}"
         end
         if value.nil?
           "#{key}"
