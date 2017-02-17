@@ -16,7 +16,7 @@ class BetterHtml::HelpersTest < ActiveSupport::TestCase
     e = assert_raises(ArgumentError) do
       html_attributes("invalid key": "bar", baz: "qux").to_s
     end
-    assert_equal "Attribute names must matche the pattern /\\A[a-zA-Z0-9\\-\\:]+\\z/", e.message
+    assert_equal "Attribute names must match the pattern /\\A[a-zA-Z0-9\\-\\:]+\\z/", e.message
   end
 
   test "#html_attributes does not accept incorrectly escaped html_safe values" do
