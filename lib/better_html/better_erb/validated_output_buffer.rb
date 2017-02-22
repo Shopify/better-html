@@ -97,10 +97,11 @@ module BetterHtml
           value = properly_escaped(value)
 
           if @context[:tag_name].downcase == 'script' &&
-              (value =~ /<!--/ || value =~ /<script/i || value =~ /<\/script/i)
+              (value =~ /<script/i || value =~ /<\/script/i)
             # https://www.w3.org/TR/html5/scripting-1.html#restrictions-for-contents-of-script-elements
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
-              "into a script tag around: <#{@context[:tag_name]}>#{@context[:rawtext_text]}<%=#{@code}%>."
+              "into a script tag around: <#{@context[:tag_name]}>#{@context[:rawtext_text]}<%=#{@code}%>. "\
+              "A script tag cannot contain <script or </script anywhere inside of it."
           elsif value =~ /<#{Regexp.escape(@context[:tag_name].downcase)}/i ||
               value =~ /<\/#{Regexp.escape(@context[:tag_name].downcase)}/i
             raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
