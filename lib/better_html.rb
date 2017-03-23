@@ -25,6 +25,12 @@ module BetterHtml
     # name of all html attributes that may contain javascript
     cattr_accessor :javascript_attribute_names
     self.javascript_attribute_names = [/\Aon/i]
+
+    cattr_accessor :template_exclusion_filter_block
+
+    def self.template_exclusion_filter(&block)
+      self.template_exclusion_filter_block = block
+    end
   end
 
   def self.config
