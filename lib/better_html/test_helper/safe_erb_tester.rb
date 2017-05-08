@@ -71,7 +71,7 @@ EOF
       class Tester
         attr_reader :errors
 
-        VALID_JAVASCRIPT_TAG_TYPES = ['text/javascript', 'text/template', 'text/html']
+        VALID_JAVASCRIPT_TAG_TYPES = ['text/javascript', 'text/template', 'text/html', 'application/json']
 
         def initialize(data, **options)
           @data = data
