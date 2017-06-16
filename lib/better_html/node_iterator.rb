@@ -3,17 +3,19 @@ require 'html_tokenizer'
 require 'ostruct'
 
 module BetterHtml
-  class Tree
+  class NodeIterator
     attr_reader :nodes, :template_language
+
+    delegate :each, :each_with_index, :[], to: :nodes
 
     def initialize(document, template_language: :html)
       @document = document
       @template_language = template_language
       @erb = case template_language
       when :html
-        BetterHtml::Tree::HtmlErb.new(@document)
+        BetterHtml::NodeIterator::HtmlErb.new(@document)
       when :javascript
-        BetterHtml::Tree::JavascriptErb.new(@document)
+        BetterHtml::NodeIterator::JavascriptErb.new(@document)
       else
         raise ArgumentError, "template_language can be :html or :javascript"
       end

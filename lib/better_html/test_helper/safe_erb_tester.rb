@@ -78,7 +78,7 @@ EOF
           @errors = []
           @options = options.present? ? options.dup : {}
           @options[:template_language] ||= :html
-          @tree = BetterHtml::Tree.new(data, @options.slice(:template_language))
+          @nodes = BetterHtml::NodeIterator.new(data, @options.slice(:template_language))
           validate!
         end
 
@@ -87,14 +87,14 @@ EOF
         end
 
         def validate!
-          @tree.nodes.each_with_index do |node, index|
+          @nodes.each_with_index do |node, index|
             case node
-            when BetterHtml::Tree::Element
+            when BetterHtml::NodeIterator::Element
               validate_element(node)
 
               if node.name == 'script'
-                next_node = @tree.nodes[index + 1]
-                if next_node.is_a?(BetterHtml::Tree::ContentNode) && !node.closing?
+                next_node = @nodes[index + 1]
+                if next_node.is_a?(BetterHtml::NodeIterator::ContentNode) && !node.closing?
                   if javascript_tag_type?(node, "text/javascript")
                     validate_script_tag_content(next_node)
                   end
@@ -103,14 +103,14 @@ EOF
 
                 validate_javascript_tag_type(node) unless node.closing?
               end
-            when BetterHtml::Tree::Text
-              if @tree.template_language == :javascript
+            when BetterHtml::NodeIterator::Text
+              if @nodes.template_language == :javascript
                 validate_script_tag_content(node)
                 validate_no_statements(node)
               else
                 validate_no_javascript_tag(node)
               end
-            when BetterHtml::Tree::CData, BetterHtml::Tree::Comment
+            when BetterHtml::NodeIterator::CData, BetterHtml::NodeIterator::Comment
               validate_no_statements(node)
             end
           end
