@@ -90,9 +90,9 @@ EOF
           @tree.nodes.each_with_index do |node, index|
             case node
             when BetterHtml::Tree::Element
-              validate_tag(node)
+              validate_element(node)
 
-              if node.name_text == 'script'
+              if node.name == 'script'
                 next_node = @tree.nodes[index + 1]
                 if next_node.is_a?(BetterHtml::Tree::ContentNode) && !node.closing?
                   if javascript_tag_type?(node, "text/javascript")
@@ -116,29 +116,28 @@ EOF
           end
         end
 
-        def javascript_tag_type?(node, which)
-          typeattr = node.find_attr('type')
-          value = typeattr&.value_text_without_quotes || "text/javascript"
+        def javascript_tag_type?(element, which)
+          typeattr = element['type']
+          value = typeattr&.unescaped_value || "text/javascript"
           value == which
         end
 
-        def validate_javascript_tag_type(node)
-          typeattr = node.find_attr('type')
+        def validate_javascript_tag_type(element)
+          typeattr = element['type']
           return if typeattr.nil?
-          if !VALID_JAVASCRIPT_TAG_TYPES.include?(typeattr.value_text_without_quotes)
-            add_error(node, typeattr.value.first, "#{typeattr.value_text} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}")
+          if !VALID_JAVASCRIPT_TAG_TYPES.include?(typeattr.unescaped_value)
+            add_error(node, typeattr.value_parts.first, "#{typeattr.value} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}")
           end
         end
 
-        def validate_tag(node)
-          node.attributes.each do |attr_token|
-            attr_name = attr_token.name_text
-            attr_token.value.each do |value_token|
+        def validate_element(element)
+          element.attributes.each do |attr_token|
+            attr_token.value_parts.each do |value_token|
               case value_token.type
               when :expr_literal
-                validate_tag_expression(node, attr_name, value_token)
+                validate_tag_expression(element, attr_token.name, value_token)
               when :expr_escaped
-                add_error(node, value_token, "erb interpolation with '<%==' inside html attribute is never safe")
+                add_error(element, value_token, "erb interpolation with '<%==' inside html attribute is never safe")
               end
             end
           end
@@ -172,7 +171,7 @@ EOF
         end
 
         def validate_script_tag_content(node)
-          node.content.each do |token|
+          node.content_parts.each do |token|
             case token.type
             when :expr_literal, :expr_escaped
               expr = RubyExpr.new(code: token.code)
@@ -200,7 +199,7 @@ EOF
         end
 
         def validate_no_statements(node)
-          node.content.each do |token|
+          node.content_parts.each do |token|
             if token.type == :stmt && !(/\A\s*end/m === token.code)
               add_error(node, token, "erb statement not allowed here; did you mean '<%=' ?")
             end
@@ -208,7 +207,7 @@ EOF
         end
 
         def validate_no_javascript_tag(node)
-          node.content.each do |token|
+          node.content_parts.each do |token|
             if [:stmt, :expr_literal, :expr_escaped].include?(token.type)
               expr = begin
                 RubyExpr.new(code: token.code)

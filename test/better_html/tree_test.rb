@@ -7,7 +7,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::CData, tree.nodes.first.class
-      assert_equal [" foo "], tree.nodes.first.content.map(&:text)
+      assert_equal [" foo "], tree.nodes.first.content_parts.map(&:text)
     end
 
     test "unterminated cdata nodes are consumed until end" do
@@ -15,7 +15,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::CData, tree.nodes.first.class
-      assert_equal [" foo"], tree.nodes.first.content.map(&:text)
+      assert_equal [" foo"], tree.nodes.first.content_parts.map(&:text)
     end
 
     test "consume cdata with interpolation" do
@@ -23,7 +23,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::CData, tree.nodes.first.class
-      assert_equal [" foo ", "<%= bar %>", " baz "], tree.nodes.first.content.map(&:text)
+      assert_equal [" foo ", "<%= bar %>", " baz "], tree.nodes.first.content_parts.map(&:text)
     end
 
     test "consume comment nodes" do
@@ -31,7 +31,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Comment, tree.nodes.first.class
-      assert_equal [" foo "], tree.nodes.first.content.map(&:text)
+      assert_equal [" foo "], tree.nodes.first.content_parts.map(&:text)
     end
 
     test "unterminated comment nodes are consumed until end" do
@@ -39,7 +39,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Comment, tree.nodes.first.class
-      assert_equal [" foo"], tree.nodes.first.content.map(&:text)
+      assert_equal [" foo"], tree.nodes.first.content_parts.map(&:text)
     end
 
     test "consume comment with interpolation" do
@@ -47,7 +47,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Comment, tree.nodes.first.class
-      assert_equal [" foo ", "<%= bar %>", " baz "], tree.nodes.first.content.map(&:text)
+      assert_equal [" foo ", "<%= bar %>", " baz "], tree.nodes.first.content_parts.map(&:text)
     end
 
     test "consume tag nodes" do
@@ -55,7 +55,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
-      assert_equal ["div"], tree.nodes.first.name.map(&:text)
+      assert_equal ["div"], tree.nodes.first.name_parts.map(&:text)
     end
 
     test "consume tag nodes with solidus" do
@@ -63,7 +63,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
-      assert_equal ["div"], tree.nodes.first.name.map(&:text)
+      assert_equal ["div"], tree.nodes.first.name_parts.map(&:text)
       assert_equal true, tree.nodes.first.closing?
     end
 
@@ -71,12 +71,12 @@ module BetterHtml
       tree = BetterHtml::Tree.new("<div/>")
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
-      assert_equal ["div"], tree.nodes.first.name.map(&:text)
+      assert_equal ["div"], tree.nodes.first.name_parts.map(&:text)
 
       tree = BetterHtml::Tree.new("<div ")
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
-      assert_equal ["div"], tree.nodes.first.name.map(&:text)
+      assert_equal ["div"], tree.nodes.first.name_parts.map(&:text)
     end
 
     test "consume tag nodes with interpolation" do
@@ -84,7 +84,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
-      assert_equal ["ns:", "<%= name %>", "-thing"], tree.nodes.first.name.map(&:text)
+      assert_equal ["ns:", "<%= name %>", "-thing"], tree.nodes.first.name_parts.map(&:text)
     end
 
     test "consume tag attributes nodes unquoted value" do
@@ -96,8 +96,8 @@ module BetterHtml
       assert_equal 1, tag.attributes.size
       attribute = tag.attributes.first
       assert_equal BetterHtml::Tree::Attribute, attribute.class
-      assert_equal ["foo"], attribute.name.map(&:text)
-      assert_equal ["bar"], attribute.value.map(&:text)
+      assert_equal ["foo"], attribute.name_parts.map(&:text)
+      assert_equal ["bar"], attribute.value_parts.map(&:text)
     end
 
     test "consume attributes without name" do
@@ -110,7 +110,7 @@ module BetterHtml
       attribute = tag.attributes.first
       assert_equal BetterHtml::Tree::Attribute, attribute.class
       assert_predicate attribute.name, :empty?
-      assert_equal ["'", "thing", "'"], attribute.value.map(&:text)
+      assert_equal ["'", "thing", "'"], attribute.value_parts.map(&:text)
     end
 
     test "consume tag attributes nodes quoted value" do
@@ -122,8 +122,8 @@ module BetterHtml
       assert_equal 1, tag.attributes.size
       attribute = tag.attributes.first
       assert_equal BetterHtml::Tree::Attribute, attribute.class
-      assert_equal ["foo"], attribute.name.map(&:text)
-      assert_equal ['"', "bar", '"'], attribute.value.map(&:text)
+      assert_equal ["foo"], attribute.name_parts.map(&:text)
+      assert_equal ['"', "bar", '"'], attribute.value_parts.map(&:text)
     end
 
     test "consume tag attributes nodes interpolation in name and value" do
@@ -135,8 +135,38 @@ module BetterHtml
       assert_equal 1, tag.attributes.size
       attribute = tag.attributes.first
       assert_equal BetterHtml::Tree::Attribute, attribute.class
-      assert_equal ["data-", "<%= foo %>"], attribute.name.map(&:text)
-      assert_equal ['"', "some ", "<%= value %>", " foo", '"'], attribute.value.map(&:text)
+      assert_equal ["data-", "<%= foo %>"], attribute.name_parts.map(&:text)
+      assert_equal ['"', "some ", "<%= value %>", " foo", '"'], attribute.value_parts.map(&:text)
+    end
+
+    test "attributes can be accessed through [] on Element object" do
+      tree = BetterHtml::Tree.new("<div foo=\"bar\">")
+
+      assert_equal 1, tree.nodes.size
+      element = tree.nodes.first
+      assert_equal BetterHtml::Tree::Element, element.class
+      assert_equal 1, element.attributes.size
+      assert_nil element['nonexistent']
+      refute_nil attribute = element['foo']
+      assert_equal BetterHtml::Tree::Attribute, attribute.class
+    end
+
+    test "attribute values can be read unescaped" do
+      tree = BetterHtml::Tree.new("<div foo=\"&lt;&quot;&gt;\">")
+
+      element = tree.nodes.first
+      assert_equal 1, element.attributes.size
+      attribute = element['foo']
+      assert_equal '<">', attribute.unescaped_value
+    end
+
+    test "attribute values does not unescape stuff inside erb" do
+      tree = BetterHtml::Tree.new("<div foo=\"&lt;<%= &gt; %>&gt;\">")
+
+      element = tree.nodes.first
+      assert_equal 1, element.attributes.size
+      attribute = element['foo']
+      assert_equal '<<%= &gt; %>>', attribute.unescaped_value
     end
 
     test "consume text nodes" do
@@ -144,7 +174,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Text, tree.nodes.first.class
-      assert_equal ["here is ", "<%= some %>", " text"], tree.nodes.first.content.map(&:text)
+      assert_equal ["here is ", "<%= some %>", " text"], tree.nodes.first.content_parts.map(&:text)
     end
 
     test "javascript template parsing works" do
@@ -152,7 +182,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Text, tree.nodes.first.class
-      assert_equal ["here is ", "<%= some %>", " text"], tree.nodes.first.content.map(&:text)
+      assert_equal ["here is ", "<%= some %>", " text"], tree.nodes.first.content_parts.map(&:text)
     end
 
     test "javascript template does not consume html tags" do
@@ -160,7 +190,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::Tree::Text, tree.nodes.first.class
-      assert_equal ["<div ", "<%= some %>", " />"], tree.nodes.first.content.map(&:text)
+      assert_equal ["<div ", "<%= some %>", " />"], tree.nodes.first.content_parts.map(&:text)
     end
   end
 end

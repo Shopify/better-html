@@ -48,7 +48,7 @@ module BetterHtml
     def consume_cdata(tokens)
       node = CData.new
       while tokens.any? && tokens[0].type != :cdata_end
-        node.content << tokens.shift
+        node.content_parts << tokens.shift
       end
       tokens.shift if tokens.any? && tokens[0].type == :cdata_end
       node
@@ -57,7 +57,7 @@ module BetterHtml
     def consume_comment(tokens)
       node = Comment.new
       while tokens.any? && tokens[0].type != :comment_end
-        node.content << tokens.shift
+        node.content_parts << tokens.shift
       end
       tokens.shift if tokens.any? && tokens[0].type == :comment_end
       node
@@ -70,7 +70,7 @@ module BetterHtml
         node.closing = true
       end
       while tokens.any? && [:tag_name, :stmt, :expr_literal, :expr_escaped].include?(tokens[0].type)
-        node.name << tokens.shift
+        node.name_parts << tokens.shift
       end
       while tokens.any?
         token = tokens[0]
@@ -91,14 +91,14 @@ module BetterHtml
     def consume_attribute(tokens)
       node = Attribute.new
       while tokens.any? && [:attribute_name, :stmt, :expr_literal, :expr_escaped].include?(tokens[0].type)
-        node.name << tokens.shift
+        node.name_parts << tokens.shift
       end
       return node unless consume_equal?(tokens)
       while tokens.any? && [
           :attribute_quoted_value_start, :attribute_quoted_value,
           :attribute_quoted_value_end, :attribute_unquoted_value,
           :stmt, :expr_literal, :expr_escaped].include?(tokens[0].type)
-        node.value << tokens.shift
+        node.value_parts << tokens.shift
       end
       node
     end
@@ -109,7 +109,7 @@ module BetterHtml
           :attribute_quoted_value_start, :attribute_quoted_value,
           :attribute_quoted_value_end, :attribute_unquoted_value,
           :stmt, :expr_literal, :expr_escaped].include?(tokens[0].type)
-        node.value << tokens.shift
+        node.value_parts << tokens.shift
       end
       node
     end
@@ -124,7 +124,7 @@ module BetterHtml
     def consume_text(tokens)
       node = Text.new
       while tokens.any? && [:text, :stmt, :expr_literal, :expr_escaped].include?(tokens[0].type)
-        node.content << tokens.shift
+        node.content_parts << tokens.shift
       end
       node
     end
@@ -259,18 +259,26 @@ module BetterHtml
       end
     end
 
-    class Element
-      attr_accessor :name
-      attr_accessor :attributes
+    class Base
+      def self.tokenized_attribute(name)
+        class_eval <<~RUBY
+          attr_reader :#{name}_parts
+
+          def #{name}
+            #{name}_parts.map(&:text).join
+          end
+        RUBY
+      end
+    end
+
+    class Element < Base
+      tokenized_attribute :name
+      attr_reader :attributes
       attr_accessor :closing
 
       def initialize
-        @name = []
+        @name_parts = []
         @attributes = []
-      end
-
-      def name_text
-        name.map(&:text).join
       end
 
       def closing?
@@ -279,44 +287,47 @@ module BetterHtml
 
       def find_attr(wanted)
         @attributes.each do |attribute|
-          name = attribute.name.map(&:text).join
-          return attribute if name == wanted
+          return attribute if attribute.name == wanted
         end
         nil
       end
+      alias_method :[], :find_attr
     end
 
-    class Attribute
-      attr_accessor :name
-      attr_accessor :value
+    class Attribute < Base
+      tokenized_attribute :name
+      tokenized_attribute :value
 
       def initialize
-        @name = []
-        @value = []
+        @name_parts = []
+        @value_parts = []
       end
 
-      def name_text
-        name.map(&:text).join
+      def unescaped_value_parts
+        value_parts.map do |part|
+          next if ["'", '"'].include?(part.text)
+          if [:attribute_quoted_value, :attribute_unquoted_value].include?(part.type)
+            CGI.unescapeHTML(part.text)
+          else
+            part.text
+          end
+        end.compact
       end
 
-      def value_text
-        value.map(&:text).join
+      def unescaped_value
+        unescaped_value_parts.join
       end
 
-      def value_text_without_quotes
-        value.map{ |s| ["'", '"'].include?(s.text) ? '' : s.text }.join
+      def value_without_quotes
+        value_parts.map{ |s| ["'", '"'].include?(s.text) ? '' : s.text }.join
       end
     end
 
-    class ContentNode
-      attr_accessor :content
+    class ContentNode < Base
+      tokenized_attribute :content
 
       def initialize
-        @content = []
-      end
-
-      def content_text
-        content.map(&:text).join
+        @content_parts = []
       end
     end
 
