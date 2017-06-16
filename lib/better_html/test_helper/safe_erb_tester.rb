@@ -89,7 +89,7 @@ EOF
         def validate!
           @tree.nodes.each_with_index do |node, index|
             case node
-            when BetterHtml::Tree::Tag
+            when BetterHtml::Tree::Element
               validate_tag(node)
 
               if node.name_text == 'script'

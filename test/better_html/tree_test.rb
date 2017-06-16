@@ -54,7 +54,7 @@ module BetterHtml
       tree = BetterHtml::Tree.new("<div>")
 
       assert_equal 1, tree.nodes.size
-      assert_equal BetterHtml::Tree::Tag, tree.nodes.first.class
+      assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
       assert_equal ["div"], tree.nodes.first.name.map(&:text)
     end
 
@@ -62,7 +62,7 @@ module BetterHtml
       tree = BetterHtml::Tree.new("</div>")
 
       assert_equal 1, tree.nodes.size
-      assert_equal BetterHtml::Tree::Tag, tree.nodes.first.class
+      assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
       assert_equal ["div"], tree.nodes.first.name.map(&:text)
       assert_equal true, tree.nodes.first.closing?
     end
@@ -70,12 +70,12 @@ module BetterHtml
     test "consume tag nodes until name ends" do
       tree = BetterHtml::Tree.new("<div/>")
       assert_equal 1, tree.nodes.size
-      assert_equal BetterHtml::Tree::Tag, tree.nodes.first.class
+      assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
       assert_equal ["div"], tree.nodes.first.name.map(&:text)
 
       tree = BetterHtml::Tree.new("<div ")
       assert_equal 1, tree.nodes.size
-      assert_equal BetterHtml::Tree::Tag, tree.nodes.first.class
+      assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
       assert_equal ["div"], tree.nodes.first.name.map(&:text)
     end
 
@@ -83,7 +83,7 @@ module BetterHtml
       tree = BetterHtml::Tree.new("<ns:<%= name %>-thing>")
 
       assert_equal 1, tree.nodes.size
-      assert_equal BetterHtml::Tree::Tag, tree.nodes.first.class
+      assert_equal BetterHtml::Tree::Element, tree.nodes.first.class
       assert_equal ["ns:", "<%= name %>", "-thing"], tree.nodes.first.name.map(&:text)
     end
 
@@ -92,7 +92,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       tag = tree.nodes.first
-      assert_equal BetterHtml::Tree::Tag, tag.class
+      assert_equal BetterHtml::Tree::Element, tag.class
       assert_equal 1, tag.attributes.size
       attribute = tag.attributes.first
       assert_equal BetterHtml::Tree::Attribute, attribute.class
@@ -105,7 +105,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       tag = tree.nodes.first
-      assert_equal BetterHtml::Tree::Tag, tag.class
+      assert_equal BetterHtml::Tree::Element, tag.class
       assert_equal 1, tag.attributes.size
       attribute = tag.attributes.first
       assert_equal BetterHtml::Tree::Attribute, attribute.class
@@ -118,7 +118,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       tag = tree.nodes.first
-      assert_equal BetterHtml::Tree::Tag, tag.class
+      assert_equal BetterHtml::Tree::Element, tag.class
       assert_equal 1, tag.attributes.size
       attribute = tag.attributes.first
       assert_equal BetterHtml::Tree::Attribute, attribute.class
@@ -131,7 +131,7 @@ module BetterHtml
 
       assert_equal 1, tree.nodes.size
       tag = tree.nodes.first
-      assert_equal BetterHtml::Tree::Tag, tag.class
+      assert_equal BetterHtml::Tree::Element, tag.class
       assert_equal 1, tag.attributes.size
       attribute = tag.attributes.first
       assert_equal BetterHtml::Tree::Attribute, attribute.class

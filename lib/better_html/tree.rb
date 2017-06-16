@@ -35,7 +35,7 @@ module BetterHtml
           nodes << consume_comment(tokens)
         when :tag_start
           tokens.shift
-          nodes << consume_tag(tokens)
+          nodes << consume_element(tokens)
         when :text, :stmt, :expr_literal, :expr_escaped
           nodes << consume_text(tokens)
         else
@@ -63,8 +63,8 @@ module BetterHtml
       node
     end
 
-    def consume_tag(tokens)
-      node = Tag.new
+    def consume_element(tokens)
+      node = Element.new
       if tokens.any? && tokens[0].type == :solidus
         tokens.shift
         node.closing = true
@@ -259,7 +259,7 @@ module BetterHtml
       end
     end
 
-    class Tag
+    class Element
       attr_accessor :name
       attr_accessor :attributes
       attr_accessor :closing
