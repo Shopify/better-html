@@ -7,9 +7,9 @@ module BetterHtml
       attr_reader :tokens
 
       cattr_accessor :lodash_escape, :lodash_evaluate, :lodash_interpolate
-      self.lodash_escape = %r{(?:\[\%)=(.+?)(?:\%\])}
-      self.lodash_evaluate = %r{(?:\[\%)(.+?)(?:\%\])}
-      self.lodash_interpolate = %r{(?:\[\%)!(.+?)(?:\%\])}
+      self.lodash_escape = %r{(?:\[\%)=(.+?)(?:\%\])}m
+      self.lodash_evaluate = %r{(?:\[\%)(.+?)(?:\%\])}m
+      self.lodash_interpolate = %r{(?:\[\%)!(.+?)(?:\%\])}m
 
       def initialize(source)
         @source = source
