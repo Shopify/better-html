@@ -1,5 +1,6 @@
 require_relative 'node_iterator/javascript_erb'
 require_relative 'node_iterator/html_erb'
+require_relative 'node_iterator/html_lodash'
 require_relative 'node_iterator/cdata'
 require_relative 'node_iterator/comment'
 require_relative 'node_iterator/element'
@@ -18,6 +19,8 @@ module BetterHtml
       @erb = case template_language
       when :html
         HtmlErb.new(@document)
+      when :lodash
+        HtmlLodash.new(@document)
       when :javascript
         JavascriptErb.new(@document)
       else

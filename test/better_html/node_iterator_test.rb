@@ -202,5 +202,20 @@ module BetterHtml
       assert_equal BetterHtml::NodeIterator::Text, tree.nodes.first.class
       assert_equal ["<div ", "<%= some %>", " />"], tree.nodes.first.content_parts.map(&:text)
     end
+
+    test "lodash template parsing works" do
+      tree = BetterHtml::NodeIterator.new('<div class="[%= foo %]">', template_language: :lodash)
+
+      assert_equal 1, tree.nodes.size
+      node = tree.nodes.first
+      assert_equal BetterHtml::NodeIterator::Element, node.class
+      assert_equal "div", node.name
+      assert_equal 1, node.attributes.size
+      attribute = node.attributes.first
+      assert_equal "class", attribute.name
+      assert_equal [:attribute_quoted_value_start, :expr_escaped,
+        :attribute_quoted_value_end], attribute.value_parts.map(&:type)
+      assert_equal ["\"", "[%= foo %]", "\""], attribute.value_parts.map(&:text)
+    end
   end
 end
