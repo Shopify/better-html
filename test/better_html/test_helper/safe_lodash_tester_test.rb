@@ -50,6 +50,26 @@ module BetterHtml
         assert_equal "No script tags allowed nested in lodash templates", errors.first.message
       end
 
+      test "statement not allowed in attribute name" do
+        errors = parse(<<-EOF).errors
+          <div class[% if (foo) %]="foo">
+        EOF
+
+        assert_equal 1, errors.size
+        assert_equal '[% if (foo) %]', errors.first.token.text
+        assert_equal "javascript statement not allowed here; did you mean '[%=' ?", errors.first.message
+      end
+
+      test "statement not allowed in attribute value" do
+        errors = parse(<<-EOF).errors
+          <div class="foo[% if (foo) %]">
+        EOF
+
+        assert_equal 1, errors.size
+        assert_equal '[% if (foo) %]', errors.first.token.text
+        assert_equal "javascript statement not allowed here; did you mean '[%=' ?", errors.first.message
+      end
+
       private
 
       def parse(data)

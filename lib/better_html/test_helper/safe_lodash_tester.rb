@@ -75,13 +75,13 @@ EOF
         def validate_element(element)
           element.attributes.each do |attribute|
             attribute.name_parts.each do |token|
-              add_no_statement_error(node, token) if token.type == :stmt
+              add_no_statement_error(attribute, token) if token.type == :stmt
             end
 
             attribute.value_parts.each do |token|
               case token.type
               when :stmt
-                add_no_statement_error(node, token)
+                add_no_statement_error(attribute, token)
               when :expr_literal
                 validate_tag_expression(element, attribute.name, token)
               when :expr_escaped
