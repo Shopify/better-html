@@ -1,8 +1,10 @@
 require 'better_html/test_helper/ruby_expr'
+require_relative 'safety_tester_base'
 
 module BetterHtml
   module TestHelper
     module SafeErbTester
+      include SafetyTesterBase
 
       SAFETY_TIPS = <<-EOF
 -----------
@@ -32,7 +34,7 @@ EOF
 
         message = ""
         tester.errors.each do |e|
-          message << format_erb_safety_error(data, e)
+          message << format_safety_error(data, e)
         end
 
         message << SAFETY_TIPS
@@ -41,32 +43,6 @@ EOF
       end
 
       private
-
-      def format_erb_safety_error(data, error)
-        loc = error.token.location
-        s = "On line #{loc.line}\n"
-        s << "#{error.message}\n"
-        line = extract_line(data, loc.line)
-        s << "#{line}\n"
-        length = [loc.stop - loc.start, line.length - loc.column].min
-        s << "#{' ' * loc.column}#{'^' * length}\n\n"
-        s
-      end
-
-      def extract_line(data, line)
-        line = data.lines[line-1]
-        line.nil? ? "" : line.gsub(/\n$/, '')
-      end
-
-      class SafetyError < InterpolatorError
-        attr_reader :node, :token
-
-        def initialize(node, token, message)
-          @node = node
-          @token = token
-          super(message)
-        end
-      end
 
       class Tester
         attr_reader :errors
@@ -83,7 +59,7 @@ EOF
         end
 
         def add_error(node, token, message)
-          @errors << SafetyError.new(node, token, message)
+          @errors << SafetyTesterBase::SafetyError.new(node, token, message)
         end
 
         def validate!

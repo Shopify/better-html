@@ -16,11 +16,11 @@ module BetterHtml
         assert_equal 0, token.location.column
       end
 
-      test "matches escape" do
+      test "matches strings to be escaped" do
         scanner = BetterHtml::NodeIterator::HtmlLodash.new("[%= foo %]")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
-        assert_equal :expr_escaped, token.type
+        assert_equal :expr_literal, token.type
         assert_equal "[%= foo %]", token.text
         assert_equal " foo ", token.code
         assert_equal 0, token.location.start
@@ -33,7 +33,7 @@ module BetterHtml
         scanner = BetterHtml::NodeIterator::HtmlLodash.new("[%! foo %]")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
-        assert_equal :expr_literal, token.type
+        assert_equal :expr_escaped, token.type
         assert_equal "[%! foo %]", token.text
         assert_equal " foo ", token.code
         assert_equal 0, token.location.start
@@ -69,7 +69,7 @@ module BetterHtml
         assert_equal 0, token.location.column
 
         token = scanner.tokens[1]
-        assert_equal :expr_escaped, token.type
+        assert_equal :expr_literal, token.type
         assert_equal "[%= foo %]", token.text
         assert_equal " foo ", token.code
         assert_equal 7, token.location.start
@@ -101,7 +101,7 @@ module BetterHtml
         assert_equal 0, token.location.column
 
         token = scanner.tokens[1]
-        assert_equal :expr_escaped, token.type
+        assert_equal :expr_literal, token.type
         assert_equal "[%= foo %]", token.text
         assert_equal " foo ", token.code
         assert_equal 12, token.location.start
@@ -123,7 +123,7 @@ module BetterHtml
         scanner = BetterHtml::NodeIterator::HtmlLodash.new('<div class="[%= foo %]">')
         assert_equal 9, scanner.tokens.size
         assert_equal [:tag_start, :tag_name, :whitespace, :attribute_name,
-          :equal, :attribute_quoted_value_start, :expr_escaped,
+          :equal, :attribute_quoted_value_start, :expr_literal,
           :attribute_quoted_value_end, :tag_end], scanner.tokens.map(&:type)
         assert_equal ["<", "div", " ", "class", "=", "\"", "[%= foo %]", "\"", ">"], scanner.tokens.map(&:text)
       end

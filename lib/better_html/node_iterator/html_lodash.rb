@@ -31,9 +31,9 @@ module BetterHtml
             end
             match = captures[1]
             if code = lodash_escape.match(match)
-              add_expr_escaped(match, code.captures[0])
+              add_expr_escape(match, code.captures[0])
             elsif code = lodash_interpolate.match(match)
-              add_expr_literal(match, code.captures[0])
+              add_expr_interpolate(match, code.captures[0])
             elsif code = lodash_evaluate.match(match)
               add_stmt(match, code.captures[0])
             else
@@ -69,13 +69,13 @@ module BetterHtml
         @parser.append_placeholder(text)
       end
 
-      def add_expr_literal(text, code)
-        add_token(:expr_literal, text, code: code)
+      def add_expr_interpolate(text, code)
+        add_token(:expr_escaped, text, code: code)
         @parser.append_placeholder(text)
       end
 
-      def add_expr_escaped(text, code)
-        add_token(:expr_escaped, text, code: code)
+      def add_expr_escape(text, code)
+        add_token(:expr_literal, text, code: code)
         @parser.append_placeholder(text)
       end
 

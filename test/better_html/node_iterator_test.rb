@@ -213,7 +213,7 @@ module BetterHtml
       assert_equal 1, node.attributes.size
       attribute = node.attributes.first
       assert_equal "class", attribute.name
-      assert_equal [:attribute_quoted_value_start, :expr_escaped,
+      assert_equal [:attribute_quoted_value_start, :expr_literal,
         :attribute_quoted_value_end], attribute.value_parts.map(&:type)
       assert_equal ["\"", "[%= foo %]", "\""], attribute.value_parts.map(&:text)
     end
