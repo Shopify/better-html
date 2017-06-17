@@ -1,6 +1,10 @@
-require 'erubis/engine/eruby'
-require 'html_tokenizer'
-require 'ostruct'
+require_relative 'node_iterator/javascript_erb'
+require_relative 'node_iterator/html_erb'
+require_relative 'node_iterator/cdata'
+require_relative 'node_iterator/comment'
+require_relative 'node_iterator/element'
+require_relative 'node_iterator/attribute'
+require_relative 'node_iterator/text'
 
 module BetterHtml
   class NodeIterator
@@ -13,9 +17,9 @@ module BetterHtml
       @template_language = template_language
       @erb = case template_language
       when :html
-        BetterHtml::NodeIterator::HtmlErb.new(@document)
+        HtmlErb.new(@document)
       when :javascript
-        BetterHtml::NodeIterator::JavascriptErb.new(@document)
+        JavascriptErb.new(@document)
       else
         raise ArgumentError, "template_language can be :html or :javascript"
       end
@@ -129,217 +133,6 @@ module BetterHtml
         node.content_parts << tokens.shift
       end
       node
-    end
-
-    class HtmlErb < ::Erubis::Eruby
-      attr_reader :tokens
-
-      def initialize(document)
-        @parser = HtmlTokenizer::Parser.new
-        @tokens = []
-        super
-      end
-
-      def add_text(src, text)
-        @parser.parse(text) { |*args| add_tokens(*args) }
-      end
-
-      def add_stmt(src, code)
-        text = "<%#{code}%>"
-        start = @parser.document_length
-        stop = start + text.size
-        @tokens << Token.new(
-          type: :stmt,
-          code: code,
-          text: text,
-          location: Location.new(start, stop, @parser.line_number, @parser.column_number)
-        )
-        @parser.append_placeholder(text)
-      end
-
-      def add_expr_literal(src, code)
-        text = "<%=#{code}%>"
-        start = @parser.document_length
-        stop = start + text.size
-        @tokens << Token.new(
-          type: :expr_literal,
-          code: code,
-          text: text,
-          location: Location.new(start, stop, @parser.line_number, @parser.column_number)
-        )
-        @parser.append_placeholder(text)
-      end
-
-      def add_expr_escaped(src, code)
-        text = "<%==#{code}%>"
-        start = @parser.document_length
-        stop = start + text.size
-        @tokens << Token.new(
-          type: :expr_escaped,
-          code: code,
-          text: text,
-          location: Location.new(start, stop, @parser.line_number, @parser.column_number)
-        )
-        @parser.append_placeholder(text)
-      end
-
-      private
-
-      def add_tokens(type, start, stop, line, column)
-        @tokens << Token.new(
-          type: type,
-          text: @parser.extract(start, stop),
-          location: Location.new(start, stop, line, column)
-        )
-      end
-    end
-
-    class JavascriptErb < ::Erubis::Eruby
-      attr_reader :tokens
-
-      def initialize(document)
-        @document = ""
-        @tokens = []
-        super
-      end
-
-      def add_text(src, text)
-        add_token(:text, text)
-        append(text)
-      end
-
-      def add_stmt(src, code)
-        text = "<%#{code}%>"
-        add_token(:stmt, text, code)
-        append(text)
-      end
-
-      def add_expr_literal(src, code)
-        text = "<%=#{code}%>"
-        add_token(:expr_literal, text, code)
-        append(text)
-      end
-
-      def add_expr_escaped(src, code)
-        text = "<%==#{code}%>"
-        add_token(:expr_escaped, text, code)
-        append(text)
-      end
-
-      private
-
-      def add_token(type, text, code = nil)
-        start = @document.size
-        stop = start + text.size
-        lines = @document.split("\n", -1)
-        line = lines.empty? ? 1 : lines.size
-        column = lines.empty? ? 0 : lines.last.size
-        @tokens << Token.new(
-          type: type,
-          text: text,
-          code: code,
-          location: Location.new(start, stop, line, column)
-        )
-      end
-
-      def append(text)
-        @document << text
-      end
-    end
-
-    class Token < OpenStruct
-    end
-
-    class Location
-      attr_accessor :start, :stop, :line, :column
-
-      def initialize(start, stop, line, column)
-        @start = start
-        @stop = stop
-        @line = line
-        @column = column
-      end
-    end
-
-    class Base
-      def self.tokenized_attribute(name)
-        class_eval <<~RUBY
-          attr_reader :#{name}_parts
-
-          def #{name}
-            #{name}_parts.map(&:text).join
-          end
-        RUBY
-      end
-    end
-
-    class Element < Base
-      tokenized_attribute :name
-      attr_reader :attributes
-      attr_accessor :closing
-
-      def initialize
-        @name_parts = []
-        @attributes = []
-      end
-
-      def closing?
-        closing
-      end
-
-      def find_attr(wanted)
-        @attributes.each do |attribute|
-          return attribute if attribute.name == wanted
-        end
-        nil
-      end
-      alias_method :[], :find_attr
-    end
-
-    class Attribute < Base
-      tokenized_attribute :name
-      tokenized_attribute :value
-
-      def initialize
-        @name_parts = []
-        @value_parts = []
-      end
-
-      def unescaped_value_parts
-        value_parts.map do |part|
-          next if ["'", '"'].include?(part.text)
-          if [:attribute_quoted_value, :attribute_unquoted_value].include?(part.type)
-            CGI.unescapeHTML(part.text)
-          else
-            part.text
-          end
-        end.compact
-      end
-
-      def unescaped_value
-        unescaped_value_parts.join
-      end
-
-      def value_without_quotes
-        value_parts.map{ |s| ["'", '"'].include?(s.text) ? '' : s.text }.join
-      end
-    end
-
-    class ContentNode < Base
-      tokenized_attribute :content
-
-      def initialize
-        @content_parts = []
-      end
-    end
-
-    class CData < ContentNode
-    end
-
-    class Comment < ContentNode
-    end
-
-    class Text < ContentNode
     end
   end
 end
