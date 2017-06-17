@@ -86,6 +86,7 @@ module BetterHtml
           node.attributes << consume_attribute_value(tokens)
         elsif token.type == :tag_end
           tokens.shift
+          node.self_closing = token.self_closing
           break
         else
           tokens.shift

@@ -56,6 +56,7 @@ module BetterHtml
       assert_equal 1, tree.nodes.size
       assert_equal BetterHtml::NodeIterator::Element, tree.nodes.first.class
       assert_equal ["div"], tree.nodes.first.name_parts.map(&:text)
+      assert_equal false, tree.nodes.first.self_closing?
     end
 
     test "consume tag nodes with solidus" do
@@ -65,6 +66,15 @@ module BetterHtml
       assert_equal BetterHtml::NodeIterator::Element, tree.nodes.first.class
       assert_equal ["div"], tree.nodes.first.name_parts.map(&:text)
       assert_equal true, tree.nodes.first.closing?
+    end
+
+    test "sets self_closing when appropriate" do
+      tree = BetterHtml::NodeIterator.new("<div/>")
+
+      assert_equal 1, tree.nodes.size
+      assert_equal BetterHtml::NodeIterator::Element, tree.nodes.first.class
+      assert_equal ["div"], tree.nodes.first.name_parts.map(&:text)
+      assert_equal true, tree.nodes.first.self_closing?
     end
 
     test "consume tag nodes until name ends" do

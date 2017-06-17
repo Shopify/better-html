@@ -60,10 +60,16 @@ module BetterHtml
       private
 
       def add_tokens(type, start, stop, line, column)
+        extra_attributes = if type == :tag_end
+          {
+            self_closing: @parser.self_closing_tag?
+          }
+        end
         @tokens << Token.new(
           type: type,
           text: @parser.extract(start, stop),
-          location: Location.new(start, stop, line, column)
+          location: Location.new(start, stop, line, column),
+          **(extra_attributes || {})
         )
       end
     end
