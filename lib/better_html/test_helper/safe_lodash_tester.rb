@@ -20,7 +20,7 @@ or twine attributes like 'data-define', 'data-context', 'data-eval', 'data-bind'
   <div onclick="[%= JSON.stringify(value) %]">
                     ^^^^^^^^^^^^^^
 
-Never use <script> tags inside lodash syntax.
+Never use <script> tags inside lodash template.
   <script type="text/javascript">
   ^^^^^^^
 
