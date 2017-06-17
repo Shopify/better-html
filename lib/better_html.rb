@@ -31,6 +31,9 @@ module BetterHtml
     def self.template_exclusion_filter(&block)
       self.template_exclusion_filter_block = block
     end
+
+    cattr_accessor :lodash_safe_javascript_expression
+    self.lodash_safe_javascript_expression = [/\AJSON\.stringify\(/]
   end
 
   def self.config

@@ -91,16 +91,18 @@ EOF
           end
         end
 
-        SAFE_EXPRESSION = %r{\AJSON.stringify\(}
-
         def validate_tag_expression(node, attr_name, value_token)
-          if javascript_attribute_name?(attr_name) && SAFE_EXPRESSION.match(value_token.code.strip).nil?
+          if javascript_attribute_name?(attr_name) && !lodash_safe_javascript_expression?(value_token.code.strip)
             add_error(node, value_token, "lodash interpolation in javascript attribute must call 'JSON.stringify(...)'")
           end
         end
 
         def javascript_attribute_name?(name)
           BetterHtml.config.javascript_attribute_names.any?{ |other| other === name }
+        end
+
+        def lodash_safe_javascript_expression?(code)
+          BetterHtml.config.lodash_safe_javascript_expression.any?{ |other| other === code }
         end
 
         def validate_no_statements(node)
