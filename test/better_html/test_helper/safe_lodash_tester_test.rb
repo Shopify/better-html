@@ -29,7 +29,7 @@ module BetterHtml
 
         assert_equal 1, errors.size
         assert_equal '[%= foo %]', errors.first.token.text
-        assert_equal "lodash interpolation in javascript attribute must call 'JSON.stringify(...)'", errors.first.message
+        assert_equal "lodash interpolation in javascript attribute `onclick` must call `JSON.stringify(foo)`", errors.first.message
       end
 
       test "escape in javascript attribute with JSON.stringify is allowed" do

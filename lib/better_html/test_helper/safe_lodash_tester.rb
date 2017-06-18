@@ -93,7 +93,8 @@ EOF
 
         def validate_tag_expression(node, attr_name, value_token)
           if javascript_attribute_name?(attr_name) && !lodash_safe_javascript_expression?(value_token.code.strip)
-            add_error(node, value_token, "lodash interpolation in javascript attribute must call 'JSON.stringify(...)'")
+            add_error(node, value_token, "lodash interpolation in javascript attribute "\
+              "`#{attr_name}` must call `JSON.stringify(#{value_token.code.strip})`")
           end
         end
 
