@@ -31,8 +31,8 @@ EOF
         tester = Tester.new(data)
 
         message = ""
-        tester.errors.each do |e|
-          message << format_safety_error(data, e)
+        tester.errors.each do |error|
+          message << format_safety_error(data, error)
         end
 
         message << SAFETY_TIPS
@@ -47,13 +47,13 @@ EOF
 
         def initialize(data)
           @data = data
-          @errors = []
+          @errors = Errors.new
           @nodes = BetterHtml::NodeIterator.new(data, template_language: :lodash)
           validate!
         end
 
-        def add_error(node, token, message)
-          @errors << SafetyTesterBase::SafetyError.new(node, token, message)
+        def add_error(token, message)
+          @errors.add(SafetyTesterBase::SafetyError.new(token, message))
         end
 
         def validate!
@@ -63,7 +63,7 @@ EOF
               validate_element(node)
 
               if node.name == 'script' && !node.closing?
-                add_error(node, node.name_parts.first,
+                add_error(node.name_parts.first,
                   "No script tags allowed nested in lodash templates")
               end
             when BetterHtml::NodeIterator::CData, BetterHtml::NodeIterator::Comment
@@ -85,7 +85,7 @@ EOF
               when :expr_literal
                 validate_tag_expression(element, attribute.name, token)
               when :expr_escaped
-                add_error(element, token, "lodash interpolation with '[%!' inside html attribute is never safe")
+                add_error(token, "lodash interpolation with '[%!' inside html attribute is never safe")
               end
             end
           end
@@ -93,7 +93,7 @@ EOF
 
         def validate_tag_expression(node, attr_name, value_token)
           if javascript_attribute_name?(attr_name) && !lodash_safe_javascript_expression?(value_token.code.strip)
-            add_error(node, value_token, "lodash interpolation in javascript attribute "\
+            add_error(value_token, "lodash interpolation in javascript attribute "\
               "`#{attr_name}` must call `JSON.stringify(#{value_token.code.strip})`")
           end
         end
@@ -113,7 +113,7 @@ EOF
         end
 
         def add_no_statement_error(node, token)
-          add_error(node, token, "javascript statement not allowed here; did you mean '[%=' ?")
+          add_error(token, "javascript statement not allowed here; did you mean '[%=' ?")
         end
       end
     end

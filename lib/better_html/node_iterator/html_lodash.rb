@@ -5,6 +5,7 @@ module BetterHtml
   class NodeIterator
     class HtmlLodash
       attr_reader :tokens
+      attr_reader :parser
 
       cattr_accessor :lodash_escape, :lodash_evaluate, :lodash_interpolate
       self.lodash_escape = %r{(?:\[\%)=(.+?)(?:\%\])}m

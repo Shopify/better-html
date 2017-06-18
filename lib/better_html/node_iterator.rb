@@ -12,6 +12,8 @@ module BetterHtml
     attr_reader :nodes, :template_language
 
     delegate :each, :each_with_index, :[], to: :nodes
+    delegate :parser, to: :@erb, allow_nil: true
+    delegate :errors, to: :parser, allow_nil: true, prefix: true
 
     def initialize(document, template_language: :html)
       @document = document

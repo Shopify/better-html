@@ -3,10 +3,9 @@ module BetterHtml
     module SafetyTesterBase
 
       class SafetyError < InterpolatorError
-        attr_reader :node, :token
+        attr_reader :token
 
-        def initialize(node, token, message)
-          @node = node
+        def initialize(token, message)
           @token = token
           super(message)
         end

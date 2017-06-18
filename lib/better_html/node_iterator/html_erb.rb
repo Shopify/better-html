@@ -7,6 +7,7 @@ module BetterHtml
   class NodeIterator
     class HtmlErb < ::Erubis::Eruby
       attr_reader :tokens
+      attr_reader :parser
 
       def initialize(document)
         @parser = HtmlTokenizer::Parser.new

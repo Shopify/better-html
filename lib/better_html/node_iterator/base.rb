@@ -10,6 +10,18 @@ module BetterHtml
           end
         RUBY
       end
+
+      def node_type
+        self.class.name.split('::').last.downcase.to_sym
+      end
+
+      %w(text cdata comment element).each do |name|
+        class_eval <<~RUBY
+          def #{name}?
+            node_type == :#{name}
+          end
+        RUBY
+      end
     end
   end
 end
