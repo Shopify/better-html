@@ -20,7 +20,7 @@ module BetterHtml
         s << "#{error.message}\n"
         line = extract_line(data, loc.line)
         s << "#{line}\n"
-        length = [loc.stop - loc.start, line.length - loc.column].min
+        length = [[loc.stop - loc.start, line.length - loc.column].min, 1].max
         s << "#{' ' * loc.column}#{'^' * length}\n\n"
         s
       end
