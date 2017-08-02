@@ -1,11 +1,23 @@
-require 'better_html/better_erb/implementation'
+require 'action_view'
+if ActionView.version < Gem::Version.new("5.1")
+require 'better_html/better_erb/erubis_implementation'
+else
+require 'better_html/better_erb/erubi_implementation'
+end
 require 'better_html/better_erb/validated_output_buffer'
+
 
 class BetterHtml::BetterErb
   cattr_accessor :content_types
-  self.content_types = {
-    'html.erb' => BetterHtml::BetterErb::Implementation
-  }
+  if ActionView.version < Gem::Version.new("5.1")
+    self.content_types = {
+      'html.erb' => BetterHtml::BetterErb::ErubisImplementation
+    }
+  else
+    self.content_types = {
+      'html.erb' => BetterHtml::BetterErb::ErubiImplementation
+    }
+  end
 
   def self.prepend!
     ActionView::Template::Handlers::ERB.prepend(ConditionalImplementation)

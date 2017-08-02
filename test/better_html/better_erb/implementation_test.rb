@@ -385,10 +385,18 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   def render(source, locals={})
     context = ViewContext.new(locals)
     impl = compile(source)
-    impl.result(context.get_binding)
+    if ActionView.version < Gem::Version.new("5.1")
+      impl.result(context.get_binding)
+    else
+      impl.evaluate(context)
+    end
   end
 
   def compile(source)
-    BetterHtml::BetterErb::Implementation.new(source)
+    if ActionView.version < Gem::Version.new("5.1")
+      BetterHtml::BetterErb::ErubisImplementation.new(source)
+    else
+      BetterHtml::BetterErb::ErubiImplementation.new(source)
+    end
   end
 end

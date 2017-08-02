@@ -12,42 +12,39 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    actionview (4.2.6)
-      activesupport (= 4.2.6)
+    actionview (5.1.2)
+      activesupport (= 5.1.2)
       builder (~> 3.1)
-      erubis (~> 2.7.0)
-      rails-dom-testing (~> 1.0, >= 1.0.5)
-      rails-html-sanitizer (~> 1.0, >= 1.0.2)
-    activesupport (4.2.6)
+      erubi (~> 1.4)
+      rails-dom-testing (~> 2.0)
+      rails-html-sanitizer (~> 1.0, >= 1.0.3)
+    activesupport (5.1.2)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (~> 0.7)
-      json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
-      thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
-    builder (3.2.2)
+    builder (3.2.3)
+    concurrent-ruby (1.0.5)
+    erubi (1.6.1)
     erubis (2.7.0)
-    i18n (0.7.0)
-    json (1.8.3)
+    i18n (0.8.6)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     metaclass (0.0.4)
-    mini_portile2 (2.1.0)
-    minitest (5.9.0)
+    mini_portile2 (2.2.0)
+    minitest (5.10.3)
     mocha (1.2.1)
       metaclass (~> 0.0.1)
-    nokogiri (1.7.0)
-      mini_portile2 (~> 2.1.0)
-    rails-deprecated_sanitizer (1.0.3)
-      activesupport (>= 4.2.0.alpha)
-    rails-dom-testing (1.0.8)
-      activesupport (>= 4.2.0.beta, < 5.0)
-      nokogiri (~> 1.6)
-      rails-deprecated_sanitizer (>= 1.0.1)
+    nokogiri (1.8.0)
+      mini_portile2 (~> 2.2.0)
+    rails-dom-testing (2.0.3)
+      activesupport (>= 4.2.0)
+      nokogiri (>= 1.6)
     rails-html-sanitizer (1.0.3)
       loofah (~> 2.0)
     rake (11.1.2)
-    thread_safe (0.3.5)
-    tzinfo (1.2.2)
+    thread_safe (0.3.6)
+    tzinfo (1.2.3)
       thread_safe (~> 0.1)
 
 PLATFORMS
@@ -55,8 +52,9 @@ PLATFORMS
 
 DEPENDENCIES
   actionview
-  activesupport (~> 4.2.1)
+  activesupport (~> 5.1)
   better_html!
+  erubis
   html_tokenizer!
   minitest
   mocha

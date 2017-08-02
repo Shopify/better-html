@@ -1,4 +1,5 @@
 require 'active_support/core_ext/string/output_safety'
+require 'action_view'
 
 module BetterHtml
   class InterpolatorError < RuntimeError; end
