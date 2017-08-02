@@ -8,7 +8,7 @@ interpolated from Ruby into HTML.
 
 Add better-html to your Gemfile with its dependency:
 ```ruby
-gem "better-html", git: "https://github.com/Shopify/better-html.git"
+gem "better_html", git: "https://github.com/Shopify/better-html.git"
 gem "html_tokenizer", git: "https://github.com/EiNSTeiN-/html_tokenizer.git"
 ```
 
