@@ -8,6 +8,7 @@ PATH
   remote: .
   specs:
     better_html (0.0.1)
+      erubis (~> 2.7.0)
 
 GEM
   remote: https://rubygems.org/

@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
   s.require_paths = ["lib"]
 
+  s.add_dependency 'erubis', '~> 2.7.0'
   s.add_development_dependency 'rake', '~> 0'
   s.add_development_dependency 'activesupport', '~> 5.1'
 end
