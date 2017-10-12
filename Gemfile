@@ -9,3 +9,7 @@ gem 'html_tokenizer', git: 'https://github.com/EiNSTeiN-/html_tokenizer.git'
 #gem 'html_tokenizer', path: '/Users/einstein/src/html_tokenizer'
 gem 'mocha'
 gem 'erubis'
+
+group :deployment do
+  gem 'package_cloud'
+end
