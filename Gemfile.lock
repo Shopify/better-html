@@ -1,9 +1,3 @@
-GIT
-  remote: https://github.com/EiNSTeiN-/html_tokenizer.git
-  revision: 7ec2e850807b3258bf0a9d462810ae524476bba1
-  specs:
-    html_tokenizer (0.0.1)
-
 PATH
   remote: .
   specs:
@@ -29,6 +23,7 @@ GEM
     erubi (1.6.1)
     erubis (2.7.0)
     highline (1.6.20)
+    html_tokenizer (0.0.1)
     i18n (0.8.6)
     json_pure (1.8.1)
     loofah (2.0.3)
@@ -72,7 +67,7 @@ DEPENDENCIES
   activesupport (~> 5.1)
   better_html!
   erubis
-  html_tokenizer!
+  html_tokenizer
   minitest
   mocha
   package_cloud
