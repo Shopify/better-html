@@ -1,7 +1,8 @@
 PATH
   remote: .
   specs:
-    better_html (0.0.3)
+    better_html (0.0.4)
+      activesupport (~> 5.1)
       erubis (~> 2.7.0)
 
 GEM
@@ -64,7 +65,6 @@ PLATFORMS
 
 DEPENDENCIES
   actionview
-  activesupport (~> 5.1)
   better_html!
   erubis
   html_tokenizer
