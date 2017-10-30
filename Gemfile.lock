@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    better_html (0.0.4)
-      activesupport (~> 5.1)
+    better_html (0.0.5)
+      actionview (>= 4.0)
+      activesupport (>= 4.0)
       erubis (~> 2.7.0)
 
 GEM
