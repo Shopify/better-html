@@ -254,7 +254,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal "<%             if foo? \n%>", errors.first.token.text
+        assert_equal "<% if foo? %>", errors.first.token.text
         assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.first.message
       end
 
@@ -266,7 +266,7 @@ module BetterHtml
         JS
 
         assert_equal 1, errors.size
-        assert_equal "<%           if foo \n%>", errors.first.token.text
+        assert_equal "<% if foo %>", errors.first.token.text
         assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.first.message
       end
 

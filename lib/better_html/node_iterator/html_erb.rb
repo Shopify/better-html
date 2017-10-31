@@ -1,25 +1,27 @@
-require 'erubis/engine/eruby'
+require 'erubi'
 require 'html_tokenizer'
 require_relative 'token'
 require_relative 'location'
 
 module BetterHtml
   class NodeIterator
-    class HtmlErb < ::Erubis::Eruby
+    class HtmlErb < ::Erubi::Engine
       attr_reader :tokens
       attr_reader :parser
+
+      REGEXP_WITHOUT_TRIM = /<%(={1,2}|-|\#|%)?(.*?)(?:[-=])?()?%>([ \t]*\r?\n)?/m
 
       def initialize(document)
         @parser = HtmlTokenizer::Parser.new
         @tokens = []
-        super
+        super(document, regexp: REGEXP_WITHOUT_TRIM, trim: false)
       end
 
-      def add_text(src, text)
+      def add_text(text)
         @parser.parse(text) { |*args| add_tokens(*args) }
       end
 
-      def add_stmt(src, code)
+      def add_code(code)
         text = "<%#{code}%>"
         start = @parser.document_length
         stop = start + text.size
@@ -32,25 +34,12 @@ module BetterHtml
         @parser.append_placeholder(text)
       end
 
-      def add_expr_literal(src, code)
-        text = "<%=#{code}%>"
+      def add_expression(indicator, code)
+        text = "<%#{indicator}#{code}%>"
         start = @parser.document_length
         stop = start + text.size
         @tokens << Token.new(
-          type: :expr_literal,
-          code: code,
-          text: text,
-          location: Location.new(start, stop, @parser.line_number, @parser.column_number)
-        )
-        @parser.append_placeholder(text)
-      end
-
-      def add_expr_escaped(src, code)
-        text = "<%==#{code}%>"
-        start = @parser.document_length
-        stop = start + text.size
-        @tokens << Token.new(
-          type: :expr_escaped,
+          type: indicator == '=' ? :expr_literal : :expr_escaped,
           code: code,
           text: text,
           location: Location.new(start, stop, @parser.line_number, @parser.column_number)
