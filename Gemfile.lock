@@ -1,10 +1,10 @@
 PATH
   remote: .
   specs:
-    better_html (0.0.5)
+    better_html (0.0.6)
       actionview (>= 4.0)
       activesupport (>= 4.0)
-      erubis (~> 2.7.0)
+      erubi (~> 1.4)
 
 GEM
   remote: https://rubygems.org/
@@ -23,7 +23,6 @@ GEM
     builder (3.2.3)
     concurrent-ruby (1.0.5)
     erubi (1.6.1)
-    erubis (2.7.0)
     highline (1.6.20)
     html_tokenizer (0.0.1)
     i18n (0.8.6)
@@ -67,7 +66,6 @@ PLATFORMS
 DEPENDENCIES
   actionview
   better_html!
-  erubis
   html_tokenizer
   minitest
   mocha

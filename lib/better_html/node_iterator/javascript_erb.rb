@@ -1,38 +1,32 @@
-require 'erubis/engine/eruby'
+require 'erubi'
 require_relative 'token'
 require_relative 'location'
 
 module BetterHtml
   class NodeIterator
-    class JavascriptErb < ::Erubis::Eruby
+    class JavascriptErb < ::Erubi::Engine
       attr_reader :tokens
 
       def initialize(document)
         @document = ""
         @tokens = []
-        super
+        super(document, regexp: HtmlErb::REGEXP_WITHOUT_TRIM, trim: false)
       end
 
-      def add_text(src, text)
+      def add_text(text)
         add_token(:text, text)
         append(text)
       end
 
-      def add_stmt(src, code)
+      def add_code(code)
         text = "<%#{code}%>"
         add_token(:stmt, text, code)
         append(text)
       end
 
-      def add_expr_literal(src, code)
-        text = "<%=#{code}%>"
-        add_token(:expr_literal, text, code)
-        append(text)
-      end
-
-      def add_expr_escaped(src, code)
-        text = "<%==#{code}%>"
-        add_token(:expr_escaped, text, code)
+      def add_expression(indicator, code)
+        text = "<%#{indicator}#{code}%>"
+        add_token(indicator == '=' ? :expr_literal : :expr_escaped, text, code)
         append(text)
       end
 

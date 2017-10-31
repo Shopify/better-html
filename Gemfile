@@ -7,7 +7,6 @@ gem 'rake'
 gem 'minitest'
 gem 'html_tokenizer'
 gem 'mocha'
-gem 'erubis'
 
 group :deployment do
   gem 'package_cloud'
