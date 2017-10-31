@@ -83,6 +83,23 @@ module BetterHtml
         assert_attributes ({ line: 4 }), scanner.tokens[3].location
       end
 
+      test "line counts with comments" do
+        scanner = BetterHtml::NodeIterator::HtmlErb.new("before\n<%# BO$$ Mode %>\nafter")
+        assert_equal 4, scanner.tokens.size
+
+        assert_attributes ({ type: :text, text: "before\n" }), scanner.tokens[0]
+        assert_attributes ({ line: 1 }), scanner.tokens[0].location
+
+        assert_attributes ({ type: :stmt, text: "<%# BO$$ Mode %>" }), scanner.tokens[1]
+        assert_attributes ({ line: 2 }), scanner.tokens[1].location
+
+        assert_attributes ({ type: :text, text: "\n" }), scanner.tokens[2]
+        assert_attributes ({ line: 2 }), scanner.tokens[2].location
+
+        assert_attributes ({ type: :text, text: "after" }), scanner.tokens[3]
+        assert_attributes ({ line: 3 }), scanner.tokens[3].location
+      end
+
       private
 
       def assert_attributes(attributes, token)

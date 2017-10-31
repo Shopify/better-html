@@ -9,7 +9,7 @@ module BetterHtml
       attr_reader :tokens
       attr_reader :parser
 
-      REGEXP_WITHOUT_TRIM = /<%(={1,2}|-|\#|%)?(.*?)(?:[-=])?()?%>([ \t]*\r?\n)?/m
+      REGEXP_WITHOUT_TRIM = /<%(={1,2}|-|%)?(.*?)(?:[-=])?()?%>([ \t]*\r?\n)?/m
 
       def initialize(document)
         @parser = HtmlTokenizer::Parser.new
