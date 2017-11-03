@@ -1,10 +1,8 @@
-require_relative 'safety_tester_base'
+require 'better_html/test_helper/safety_error'
 
 module BetterHtml
   module TestHelper
     module SafeLodashTester
-      include SafetyTesterBase
-
       SAFETY_TIPS = <<-EOF
 -----------
 
@@ -32,7 +30,11 @@ EOF
 
         message = ""
         tester.errors.each do |error|
-          message << format_safety_error(data, error)
+          message << <<~EOL
+            On line #{error.location.line}
+            #{error.message}
+            #{error.location.line_source_with_underline}\n
+          EOL
         end
 
         message << SAFETY_TIPS
@@ -52,8 +54,8 @@ EOF
           validate!
         end
 
-        def add_error(token, message)
-          @errors.add(SafetyTesterBase::SafetyError.new(token, message))
+        def add_error(message, location:)
+          @errors.add(SafetyError.new(message, location: location))
         end
 
         def validate!
@@ -63,8 +65,10 @@ EOF
               validate_element(node)
 
               if node.name == 'script' && !node.closing?
-                add_error(node.name_parts.first,
-                  "No script tags allowed nested in lodash templates")
+                add_error(
+                  "No script tags allowed nested in lodash templates",
+                  location: node.name_parts.first.location
+                )
               end
             when BetterHtml::NodeIterator::CData, BetterHtml::NodeIterator::Comment
               validate_no_statements(node)
@@ -85,7 +89,10 @@ EOF
               when :expr_literal
                 validate_tag_expression(element, attribute.name, token)
               when :expr_escaped
-                add_error(token, "lodash interpolation with '[%!' inside html attribute is never safe")
+                add_error(
+                  "lodash interpolation with '[%!' inside html attribute is never safe",
+                  location: token.location
+                )
               end
             end
           end
@@ -93,8 +100,11 @@ EOF
 
         def validate_tag_expression(node, attr_name, value_token)
           if javascript_attribute_name?(attr_name) && !lodash_safe_javascript_expression?(value_token.code.strip)
-            add_error(value_token, "lodash interpolation in javascript attribute "\
-              "`#{attr_name}` must call `JSON.stringify(#{value_token.code.strip})`")
+            add_error(
+              "lodash interpolation in javascript attribute "\
+              "`#{attr_name}` must call `JSON.stringify(#{value_token.code.strip})`",
+              location: value_token.location
+            )
           end
         end
 
@@ -113,7 +123,10 @@ EOF
         end
 
         def add_no_statement_error(node, token)
-          add_error(token, "javascript statement not allowed here; did you mean '[%=' ?")
+          add_error(
+            "javascript statement not allowed here; did you mean '[%=' ?",
+            location: token.location
+          )
         end
       end
     end

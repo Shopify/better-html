@@ -5,6 +5,7 @@ PATH
       actionview (>= 4.0)
       activesupport (>= 4.0)
       erubi (~> 1.4)
+      parser (>= 2.4)
 
 GEM
   remote: https://rubygems.org/
@@ -20,42 +21,38 @@ GEM
       i18n (~> 0.7)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
+    ast (2.3.0)
     builder (3.2.3)
+    byebug (9.1.0)
+    coderay (1.1.2)
     concurrent-ruby (1.0.5)
     erubi (1.6.1)
-    highline (1.6.20)
     html_tokenizer (0.0.1)
     i18n (0.8.6)
-    json_pure (1.8.1)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     metaclass (0.0.4)
-    mime-types (2.99.3)
+    method_source (0.9.0)
     mini_portile2 (2.2.0)
     minitest (5.10.3)
     mocha (1.2.1)
       metaclass (~> 0.0.1)
-    netrc (0.11.0)
     nokogiri (1.8.0)
       mini_portile2 (~> 2.2.0)
-    package_cloud (0.2.45)
-      highline (= 1.6.20)
-      json_pure (= 1.8.1)
-      rainbow (= 2.2.2)
-      rest-client (~> 1.7.3)
-      thor (~> 0.18)
+    parser (2.4.0.0)
+      ast (~> 2.2)
+    pry (0.11.2)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
+    pry-byebug (3.5.0)
+      byebug (~> 9.1)
+      pry (~> 0.10)
     rails-dom-testing (2.0.3)
       activesupport (>= 4.2.0)
       nokogiri (>= 1.6)
     rails-html-sanitizer (1.0.3)
       loofah (~> 2.0)
-    rainbow (2.2.2)
-      rake
     rake (11.1.2)
-    rest-client (1.7.3)
-      mime-types (>= 1.16, < 3.0)
-      netrc (~> 0.7)
-    thor (0.20.0)
     thread_safe (0.3.6)
     tzinfo (1.2.3)
       thread_safe (~> 0.1)
@@ -69,7 +66,7 @@ DEPENDENCIES
   html_tokenizer
   minitest
   mocha
-  package_cloud
+  pry-byebug
   rake
 
 BUNDLED WITH

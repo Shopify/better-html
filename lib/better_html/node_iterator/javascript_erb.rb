@@ -7,10 +7,11 @@ module BetterHtml
     class JavascriptErb < ::Erubi::Engine
       attr_reader :tokens
 
-      def initialize(document)
-        @document = ""
+      def initialize(source)
+        @source = source
+        @parsed_document = ""
         @tokens = []
-        super(document, regexp: HtmlErb::REGEXP_WITHOUT_TRIM, trim: false)
+        super(source, regexp: HtmlErb::REGEXP_WITHOUT_TRIM, trim: false)
       end
 
       def add_text(text)
@@ -33,21 +34,21 @@ module BetterHtml
       private
 
       def add_token(type, text, code = nil)
-        start = @document.size
+        start = @parsed_document.size
         stop = start + text.size
-        lines = @document.split("\n", -1)
+        lines = @parsed_document.split("\n", -1)
         line = lines.empty? ? 1 : lines.size
         column = lines.empty? ? 0 : lines.last.size
         @tokens << Token.new(
           type: type,
           text: text,
           code: code,
-          location: Location.new(start, stop, line, column)
+          location: Location.new(@source, start, stop, line, column)
         )
       end
 
       def append(text)
-        @document << text
+        @parsed_document << text
       end
     end
   end

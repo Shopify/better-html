@@ -8,6 +8,9 @@ module BetterHtml
         BetterHtml.config
           .stubs(:javascript_safe_methods)
           .returns(['j', 'escape_javascript', 'to_json'])
+        BetterHtml.config
+          .stubs(:javascript_attribute_names)
+          .returns([/\Aon/i, 'data-eval'])
       end
 
       test "string without interpolation is safe" do
@@ -15,9 +18,7 @@ module BetterHtml
           <a onclick="alert('<%= "something" %>')">
         EOF
 
-        assert_equal 1, errors.size
-        assert_equal '<%= "something" %>', errors.first.token.text
-        assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
+        assert_equal 0, errors.size
       end
 
       test "string with interpolation" do
@@ -26,7 +27,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= "hello #{name}" %>', errors.first.token.text
+        assert_equal '"hello #{name}"', errors.first.location.source
         assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
       end
 
@@ -37,10 +38,10 @@ module BetterHtml
 
         assert_equal 2, errors.size
 
-        assert_equal '<%= "hello #{foo ? bar : baz}" if bla? %>', errors.first.token.text
+        assert_equal '"hello #{foo ? bar : baz}" if bla?', errors.first.location.source
         assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
 
-        assert_equal '<%= "hello #{foo ? bar : baz}" if bla? %>', errors.first.token.text
+        assert_equal '"hello #{foo ? bar : baz}" if bla?', errors.first.location.source
         assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
       end
 
@@ -50,7 +51,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= unsafe %>', errors.first.token.text
+        assert_equal 'unsafe', errors.first.location.source
         assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
       end
 
@@ -74,7 +75,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= foo ? bar : j(baz) %>', errors.first.token.text
+        assert_equal 'foo ? bar : j(baz)', errors.first.location.source
         assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
       end
 
@@ -112,7 +113,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= unsafe.html_safe %>', errors.first.token.text
+        assert_equal 'unsafe.html_safe', errors.first.location.source
         assert_equal "erb interpolation with '<%= (...).html_safe %>' inside html attribute is never safe", errors.first.message
       end
 
@@ -122,7 +123,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= unsafe.to_json.html_safe %>', errors.first.token.text
+        assert_equal 'unsafe.to_json.html_safe', errors.first.location.source
         assert_equal "erb interpolation with '<%= (...).html_safe %>' inside html attribute is never safe", errors.first.message
       end
 
@@ -132,7 +133,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%== unsafe %>', errors.first.token.text
+        assert_equal '<%== unsafe %>', errors.first.location.source
         assert_includes "erb interpolation with '<%==' inside html attribute is never safe", errors.first.message
       end
 
@@ -142,7 +143,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%== unsafe.to_json %>', errors.first.token.text
+        assert_equal '<%== unsafe.to_json %>', errors.first.location.source
         assert_includes "erb interpolation with '<%==' inside html attribute is never safe", errors.first.message
       end
 
@@ -152,7 +153,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= raw unsafe %>', errors.first.token.text
+        assert_equal 'raw unsafe', errors.first.location.source
         assert_equal "erb interpolation with '<%= raw(...) %>' inside html attribute is never safe", errors.first.message
       end
 
@@ -162,7 +163,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= raw unsafe.to_json %>', errors.first.token.text
+        assert_equal 'raw unsafe.to_json', errors.first.location.source
         assert_equal "erb interpolation with '<%= raw(...) %>' inside html attribute is never safe", errors.first.message
       end
 
@@ -174,7 +175,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= unsafe %>', errors.first.token.text
+        assert_equal '<%= unsafe %>', errors.first.location.source
         assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
       end
 
@@ -184,7 +185,7 @@ module BetterHtml
         JS
 
         assert_equal 1, errors.size
-        assert_equal '<%= unsafe %>', errors.first.token.text
+        assert_equal '<%= unsafe %>', errors.first.location.source
         assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
       end
 
@@ -196,7 +197,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= "unsafe" %>', errors.first.token.text
+        assert_equal '<%= "unsafe" %>', errors.first.location.source
         assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
       end
 
@@ -206,7 +207,7 @@ module BetterHtml
         JS
 
         assert_equal 1, errors.size
-        assert_equal '<%= "unsafe" %>', errors.first.token.text
+        assert_equal '<%= "unsafe" %>', errors.first.location.source
         assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
       end
 
@@ -218,7 +219,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= javascript_tag do %>', errors.first.token.text
+        assert_equal '<%= javascript_tag do %>', errors.first.location.source
         assert_includes "'javascript_tag do' syntax is deprecated; use inline <script> instead", errors.first.message
       end
 
@@ -230,7 +231,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '<%= unsafe %>', errors.first.token.text
+        assert_equal '<%= unsafe %>', errors.first.location.source
         assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
       end
 
@@ -254,7 +255,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal "<% if foo? %>", errors.first.token.text
+        assert_equal "<% if foo? %>", errors.first.location.source
         assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.first.message
       end
 
@@ -266,7 +267,7 @@ module BetterHtml
         JS
 
         assert_equal 1, errors.size
-        assert_equal "<% if foo %>", errors.first.token.text
+        assert_equal "<% if foo %>", errors.first.location.source
         assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.first.message
       end
 
@@ -347,6 +348,46 @@ module BetterHtml
         EOF
 
         assert_predicate errors, :empty?
+      end
+
+      test "unsafe javascript methods in helper calls with new hash syntax" do
+        errors = parse(<<-EOF).errors
+          <%= ui_my_helper(:foo, onclick: "alert(\#{unsafe})", onmouseover: "alert(\#{unsafe.to_json})") %>
+        EOF
+
+        assert_equal 1, errors.size
+        assert_equal "\#{unsafe}", errors[0].location.source
+        assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors[0].message
+      end
+
+      test "unsafe javascript methods in helper calls with old hash syntax" do
+        errors = parse(<<-EOF).errors
+          <%= ui_my_helper(:foo, :onclick => "alert(\#{unsafe})") %>
+        EOF
+
+        assert_equal 1, errors.size
+        assert_equal "\#{unsafe}", errors.first.location.source
+        assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
+      end
+
+      test "unsafe javascript methods in helper calls with string as key" do
+        errors = parse(<<-EOF).errors
+          <%= ui_my_helper(:foo, 'data-eval' => "alert(\#{unsafe})") %>
+        EOF
+
+        assert_equal 1, errors.size
+        assert_equal "\#{unsafe}", errors.first.location.source
+        assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
+      end
+
+      test "unsafe javascript methods in helper calls with nested data key" do
+        errors = parse(<<-EOF).errors
+          <%= ui_my_helper(:foo, data: { eval: "alert(\#{unsafe})" }) %>
+        EOF
+
+        assert_equal 1, errors.size
+        assert_equal "\#{unsafe}", errors.first.location.source
+        assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
       end
 
       private

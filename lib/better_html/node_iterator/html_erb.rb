@@ -14,6 +14,7 @@ module BetterHtml
       def initialize(document)
         @parser = HtmlTokenizer::Parser.new
         @tokens = []
+        @document = document
         super(document, regexp: REGEXP_WITHOUT_TRIM, trim: false)
       end
 
@@ -29,7 +30,8 @@ module BetterHtml
           type: :stmt,
           code: code,
           text: text,
-          location: Location.new(start, stop, @parser.line_number, @parser.column_number)
+          location: Location.new(@document, start, stop, @parser.line_number, @parser.column_number),
+          code_location: Location.new(@document, start+2, stop-2, @parser.line_number, @parser.column_number+2)
         )
         @parser.append_placeholder(text)
       end
@@ -42,7 +44,8 @@ module BetterHtml
           type: indicator == '=' ? :expr_literal : :expr_escaped,
           code: code,
           text: text,
-          location: Location.new(start, stop, @parser.line_number, @parser.column_number)
+          location: Location.new(@document, start, stop, @parser.line_number, @parser.column_number),
+          code_location: Location.new(@document, start+2+indicator.size, stop-2, @parser.line_number, @parser.column_number+2+indicator.size)
         )
         @parser.append_placeholder(text)
       end
@@ -58,7 +61,7 @@ module BetterHtml
         @tokens << Token.new(
           type: type,
           text: @parser.extract(start, stop),
-          location: Location.new(start, stop, line, column),
+          location: Location.new(@document, start, stop, line, column),
           **(extra_attributes || {})
         )
       end
