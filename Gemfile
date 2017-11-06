@@ -8,6 +8,6 @@ gem 'minitest'
 gem 'html_tokenizer'
 gem 'mocha'
 
-group :deployment do
-  gem 'package_cloud'
+group :deployment, :test do
+  gem 'pry-byebug'
 end

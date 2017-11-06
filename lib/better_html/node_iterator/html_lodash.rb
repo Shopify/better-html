@@ -92,7 +92,7 @@ module BetterHtml
           type: type,
           text: text,
           code: code,
-          location: Location.new(start, stop, line || @parser.line_number, column || @parser.column_number),
+          location: Location.new(@source, start, stop, line || @parser.line_number, column || @parser.column_number),
           **(extra_attributes || {})
         )
       end

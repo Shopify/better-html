@@ -1,11 +1,10 @@
 require 'better_html/test_helper/ruby_expr'
-require_relative 'safety_tester_base'
+require 'better_html/test_helper/safety_error'
+require 'parser/current'
 
 module BetterHtml
   module TestHelper
     module SafeErbTester
-      include SafetyTesterBase
-
       SAFETY_TIPS = <<-EOF
 -----------
 
@@ -34,7 +33,11 @@ EOF
 
         message = ""
         tester.errors.each do |error|
-          message << format_safety_error(data, error)
+          message << <<~EOL
+            On line #{error.location.line}
+            #{error.message}
+            #{error.location.line_source_with_underline}\n
+          EOL
         end
 
         message << SAFETY_TIPS
@@ -58,8 +61,8 @@ EOF
           validate!
         end
 
-        def add_error(token, message)
-          @errors.add(SafetyTesterBase::SafetyError.new(token, message))
+        def add_error(message, location:)
+          @errors.add(SafetyError.new(message, location: location))
         end
 
         def validate!
@@ -80,6 +83,8 @@ EOF
                 validate_javascript_tag_type(node) unless node.closing?
               end
             when BetterHtml::NodeIterator::Text
+              validate_text_content(node)
+
               if @nodes.template_language == :javascript
                 validate_script_tag_content(node)
                 validate_no_statements(node)
@@ -102,7 +107,10 @@ EOF
           typeattr = element['type']
           return if typeattr.nil?
           if !VALID_JAVASCRIPT_TAG_TYPES.include?(typeattr.unescaped_value)
-            add_error(typeattr.value_parts.first, "#{typeattr.value} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}")
+            add_error(
+              "#{typeattr.value} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}",
+              location: typeattr.value_parts.first.location
+            )
           end
         end
 
@@ -111,48 +119,132 @@ EOF
             attr_token.value_parts.each do |value_token|
               case value_token.type
               when :expr_literal
-                validate_tag_expression(element, attr_token.name, value_token)
+                begin
+                  expr = RubyExpr.parse(value_token.code)
+                  validate_tag_expression(value_token, expr, attr_token.name)
+                rescue RubyExpr::ParseError
+                  nil
+                end
               when :expr_escaped
-                add_error(value_token, "erb interpolation with '<%==' inside html attribute is never safe")
+                add_error(
+                  "erb interpolation with '<%==' inside html attribute is never safe",
+                  location: value_token.location
+                )
               end
             end
           end
         end
 
-        def validate_tag_expression(node, attr_name, value_token)
-          expr = RubyExpr.new(code: value_token.code)
+        def validate_text_content(text)
+          text.content_parts.each do |text_token|
+            case text_token.type
+            when :stmt, :expr_literal, :expr_escaped
+              begin
+                expr = RubyExpr.parse(text_token.code)
+                validate_ruby_helper(text_token, expr)
+              rescue RubyExpr::ParseError
+                nil
+              end
+            end
+          end
+        end
+
+        def validate_ruby_helper(parent_token, expr)
+          expr.traverse(only: [:send, :csend]) do |send_node|
+            expr.each_child_node(send_node, only: :hash) do |hash_node|
+              expr.each_child_node(hash_node, only: :pair) do |pair_node|
+                validate_ruby_helper_hash_entry(parent_token, expr, nil, *pair_node.children)
+              end
+            end
+          end
+        end
+
+        def validate_ruby_helper_hash_entry(parent_token, expr, key_prefix, key_node, value_node)
+          return unless [:sym, :str].include?(key_node.type)
+          key = [key_prefix, key_node.children.first.to_s].compact.join('-').dasherize
+          case value_node.type
+          when :dstr
+            validate_ruby_helper_hash_value(parent_token, expr, key, value_node)
+          when :hash
+            if key == 'data'
+              expr.each_child_node(value_node, only: :pair) do |pair_node|
+                validate_ruby_helper_hash_entry(parent_token, expr, key, *pair_node.children)
+              end
+            end
+          end
+        end
+
+        def validate_ruby_helper_hash_value(parent_token, expr, attr_name, hash_value)
+          expr.each_child_node(hash_value, only: :begin) do |child|
+            validate_tag_expression(parent_token, RubyExpr.new(child), attr_name)
+          end
+        end
+
+        def validate_tag_expression(parent_token, expr, attr_name)
+          return if expr.static_value?
 
           if javascript_attribute_name?(attr_name) && expr.calls.empty?
-            add_error(value_token, "erb interpolation in javascript attribute must call '(...).to_json'")
+            add_error(
+              "erb interpolation in javascript attribute must call '(...).to_json'",
+              location: NodeIterator::Location.new(
+                @data,
+                parent_token.code_location.start + expr.start,
+                parent_token.code_location.start + expr.end
+              )
+            )
             return
           end
 
           expr.calls.each do |call|
-            if call.method == 'raw'
-              add_error(value_token, "erb interpolation with '<%= raw(...) %>' inside html attribute is never safe")
-            elsif call.method == 'html_safe'
-              add_error(value_token, "erb interpolation with '<%= (...).html_safe %>' inside html attribute is never safe")
+            if call.method == :raw
+              add_error(
+                "erb interpolation with '<%= raw(...) %>' inside html attribute is never safe",
+                location: NodeIterator::Location.new(
+                  @data,
+                  parent_token.code_location.start + expr.start,
+                  parent_token.code_location.start + expr.end
+                )
+              )
+            elsif call.method == :html_safe
+              add_error(
+                "erb interpolation with '<%= (...).html_safe %>' inside html attribute is never safe",
+                location: NodeIterator::Location.new(
+                  @data,
+                  parent_token.code_location.start + expr.start,
+                  parent_token.code_location.start + expr.end
+                )
+              )
             elsif javascript_attribute_name?(attr_name) && !javascript_safe_method?(call.method)
-              add_error(value_token, "erb interpolation in javascript attribute must call '(...).to_json'")
+              add_error(
+                "erb interpolation in javascript attribute must call '(...).to_json'",
+                location: NodeIterator::Location.new(
+                  @data,
+                  parent_token.code_location.start + expr.start,
+                  parent_token.code_location.start + expr.end
+                )
+              )
             end
           end
         end
 
         def javascript_attribute_name?(name)
-          BetterHtml.config.javascript_attribute_names.any?{ |other| other === name }
+          BetterHtml.config.javascript_attribute_names.any?{ |other| other === name.to_s }
         end
 
         def javascript_safe_method?(name)
-          BetterHtml.config.javascript_safe_methods.include?(name)
+          BetterHtml.config.javascript_safe_methods.include?(name.to_s)
         end
 
         def validate_script_tag_content(node)
           node.content_parts.each do |token|
             case token.type
             when :expr_literal, :expr_escaped
-              expr = RubyExpr.new(code: token.code)
+              expr = RubyExpr.parse(token.code)
               if expr.calls.empty?
-                add_error(token, "erb interpolation in javascript tag must call '(...).to_json'")
+                add_error(
+                  "erb interpolation in javascript tag must call '(...).to_json'",
+                  location: token.location,
+                )
               else
                 validate_script_expression(node, token, expr)
               end
@@ -162,14 +254,19 @@ EOF
 
         def validate_script_expression(node, token, expr)
           expr.calls.each do |call|
-            if call.method == 'raw'
-              arguments_expr = RubyExpr.new(tree: call.arguments)
-              validate_script_expression(node, token, arguments_expr)
-            elsif call.method == 'html_safe'
-              instance_expr = RubyExpr.new(tree: call.instance)
+            if call.method == :raw
+              call.arguments.each do |argument_node|
+                arguments_expr = RubyExpr.new(argument_node)
+                validate_script_expression(node, token, arguments_expr)
+              end
+            elsif call.method == :html_safe
+              instance_expr = RubyExpr.new(call.instance)
               validate_script_expression(node, token, instance_expr)
             elsif !javascript_safe_method?(call.method)
-              add_error(token, "erb interpolation in javascript tag must call '(...).to_json'")
+              add_error(
+                "erb interpolation in javascript tag must call '(...).to_json'",
+                location: token.location,
+              )
             end
           end
         end
@@ -177,7 +274,10 @@ EOF
         def validate_no_statements(node)
           node.content_parts.each do |token|
             if token.type == :stmt && !(/\A\s*end/m === token.code)
-              add_error(token, "erb statement not allowed here; did you mean '<%=' ?")
+              add_error(
+                "erb statement not allowed here; did you mean '<%=' ?",
+                location: token.location,
+              )
             end
           end
         end
@@ -186,12 +286,15 @@ EOF
           node.content_parts.each do |token|
             if [:stmt, :expr_literal, :expr_escaped].include?(token.type)
               expr = begin
-                RubyExpr.new(code: token.code)
+                RubyExpr.parse(token.code)
               rescue RubyExpr::ParseError
                 next
               end
-              if expr.calls.size == 1 && expr.calls.first.method == 'javascript_tag'
-                add_error(token, "'javascript_tag do' syntax is deprecated; use inline <script> instead")
+              if expr.calls.size == 1 && expr.calls.first.method == :javascript_tag
+                add_error(
+                  "'javascript_tag do' syntax is deprecated; use inline <script> instead",
+                  location: token.location,
+                )
               end
             end
           end

@@ -10,7 +10,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '[%! foo %]', errors.first.token.text
+        assert_equal '[%! foo %]', errors.first.location.source
         assert_equal "lodash interpolation with '[%!' inside html attribute is never safe", errors.first.message
       end
 
@@ -28,7 +28,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '[%= foo %]', errors.first.token.text
+        assert_equal '[%= foo %]', errors.first.location.source
         assert_equal "lodash interpolation in javascript attribute `onclick` must call `JSON.stringify(foo)`", errors.first.message
       end
 
@@ -46,7 +46,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal 'script', errors.first.token.text
+        assert_equal 'script', errors.first.location.source
         assert_equal "No script tags allowed nested in lodash templates", errors.first.message
       end
 
@@ -56,7 +56,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '[% if (foo) %]', errors.first.token.text
+        assert_equal '[% if (foo) %]', errors.first.location.source
         assert_equal "javascript statement not allowed here; did you mean '[%=' ?", errors.first.message
       end
 
@@ -66,7 +66,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '[% if (foo) %]', errors.first.token.text
+        assert_equal '[% if (foo) %]', errors.first.location.source
         assert_equal "javascript statement not allowed here; did you mean '[%=' ?", errors.first.message
       end
 
