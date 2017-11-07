@@ -10,6 +10,10 @@ module BetterHtml
   def self.config
     @config ||= Config.new
   end
+
+  def self.config=(new_config)
+    @config = new_config
+  end
 end
 
 require 'better_html/version'

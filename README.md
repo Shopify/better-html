@@ -12,6 +12,55 @@ gem "better_html", git: "https://github.com/Shopify/better-html.git"
 gem "html_tokenizer", git: "https://github.com/EiNSTeiN-/html_tokenizer.git"
 ```
 
+## Configuration
+
+A global configuration for the app is stored at `BetterHtml.config`. The default
+configuration can be changed like this:
+
+```ruby
+# config/initializers/better_html.rb
+BetterHtml.configure do |config|
+  config.allow_single_quoted_attributes = false
+end
+```
+
+or if you prefer storing the config elsewhere, in a yml file for example:
+
+```ruby
+# config/initializers/better_html.rb
+BetterHtml.config = BetterHtml::Config.new(YAML.load(File.read('/path/to/.better-html.yml')))
+```
+
+Available configuration options are:
+
+* `partial_tag_name_pattern`: Regex to validate `foo` in `<foo>`. Defaults to `/\A[a-z0-9\-\:]+\z/`.
+* `partial_attribute_name_pattern`: Regex to validate `bar` in `<foo bar=1>`. Defaults to `/\A[a-zA-Z0-9\-\:]+\z/`.
+* `allow_single_quoted_attributes`: When true, `<foo bar='1'>` is valid syntax. Defaults to `true`.
+* `allow_unquoted_attributes`: When true, `<foo bar=1>` is valid syntax. Defaults to `false`.
+* `javascript_safe_methods`: List of methods that return javascript-safe strings. This list is used
+  by `SafeErbTester` when determining whether ruby interpolation is safe for a given attribute.
+  Defaults to `['to_json']`.
+* `lodash_safe_javascript_expression`: Same as `javascript_safe_methods`, but for lodash templates.
+  Defaults to `[/\AJSON\.stringify\(/]`.
+* `javascript_attribute_names`: List of all attribute names that contain javascript code. This list is used
+  by `SafeErbTester` when determining whether or not a given attribute value will be eval'ed as javascript.
+  Defaults to `[/\Aon/i]` (matches `onclick` for example).
+* `template_exclusion_filter`: This is called when determining whether to apply runtime checks on a `.erb` template.
+  When this `Proc` returns false, no safety checks are applied and parsing is done using the default Rails erubi engine.
+  For example, to exclude erb templates provided by libraries, use: `Proc.new { |filename| !filename.start_with?(Rails.root.to_s) }`.
+  Defaults to `nil` (all html.erb templates are parsed).
+
+By default, only files named `.html.erb` are parsed at runtime using BetterHtml's erubi implementation.
+To change this behavior and parse other file types, assign the erubi implementation into `BetterHtml::BetterErb.content_types` like this:
+
+```ruby
+# config/initializers/better_html.rb
+impl = BetterHtml::BetterErb.content_types['html.erb']
+BetterHtml::BetterErb.content_types['htm.erb'] = impl
+BetterHtml::BetterErb.content_types['atom.erb'] = impl
+BetterHtml::BetterErb.content_types['html+variant.erb'] = impl
+```
+
 ## Syntax restriction
 
 In order to apply effective runtime checks, it is necessary to enforce the
