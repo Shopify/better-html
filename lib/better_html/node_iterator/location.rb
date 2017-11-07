@@ -28,10 +28,9 @@ module BetterHtml
       end
 
       def line_source_with_underline
-        line_content = @document.lines[line-1]
-        line_content = line_content.nil? ? "" : line_content.gsub(/\n$/, '')
+        line_content = extract_line(line: line)
         spaces = line_content.scan(/\A\s*/).first
-        column_without_spaces = column - spaces.length
+        column_without_spaces = [column - spaces.length, 0].max
         underscore_length = [[stop - start, line_content.length - column_without_spaces].min, 1].max
         "#{line_content.gsub(/\A\s*/, '')}\n#{' ' * column_without_spaces}#{'^' * underscore_length}"
       end
@@ -44,6 +43,10 @@ module BetterHtml
 
       def calculate_column
         @document[0..start-1]&.split("\n", -1)&.last&.length || 0
+      end
+
+      def extract_line(line:)
+        @document.split("\n", -1)[line - 1]&.gsub(/\n$/, '') || ""
       end
     end
   end
