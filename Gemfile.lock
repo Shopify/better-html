@@ -5,6 +5,7 @@ PATH
       actionview (>= 4.0)
       activesupport (>= 4.0)
       erubi (~> 1.4)
+      html_tokenizer
       parser (>= 2.4)
       smart_properties
 
