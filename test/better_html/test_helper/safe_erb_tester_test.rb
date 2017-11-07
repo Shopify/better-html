@@ -390,6 +390,14 @@ module BetterHtml
         assert_equal "erb interpolation in javascript attribute must call '(...).to_json'", errors.first.message
       end
 
+      test "ivar missing .to_json is unsafe" do
+        errors = parse('<script><%= @feature.html_safe %></script>').errors
+
+        assert_equal 1, errors.size
+        assert_equal "<%= @feature.html_safe %>", errors.first.location.source
+        assert_equal "erb interpolation in javascript tag must call '(...).to_json'", errors.first.message
+      end
+
       private
       def parse(data, template_language: :html)
         SafeErbTester::Tester.new(data, template_language: template_language)
