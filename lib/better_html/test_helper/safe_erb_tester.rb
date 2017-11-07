@@ -240,19 +240,20 @@ EOF
             case token.type
             when :expr_literal, :expr_escaped
               expr = RubyExpr.parse(token.code)
-              if expr.calls.empty?
-                add_error(
-                  "erb interpolation in javascript tag must call '(...).to_json'",
-                  location: token.location,
-                )
-              else
-                validate_script_expression(node, token, expr)
-              end
+              validate_script_expression(node, token, expr)
             end
           end
         end
 
         def validate_script_expression(node, token, expr)
+          if expr.calls.empty?
+            add_error(
+              "erb interpolation in javascript tag must call '(...).to_json'",
+              location: token.location,
+            )
+            return
+          end
+
           expr.calls.each do |call|
             if call.method == :raw
               call.arguments.each do |argument_node|
