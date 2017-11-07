@@ -5,12 +5,10 @@ module BetterHtml
   module TestHelper
     class SafeErbTesterTest < ActiveSupport::TestCase
       setup do
-        BetterHtml.config
-          .stubs(:javascript_safe_methods)
-          .returns(['j', 'escape_javascript', 'to_json'])
-        BetterHtml.config
-          .stubs(:javascript_attribute_names)
-          .returns([/\Aon/i, 'data-eval'])
+        @config = BetterHtml::Config.new(
+          javascript_safe_methods: ['j', 'escape_javascript', 'to_json'],
+          javascript_attribute_names: [/\Aon/i, 'data-eval'],
+        )
       end
 
       test "string without interpolation is safe" do
@@ -400,7 +398,7 @@ module BetterHtml
 
       private
       def parse(data, template_language: :html)
-        SafeErbTester::Tester.new(data, template_language: template_language)
+        SafeErbTester::Tester.new(data, config: @config, template_language: template_language)
       end
     end
   end

@@ -25,8 +25,8 @@ Never use <script> tags inside lodash template.
 -----------
 EOF
 
-      def assert_lodash_safety(data)
-        tester = Tester.new(data)
+      def assert_lodash_safety(data, **options)
+        tester = Tester.new(data, **options)
 
         message = ""
         tester.errors.each do |error|
@@ -47,8 +47,9 @@ EOF
       class Tester
         attr_reader :errors
 
-        def initialize(data)
+        def initialize(data, config: BetterHtml.config)
           @data = data
+          @config = config
           @errors = Errors.new
           @nodes = BetterHtml::NodeIterator.new(data, template_language: :lodash)
           validate!
@@ -109,11 +110,11 @@ EOF
         end
 
         def javascript_attribute_name?(name)
-          BetterHtml.config.javascript_attribute_names.any?{ |other| other === name }
+          @config.javascript_attribute_names.any?{ |other| other === name }
         end
 
         def lodash_safe_javascript_expression?(code)
-          BetterHtml.config.lodash_safe_javascript_expression.any?{ |other| other === code }
+          @config.lodash_safe_javascript_expression.any?{ |other| other === code }
         end
 
         def validate_no_statements(node)

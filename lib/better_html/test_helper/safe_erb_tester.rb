@@ -52,8 +52,9 @@ EOF
 
         VALID_JAVASCRIPT_TAG_TYPES = ['text/javascript', 'text/template', 'text/html']
 
-        def initialize(data, **options)
+        def initialize(data, config: BetterHtml.config, **options)
           @data = data
+          @config = config
           @errors = Errors.new
           @options = options.present? ? options.dup : {}
           @options[:template_language] ||= :html
@@ -228,11 +229,11 @@ EOF
         end
 
         def javascript_attribute_name?(name)
-          BetterHtml.config.javascript_attribute_names.any?{ |other| other === name.to_s }
+          @config.javascript_attribute_names.any?{ |other| other === name.to_s }
         end
 
         def javascript_safe_method?(name)
-          BetterHtml.config.javascript_safe_methods.include?(name.to_s)
+          @config.javascript_safe_methods.include?(name.to_s)
         end
 
         def validate_script_tag_content(node)
