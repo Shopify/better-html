@@ -6,36 +6,36 @@ require 'json'
 class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   test "simple template rendering" do
     assert_equal "<foo>some value<foo>",
-      render("<foo><%= bar %><foo>", { bar: 'some value' })
+      render("<foo><%= bar %><foo>", locals: { bar: 'some value' })
   end
 
   test "html_safe interpolation" do
     assert_equal "<foo><bar /><foo>",
-      render("<foo><%= bar %><foo>", { bar: '<bar />'.html_safe })
+      render("<foo><%= bar %><foo>", locals: { bar: '<bar />'.html_safe })
   end
 
   test "non html_safe interpolation" do
     assert_equal "<foo>&lt;bar /&gt;<foo>",
-      render("<foo><%= bar %><foo>", { bar: '<bar />' })
+      render("<foo><%= bar %><foo>", locals: { bar: '<bar />' })
   end
 
   test "interpolate non-html_safe inside attribute is escaped" do
     assert_equal "<a href=\" &#39;&quot;&gt;x \">",
-      render("<a href=\"<%= value %>\">", { value: ' \'">x ' })
+      render("<a href=\"<%= value %>\">", locals: { value: ' \'">x ' })
   end
 
   test "interpolate html_safe inside attribute is magically force-escaped" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<a href=\"<%= value %>\">", { value: ' \'">x '.html_safe })
+      render("<a href=\"<%= value %>\">", locals: { value: ' \'">x '.html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a quoted attribute value. The value cannot contain the character \".", e.message
   end
 
   test "interpolate html_safe inside single quoted attribute" do
-    BetterHtml.config.stubs(:allow_single_quoted_attributes).returns(true)
+    config = build_config(allow_single_quoted_attributes: true)
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<a href=\'<%= value %>\'>", { value: ' \'">x '.html_safe })
+      render("<a href=\'<%= value %>\'>", config: config, locals: { value: ' \'">x '.html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a quoted attribute value. The value cannot contain the character '.", e.message
@@ -43,12 +43,12 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in attribute name" do
     assert_equal "<a data-safe-foo>",
-      render("<a data-<%= value %>-foo>", { value: "safe" })
+      render("<a data-<%= value %>-foo>", locals: { value: "safe" })
   end
 
   test "interpolate in attribute name with unsafe value with spaces" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<a data-<%= value %>-foo>", { value: "un safe" })
+      render("<a data-<%= value %>-foo>", locals: { value: "un safe" })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a attribute name around 'data-<%= value %>'.", e.message
@@ -56,7 +56,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in attribute name with unsafe value with equal sign" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<a data-<%= value %>-foo>", { value: "un=safe" })
+      render("<a data-<%= value %>-foo>", locals: { value: "un=safe" })
     end
     assert_equal "Detected invalid characters as part of the "\
       "interpolation into a attribute name around 'data-<%= value %>'.", e.message
@@ -64,7 +64,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in attribute name with unsafe value with quote" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<a data-<%= value %>-foo>", { value: "un\"safe" })
+      render("<a data-<%= value %>-foo>", locals: { value: "un\"safe" })
     end
     assert_equal "Detected invalid characters as part of the "\
       "interpolation into a attribute name around 'data-<%= value %>'.", e.message
@@ -76,9 +76,9 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "interpolate after an attribute name with equal sign" do
-    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(true)
+    config = build_config(allow_unquoted_attributes: true)
     e = assert_raises(BetterHtml::DontInterpolateHere) do
-      render("<a data-foo= <%= html_attributes(foo: 'bar') %>>")
+      render("<a data-foo= <%= html_attributes(foo: 'bar') %>>", config: config)
     end
     assert_equal "Do not interpolate without quotes after "\
       "attribute around 'data-foo=<%= html_attributes(foo: 'bar') %>'.", e.message
@@ -94,18 +94,18 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "interpolate in attribute without quotes" do
-    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(true)
+    config = build_config(allow_unquoted_attributes: true)
     e = assert_raises(BetterHtml::DontInterpolateHere) do
-      render("<a href=<%= value %>>", { value: "un safe" })
+      render("<a href=<%= value %>>", config: config, locals: { value: "un safe" })
     end
     assert_equal "Do not interpolate without quotes after "\
       "attribute around 'href=<%= value %>'.", e.message
   end
 
   test "interpolate in attribute after value" do
-    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(true)
+    config = build_config(allow_unquoted_attributes: true)
     e = assert_raises(BetterHtml::DontInterpolateHere) do
-      render("<a href=something<%= value %>>", { value: "" })
+      render("<a href=something<%= value %>>", config: config, locals: { value: "" })
     end
     assert_equal "Do not interpolate without quotes around this "\
       "attribute value. Instead of <a href=something<%= value %>> "\
@@ -114,12 +114,12 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in tag name" do
     assert_equal "<tag-safe-foo>",
-      render("<tag-<%= value %>-foo>", { value: "safe" })
+      render("<tag-<%= value %>-foo>", locals: { value: "safe" })
   end
 
   test "interpolate in tag name with space" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<tag-<%= value %>-foo>", { value: "un safe" })
+      render("<tag-<%= value %>-foo>", locals: { value: "un safe" })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a tag name around: <tag-<%= value %>>.", e.message
@@ -127,7 +127,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in tag name with slash" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<tag-<%= value %>-foo>", { value: "un/safe" })
+      render("<tag-<%= value %>-foo>", locals: { value: "un/safe" })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a tag name around: <tag-<%= value %>>.", e.message
@@ -135,7 +135,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in tag name with end of tag" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<tag-<%= value %>-foo>", { value: "><script>" })
+      render("<tag-<%= value %>-foo>", locals: { value: "><script>" })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a tag name around: <tag-<%= value %>>.", e.message
@@ -143,12 +143,12 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in comment" do
     assert_equal "<!-- safe -->",
-      render("<!-- <%= value %> -->", { value: "safe" })
+      render("<!-- <%= value %> -->", locals: { value: "safe" })
   end
 
   test "interpolate in comment with end-of-comment" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<!-- <%= value %> -->", { value: "-->".html_safe })
+      render("<!-- <%= value %> -->", locals: { value: "-->".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a html comment around: <!-- <%= value %>.", e.message
@@ -156,18 +156,18 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "non html_safe interpolation into comment tag" do
     assert_equal "<!-- --&gt; -->",
-      render("<!-- <%= value %> -->", value: '-->')
+      render("<!-- <%= value %> -->", locals: { value: '-->' })
   end
 
   test "interpolate in script tag" do
     assert_equal "<script> foo safe bar<script>",
-      render("<script> foo <%= value %> bar<script>", { value: "safe" })
+      render("<script> foo <%= value %> bar<script>", locals: { value: "safe" })
   end
 
   test "interpolate in script tag with start of comment" do
     skip "skip for now; causing problems"
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<script> foo <%= value %> bar<script>", { value: "<!--".html_safe })
+      render("<script> foo <%= value %> bar<script>", locals: { value: "<!--".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a script tag around: <script> foo <%= value %>. "\
@@ -176,7 +176,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in script tag with start of script" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<script> foo <%= value %> bar<script>", { value: "<script".html_safe })
+      render("<script> foo <%= value %> bar<script>", locals: { value: "<script".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a script tag around: <script> foo <%= value %>. "\
@@ -185,12 +185,12 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in script tag with raw interpolation" do
     assert_equal "<script> x = \"foo\" </script>",
-      render("<script> x = <%== value %> </script>", { value: JSON.dump("foo") })
+      render("<script> x = <%== value %> </script>", locals: { value: JSON.dump("foo") })
   end
 
   test "interpolate in script tag with start of script case insensitive" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<script> foo <%= value %> bar<script>", { value: "<ScRIpT".html_safe })
+      render("<script> foo <%= value %> bar<script>", locals: { value: "<ScRIpT".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a script tag around: <script> foo <%= value %>. "\
@@ -199,7 +199,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "interpolate in script tag with end of script" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<script> foo <%= value %> bar<script>", { value: "</script".html_safe })
+      render("<script> foo <%= value %> bar<script>", locals: { value: "</script".html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a script tag around: <script> foo <%= value %>. "\
@@ -221,17 +221,17 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "non html_safe interpolation into rawtext tag" do
     assert_equal "<title>&lt;/title&gt;</title>",
-      render("<title><%= value %></title>", value: '</title>')
+      render("<title><%= value %></title>", locals: { value: '</title>' })
   end
 
   test "html_safe interpolation into rawtext tag" do
     assert_equal "<title><safe></title>",
-      render("<title><%= value %></title>", value: '<safe>'.html_safe)
+      render("<title><%= value %></title>", locals: { value: '<safe>'.html_safe })
   end
 
   test "html_safe interpolation terminating the current tag" do
     e = assert_raises(BetterHtml::UnsafeHtmlError) do
-      render("<title><%= value %></title>", value: '</title>'.html_safe)
+      render("<title><%= value %></title>", locals: { value: '</title>'.html_safe })
     end
     assert_equal "Detected invalid characters as part of the interpolation "\
       "into a title tag around: <title><%= value %>.", e.message
@@ -273,7 +273,7 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
 
   test "can interpolate method calls without parenthesis" do
     assert_equal "<div>foo</div>",
-      render("<div><%= send 'value' %></div>", value: 'foo')
+      render("<div><%= send 'value' %></div>", locals: { value: 'foo' })
   end
 
   test "tag names are validated against tag_name_pattern regexp" do
@@ -290,16 +290,16 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     e = assert_raises(BetterHtml::HtmlError) do
       render("<foo bar_baz=\"1\">")
     end
-    assert_equal "Invalid attribute name \"bar_baz\" does not match regular expression #{BetterHtml.config.partial_attribute_name_pattern.inspect}\n"\
+    assert_equal "Invalid attribute name \"bar_baz\" does not match regular expression #{build_config.partial_attribute_name_pattern.inspect}\n"\
       "On line 1 column 5:\n"\
       "<foo bar_baz=\"1\">\n"\
       "     ^^^^^^^", e.message
   end
 
   test "single quotes are disallowed when allow_single_quoted_attributes=false" do
-    BetterHtml.config.stubs(:allow_single_quoted_attributes).returns(false)
+    config = build_config(allow_single_quoted_attributes: false)
     e = assert_raises(BetterHtml::HtmlError) do
-      render("<foo bar='1'>")
+      render("<foo bar='1'>", config: config)
     end
     assert_equal "Single-quoted attributes are not allowed\n"\
       "On line 1 column 9:\n"\
@@ -308,16 +308,16 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "single quotes are allowed when allow_single_quoted_attributes=true" do
-    BetterHtml.config.stubs(:allow_single_quoted_attributes).returns(true)
+    config = build_config(allow_single_quoted_attributes: true)
     assert_nothing_raised do
-      render("<foo bar='1'>")
+      render("<foo bar='1'>", config: config)
     end
   end
 
   test "unquoted values are disallowed when allow_unquoted_attributes=false" do
-    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(false)
+    config = build_config(allow_unquoted_attributes: false)
     e = assert_raises(BetterHtml::HtmlError) do
-      render("<foo bar=1>")
+      render("<foo bar=1>", config: config)
     end
     assert_equal "Unquoted attribute values are not allowed\n"\
       "On line 1 column 9:\n"\
@@ -326,9 +326,9 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
   end
 
   test "unquoted values are allowed when allow_unquoted_attributes=true" do
-    BetterHtml.config.stubs(:allow_unquoted_attributes).returns(true)
+    config = build_config(allow_unquoted_attributes: true)
     assert_nothing_raised do
-      render("<foo bar=1>")
+      render("<foo bar=1>", config: config)
     end
   end
 
@@ -382,9 +382,13 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     end
   end
 
-  def render(source, locals={})
+  def build_config(**options)
+    BetterHtml::Config.new(**options)
+  end
+
+  def render(source, config: build_config, locals: {})
     context = ViewContext.new(locals)
-    impl = compile(source)
+    impl = compile(source, config: config)
     if ActionView.version < Gem::Version.new("5.1")
       impl.result(context.get_binding)
     else
@@ -392,11 +396,11 @@ class BetterHtml::BetterErb::ImplementationTest < ActiveSupport::TestCase
     end
   end
 
-  def compile(source)
+  def compile(source, config: build_config)
     if ActionView.version < Gem::Version.new("5.1")
-      BetterHtml::BetterErb::ErubisImplementation.new(source)
+      BetterHtml::BetterErb::ErubisImplementation.new(source, config: config)
     else
-      BetterHtml::BetterErb::ErubiImplementation.new(source)
+      BetterHtml::BetterErb::ErubiImplementation.new(source, config: config)
     end
   end
 end

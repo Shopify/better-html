@@ -3,9 +3,10 @@ require 'action_view'
 
 class BetterHtml::BetterErb
   module RuntimeChecks
-    def initialize(*)
+    def initialize(erb, config: BetterHtml.config, **options)
       @parser = HtmlTokenizer::Parser.new
-      super
+      @config = config
+      super(erb, **options)
     end
 
     def validate!
@@ -112,26 +113,26 @@ class BetterHtml::BetterErb
     def check_tag_name(type, start, stop, line, column)
       text = @parser.extract(start, stop)
       return if text.upcase == "!DOCTYPE"
-      return if BetterHtml.config.partial_tag_name_pattern === text
+      return if @config.partial_tag_name_pattern === text
 
       s = "Invalid tag name #{text.inspect} does not match "\
-        "regular expression #{BetterHtml.config.partial_tag_name_pattern.inspect}\n"
+        "regular expression #{@config.partial_tag_name_pattern.inspect}\n"
       s << build_location(line, column, text.size)
       raise BetterHtml::HtmlError, s
     end
 
     def check_attribute_name(type, start, stop, line, column)
       text = @parser.extract(start, stop)
-      return if BetterHtml.config.partial_attribute_name_pattern === text
+      return if @config.partial_attribute_name_pattern === text
 
       s = "Invalid attribute name #{text.inspect} does not match "\
-        "regular expression #{BetterHtml.config.partial_attribute_name_pattern.inspect}\n"
+        "regular expression #{@config.partial_attribute_name_pattern.inspect}\n"
       s << build_location(line, column, text.size)
       raise BetterHtml::HtmlError, s
     end
 
     def check_quoted_value(type, start, stop, line, column)
-      return if BetterHtml.config.allow_single_quoted_attributes
+      return if @config.allow_single_quoted_attributes
       text = @parser.extract(start, stop)
       return if text == '"'
 
@@ -141,7 +142,7 @@ class BetterHtml::BetterErb
     end
 
     def check_unquoted_value(type, start, stop, line, column)
-      return if BetterHtml.config.allow_unquoted_attributes
+      return if @config.allow_unquoted_attributes
       s = "Unquoted attribute values are not allowed\n"
       s << build_location(line, column, stop-start)
       raise BetterHtml::HtmlError, s

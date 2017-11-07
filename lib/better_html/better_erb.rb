@@ -52,7 +52,7 @@ class BetterHtml::BetterErb
       # Always make sure we return a String in the default_internal
       erb.encode!
 
-      excluded_template = !!BetterHtml::Config.template_exclusion_filter_block&.call(template.identifier)
+      excluded_template = !!BetterHtml.config.template_exclusion_filter_block&.call(template.identifier)
       klass = BetterHtml::BetterErb.content_types[exts] unless excluded_template
       klass ||= self.class.erb_implementation
 
