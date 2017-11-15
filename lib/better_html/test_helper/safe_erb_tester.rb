@@ -140,6 +140,7 @@ EOF
           text.content_parts.each do |text_token|
             case text_token.type
             when :stmt, :expr_literal, :expr_escaped
+              next if text_token.type == :stmt && text_token.code.start_with?('#')
               begin
                 expr = RubyExpr.parse(text_token.code)
                 validate_ruby_helper(text_token, expr)
@@ -275,7 +276,7 @@ EOF
 
         def validate_no_statements(node)
           node.content_parts.each do |token|
-            if token.type == :stmt && !(/\A\s*end/m === token.code)
+            if token.type == :stmt && !(/\A\s*end/m === token.code) && !token.code.start_with?('#')
               add_error(
                 "erb statement not allowed here; did you mean '<%=' ?",
                 location: token.location,
@@ -286,6 +287,7 @@ EOF
 
         def validate_no_javascript_tag(node)
           node.content_parts.each do |token|
+            next if token.type == :stmt && token.code.start_with?('#')
             if [:stmt, :expr_literal, :expr_escaped].include?(token.type)
               expr = begin
                 RubyExpr.parse(token.code)

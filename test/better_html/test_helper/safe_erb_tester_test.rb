@@ -11,6 +11,30 @@ module BetterHtml
         )
       end
 
+      test "multi line erb comments in text" do
+        errors = parse(<<-EOF).errors
+          text
+          <%#
+             this is a nice comment
+             !@\#{$%?&*()}
+          %>
+        EOF
+
+        assert_predicate errors, :empty?
+      end
+
+      test "multi line erb comments in html attribute" do
+        errors = parse(<<-EOF).errors
+          <div title="
+            <%#
+               this is a comment right in the middle of an attribute for some reason
+            %>
+            ">
+        EOF
+
+        assert_predicate errors, :empty?
+      end
+
       test "string without interpolation is safe" do
         errors = parse(<<-EOF).errors
           <a onclick="alert('<%= "something" %>')">
@@ -267,6 +291,16 @@ module BetterHtml
         assert_equal 1, errors.size
         assert_equal "<% if foo %>", errors.first.location.source
         assert_equal "erb statement not allowed here; did you mean '<%=' ?", errors.first.message
+      end
+
+      test "erb comments allowed in scripts" do
+        errors = parse(<<-EOF).errors
+          <script type="text/javascript">
+            <%# comment %>
+          </script>
+        EOF
+
+        assert_predicate errors, :empty?
       end
 
       test "script tag without content" do
