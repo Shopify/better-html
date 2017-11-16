@@ -11,6 +11,17 @@ Add better-html to your Gemfile with its dependency:
 gem "better_html"
 ```
 
+### Helpers
+
+If you want to use `html_attributes` helper as described further down, add it to your `app/helpers/application_helper.rb`,
+
+```ruby
+module ApplicationHelper
+  include BetterHtml::Helpers
+
+  ...
+```
+
 ## Configuration
 
 A global configuration for the app is stored at `BetterHtml.config`. The default
@@ -217,7 +228,7 @@ class ErbImplementationTest < ActiveSupport::TestCase
   Dir[ERB_GLOB].each do |filename|
     test "html errors in #{Pathname.new(filename).relative_path_from(Rails.root)}" do
       data = File.read(filename)
-      BetterHtml::BetterErb::Implementation.new(data).validate!
+      BetterHtml::BetterErb::ErubiImplementation.new(data).validate!
     end
   end
 end
