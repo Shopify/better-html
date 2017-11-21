@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'actionview', '>= 4.0'
   s.add_dependency 'parser', '>= 2.4'
   s.add_dependency 'smart_properties'
-  s.add_dependency 'html_tokenizer'
+  s.add_dependency 'html_tokenizer', '~> 0.0.2'
 
   s.add_development_dependency 'rake', '~> 0'
 end

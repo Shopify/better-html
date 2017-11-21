@@ -60,7 +60,7 @@ module BetterHtml
         end
         @tokens << Token.new(
           type: type,
-          text: @parser.extract(start, stop),
+          text: @parser.document[start...stop],
           location: Location.new(@document, start, stop, line, column),
           **(extra_attributes || {})
         )

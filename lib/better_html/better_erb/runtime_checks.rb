@@ -111,7 +111,7 @@ class BetterHtml::BetterErb
     end
 
     def check_tag_name(type, start, stop, line, column)
-      text = @parser.extract(start, stop)
+      text = @parser.document[start...stop]
       return if text.upcase == "!DOCTYPE"
       return if @config.partial_tag_name_pattern === text
 
@@ -122,7 +122,7 @@ class BetterHtml::BetterErb
     end
 
     def check_attribute_name(type, start, stop, line, column)
-      text = @parser.extract(start, stop)
+      text = @parser.document[start...stop]
       return if @config.partial_attribute_name_pattern === text
 
       s = "Invalid attribute name #{text.inspect} does not match "\
@@ -133,7 +133,7 @@ class BetterHtml::BetterErb
 
     def check_quoted_value(type, start, stop, line, column)
       return if @config.allow_single_quoted_attributes
-      text = @parser.extract(start, stop)
+      text = @parser.document[start...stop]
       return if text == '"'
 
       s = "Single-quoted attributes are not allowed\n"
