@@ -5,7 +5,7 @@ PATH
       actionview (>= 4.0)
       activesupport (>= 4.0)
       erubi (~> 1.4)
-      html_tokenizer
+      html_tokenizer (~> 0.0.2)
       parser (>= 2.4)
       smart_properties
 
@@ -29,7 +29,7 @@ GEM
     coderay (1.1.2)
     concurrent-ruby (1.0.5)
     erubi (1.6.1)
-    html_tokenizer (0.0.1)
+    html_tokenizer (0.0.2)
     i18n (0.8.6)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
