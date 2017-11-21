@@ -15,7 +15,7 @@ module BetterHtml
       end
 
       def add_text(text)
-        add_token(:text, text)
+        add_token(:text, text) if text.present?
         append(text)
       end
 
@@ -34,16 +34,14 @@ module BetterHtml
       private
 
       def add_token(type, text, code = nil)
+        raise ArgumentError, "empty #{type} token" if text.size == 0
         start = @parsed_document.size
-        stop = start + text.size
-        lines = @parsed_document.split("\n", -1)
-        line = lines.empty? ? 1 : lines.size
-        column = lines.empty? ? 0 : lines.last.size
+        stop = start + text.size - 1
         @tokens << Token.new(
           type: type,
           text: text,
           code: code,
-          location: Location.new(@source, start, stop, line, column)
+          location: Location.new(@source, start, stop)
         )
       end
 

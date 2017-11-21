@@ -25,7 +25,7 @@ module BetterHtml
       def add_code(code)
         text = "<%#{code}%>"
         start = @parser.document_length
-        stop = start + text.size
+        stop = start + text.size - 1
         @tokens << Token.new(
           type: :stmt,
           code: code,
@@ -39,7 +39,7 @@ module BetterHtml
       def add_expression(indicator, code)
         text = "<%#{indicator}#{code}%>"
         start = @parser.document_length
-        stop = start + text.size
+        stop = start + text.size - 1
         @tokens << Token.new(
           type: indicator == '=' ? :expr_literal : :expr_escaped,
           code: code,
@@ -61,7 +61,7 @@ module BetterHtml
         @tokens << Token.new(
           type: type,
           text: @parser.document[start...stop],
-          location: Location.new(@document, start, stop, line, column),
+          location: Location.new(@document, start, stop - 1, line, column),
           **(extra_attributes || {})
         )
       end

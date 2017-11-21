@@ -204,7 +204,7 @@ EOF
                 location: NodeIterator::Location.new(
                   @data,
                   parent_token.code_location.start + expr.start,
-                  parent_token.code_location.start + expr.end
+                  parent_token.code_location.start + expr.end - 1
                 )
               )
             elsif call.method == :html_safe
@@ -213,7 +213,7 @@ EOF
                 location: NodeIterator::Location.new(
                   @data,
                   parent_token.code_location.start + expr.start,
-                  parent_token.code_location.start + expr.end
+                  parent_token.code_location.start + expr.end - 1
                 )
               )
             elsif javascript_attribute_name?(attr_name) && !javascript_safe_method?(call.method)
@@ -222,7 +222,7 @@ EOF
                 location: NodeIterator::Location.new(
                   @data,
                   parent_token.code_location.start + expr.start,
-                  parent_token.code_location.start + expr.end
+                  parent_token.code_location.start + expr.end - 1
                 )
               )
             end
