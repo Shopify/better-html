@@ -12,5 +12,17 @@ module BetterHtml
     property :javascript_attribute_names, default: [/\Aon/i]
     property :template_exclusion_filter
     property :lodash_safe_javascript_expression, default: [/\AJSON\.stringify\(/]
+
+    def javascript_attribute_name?(name)
+      javascript_attribute_names.any?{ |other| other === name.to_s }
+    end
+
+    def lodash_safe_javascript_expression?(code)
+      lodash_safe_javascript_expression.any?{ |other| other === code }
+    end
+
+    def javascript_safe_method?(name)
+      javascript_safe_methods.include?(name.to_s)
+    end
   end
 end
