@@ -22,14 +22,14 @@ module BetterHtml
       end
 
       def initialize(ast)
-        raise ArgumentError, "expect first argument to be Parser::AST::Node" unless ast.is_a?(Parser::AST::Node)
+        raise ArgumentError, "expect first argument to be Parser::AST::Node" unless ast.is_a?(::Parser::AST::Node)
         @ast = ast
       end
 
       def self.parse(code)
-        parser = Parser::CurrentRuby.new
+        parser = ::Parser::CurrentRuby.new
         parser.diagnostics.consumer = lambda { |diag| }
-        buf = Parser::Source::Buffer.new('(string)')
+        buf = ::Parser::Source::Buffer.new('(string)')
         buf.source = code.sub(BLOCK_EXPR, '')
         parsed = parser.parse(buf)
         raise ParseError, "error parsing code: #{code.inspect}" unless parsed
@@ -53,7 +53,7 @@ module BetterHtml
 
       def each_child_node(current=@ast, only: nil, range: (0..-1))
         current.children[range].each do |child|
-          if child.is_a?(Parser::AST::Node) && node_match?(child, only)
+          if child.is_a?(::Parser::AST::Node) && node_match?(child, only)
             yield child
           end
         end

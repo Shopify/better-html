@@ -1,7 +1,7 @@
 require 'ostruct'
 
 module BetterHtml
-  class NodeIterator
+  module Tokenizer
     class Token < OpenStruct
     end
   end

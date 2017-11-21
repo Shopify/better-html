@@ -1,8 +1,8 @@
 require_relative 'content_node'
 
 module BetterHtml
-  class NodeIterator
-    class Comment < ContentNode
+  class Parser
+    class CData < ContentNode
     end
   end
 end

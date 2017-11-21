@@ -1,4 +1,5 @@
 require 'better_html/test_helper/safety_error'
+require 'better_html/parser'
 
 module BetterHtml
   module TestHelper
@@ -51,7 +52,7 @@ EOF
           @data = data
           @config = config
           @errors = Errors.new
-          @nodes = BetterHtml::NodeIterator.new(data, template_language: :lodash)
+          @nodes = BetterHtml::Parser.new(data, template_language: :lodash)
           validate!
         end
 
@@ -62,7 +63,7 @@ EOF
         def validate!
           @nodes.each_with_index do |node, index|
             case node
-            when BetterHtml::NodeIterator::Element
+            when BetterHtml::Parser::Element
               validate_element(node)
 
               if node.name == 'script' && !node.closing?
@@ -71,7 +72,7 @@ EOF
                   location: node.name_parts.first.location
                 )
               end
-            when BetterHtml::NodeIterator::CData, BetterHtml::NodeIterator::Comment
+            when BetterHtml::Parser::CData, BetterHtml::Parser::Comment
               validate_no_statements(node)
             end
           end

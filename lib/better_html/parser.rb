@@ -1,14 +1,14 @@
-require_relative 'node_iterator/javascript_erb'
-require_relative 'node_iterator/html_erb'
-require_relative 'node_iterator/html_lodash'
-require_relative 'node_iterator/cdata'
-require_relative 'node_iterator/comment'
-require_relative 'node_iterator/element'
-require_relative 'node_iterator/attribute'
-require_relative 'node_iterator/text'
+require_relative 'tokenizer/javascript_erb'
+require_relative 'tokenizer/html_erb'
+require_relative 'tokenizer/html_lodash'
+require_relative 'parser/cdata'
+require_relative 'parser/comment'
+require_relative 'parser/element'
+require_relative 'parser/attribute'
+require_relative 'parser/text'
 
 module BetterHtml
-  class NodeIterator
+  class Parser
     attr_reader :nodes, :template_language
 
     delegate :each, :each_with_index, :[], to: :nodes
@@ -20,11 +20,11 @@ module BetterHtml
       @template_language = template_language
       @erb = case template_language
       when :html
-        HtmlErb.new(@document)
+        BetterHtml::Tokenizer::HtmlErb.new(@document)
       when :lodash
-        HtmlLodash.new(@document)
+        BetterHtml::Tokenizer::HtmlLodash.new(@document)
       when :javascript
-        JavascriptErb.new(@document)
+        BetterHtml::Tokenizer::JavascriptErb.new(@document)
       else
         raise ArgumentError, "template_language can be :html or :javascript"
       end

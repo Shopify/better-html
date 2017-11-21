@@ -3,7 +3,7 @@ require_relative 'token'
 require_relative 'location'
 
 module BetterHtml
-  class NodeIterator
+  module Tokenizer
     class JavascriptErb < ::Erubi::Engine
       attr_reader :tokens
 

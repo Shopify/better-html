@@ -1,5 +1,5 @@
 module BetterHtml
-  class NodeIterator
+  class Parser
     class Base
       def self.tokenized_attribute(name)
         class_eval <<~RUBY

@@ -1,5 +1,6 @@
 require 'better_html/test_helper/ruby_expr'
 require 'better_html/test_helper/safety_error'
+require 'better_html/parser'
 require 'parser/current'
 
 module BetterHtml
@@ -58,7 +59,7 @@ EOF
           @errors = Errors.new
           @options = options.present? ? options.dup : {}
           @options[:template_language] ||= :html
-          @nodes = BetterHtml::NodeIterator.new(data, @options.slice(:template_language))
+          @nodes = BetterHtml::Parser.new(data, @options.slice(:template_language))
           validate!
         end
 
@@ -69,12 +70,12 @@ EOF
         def validate!
           @nodes.each_with_index do |node, index|
             case node
-            when BetterHtml::NodeIterator::Element
+            when BetterHtml::Parser::Element
               validate_element(node)
 
               if node.name == 'script'
                 next_node = @nodes[index + 1]
-                if next_node.is_a?(BetterHtml::NodeIterator::ContentNode) && !node.closing?
+                if next_node.is_a?(BetterHtml::Parser::ContentNode) && !node.closing?
                   if javascript_tag_type?(node, "text/javascript")
                     validate_script_tag_content(next_node)
                   end
@@ -83,7 +84,7 @@ EOF
 
                 validate_javascript_tag_type(node) unless node.closing?
               end
-            when BetterHtml::NodeIterator::Text
+            when BetterHtml::Parser::Text
               validate_text_content(node)
 
               if @nodes.template_language == :javascript
@@ -92,7 +93,7 @@ EOF
               else
                 validate_no_javascript_tag(node)
               end
-            when BetterHtml::NodeIterator::CData, BetterHtml::NodeIterator::Comment
+            when BetterHtml::Parser::CData, BetterHtml::Parser::Comment
               validate_no_statements(node)
             end
           end
@@ -188,7 +189,7 @@ EOF
           if @config.javascript_attribute_name?(attr_name) && expr.calls.empty?
             add_error(
               "erb interpolation in javascript attribute must call '(...).to_json'",
-              location: NodeIterator::Location.new(
+              location: Tokenizer::Location.new(
                 @data,
                 parent_token.code_location.start + expr.start,
                 parent_token.code_location.start + expr.end
@@ -201,7 +202,7 @@ EOF
             if call.method == :raw
               add_error(
                 "erb interpolation with '<%= raw(...) %>' inside html attribute is never safe",
-                location: NodeIterator::Location.new(
+                location: Tokenizer::Location.new(
                   @data,
                   parent_token.code_location.start + expr.start,
                   parent_token.code_location.start + expr.end - 1
@@ -210,7 +211,7 @@ EOF
             elsif call.method == :html_safe
               add_error(
                 "erb interpolation with '<%= (...).html_safe %>' inside html attribute is never safe",
-                location: NodeIterator::Location.new(
+                location: Tokenizer::Location.new(
                   @data,
                   parent_token.code_location.start + expr.start,
                   parent_token.code_location.start + expr.end - 1
@@ -219,7 +220,7 @@ EOF
             elsif @config.javascript_attribute_name?(attr_name) && !@config.javascript_safe_method?(call.method)
               add_error(
                 "erb interpolation in javascript attribute must call '(...).to_json'",
-                location: NodeIterator::Location.new(
+                location: Tokenizer::Location.new(
                   @data,
                   parent_token.code_location.start + expr.start,
                   parent_token.code_location.start + expr.end - 1

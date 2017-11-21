@@ -1,10 +1,11 @@
 require 'test_helper'
+require 'better_html/tokenizer/html_lodash'
 
 module BetterHtml
-  class NodeIterator
+  module Tokenizer
     class HtmlLodashTest < ActiveSupport::TestCase
       test "matches text" do
-        scanner = BetterHtml::NodeIterator::HtmlLodash.new("just some text")
+        scanner = HtmlLodash.new("just some text")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
         assert_equal :text, token.type
@@ -17,7 +18,7 @@ module BetterHtml
       end
 
       test "matches strings to be escaped" do
-        scanner = BetterHtml::NodeIterator::HtmlLodash.new("[%= foo %]")
+        scanner = HtmlLodash.new("[%= foo %]")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
         assert_equal :expr_literal, token.type
@@ -30,7 +31,7 @@ module BetterHtml
       end
 
       test "matches interpolate" do
-        scanner = BetterHtml::NodeIterator::HtmlLodash.new("[%! foo %]")
+        scanner = HtmlLodash.new("[%! foo %]")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
         assert_equal :expr_escaped, token.type
@@ -43,7 +44,7 @@ module BetterHtml
       end
 
       test "matches statement" do
-        scanner = BetterHtml::NodeIterator::HtmlLodash.new("[% foo %]")
+        scanner = HtmlLodash.new("[% foo %]")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
         assert_equal :stmt, token.type
@@ -56,7 +57,7 @@ module BetterHtml
       end
 
       test "matches text before and after" do
-        scanner = BetterHtml::NodeIterator::HtmlLodash.new("before\n[%= foo %]\nafter")
+        scanner = HtmlLodash.new("before\n[%= foo %]\nafter")
         assert_equal 3, scanner.tokens.size
 
         token = scanner.tokens[0]
@@ -88,7 +89,7 @@ module BetterHtml
       end
 
       test "matches multiple" do
-        scanner = BetterHtml::NodeIterator::HtmlLodash.new("[% if() { %][%= foo %][% } %]")
+        scanner = HtmlLodash.new("[% if() { %][%= foo %][% } %]")
         assert_equal 3, scanner.tokens.size
 
         token = scanner.tokens[0]
@@ -120,7 +121,7 @@ module BetterHtml
       end
 
       test "parses out html correctly" do
-        scanner = BetterHtml::NodeIterator::HtmlLodash.new('<div class="[%= foo %]">')
+        scanner = HtmlLodash.new('<div class="[%= foo %]">')
         assert_equal 9, scanner.tokens.size
         assert_equal [:tag_start, :tag_name, :whitespace, :attribute_name,
           :equal, :attribute_quoted_value_start, :expr_literal,

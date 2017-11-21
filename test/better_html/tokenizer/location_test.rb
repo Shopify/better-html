@@ -1,8 +1,8 @@
 require 'test_helper'
-require 'better_html/test_helper/safe_erb_tester'
+require 'better_html/tokenizer/location'
 
 module BetterHtml
-  class NodeIterator
+  module Tokenizer
     class LocationTest < ActiveSupport::TestCase
       test "location start out of bounds" do
         e = assert_raises(ArgumentError) do
