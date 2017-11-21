@@ -40,35 +40,36 @@ module BetterHtml
       end
 
       def add_erb_tokens(ltrim, indicator, code, rtrim)
-        type = case indicator
-        when nil
-          :stmt
-        when '#'
-          :comment
-        when '='
-          :expr_literal
-        when '=='
-          :expr_escaped
-        else
-          raise ArgumentError
+        pos = current_position
+
+        token = add_token(:erb_begin, pos, pos + 2)
+        pos += 2
+
+        if ltrim
+          token = add_token(:trim, pos, pos + ltrim.length)
+          pos += ltrim.length
         end
 
-        start = current_position
-        code_start = start + 2 + (ltrim&.length || 0) + (indicator&.length || 0)
-        code_stop = code_start + code.length
-        stop = code_stop + (rtrim&.length || 0) + 2
+        if indicator
+          token = add_token(:indicator, pos, pos + indicator.length)
+          pos += indicator.length
+        end
 
-        add_token(
-          type, start, stop, nil, nil,
-          code_location: Location.new(@document, code_start, code_stop - 1)
-        )
+        token = add_token(:code, pos, pos + code.length)
+        pos += code.length
+
+        if rtrim
+          token = add_token(:trim, pos, pos + rtrim.length)
+          pos += rtrim.length
+        end
+
+        token = add_token(:erb_end, pos, pos + 2)
       end
 
-      def add_token(type, start, stop, line = nil, column = nil, **extra_attributes)
+      def add_token(type, start, stop, line = nil, column = nil)
         token = Token.new(
           type: type,
-          location: Location.new(@document, start, stop - 1, line, column),
-          **extra_attributes
+          loc: Location.new(@document, start, stop - 1, line, column)
         )
         @tokens << token
         token

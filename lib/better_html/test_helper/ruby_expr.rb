@@ -28,7 +28,10 @@ module BetterHtml
 
       def self.parse(code)
         parser = ::Parser::CurrentRuby.new
-        parser.diagnostics.consumer = lambda { |diag| }
+        parser.diagnostics.ignore_warnings = true
+        parser.diagnostics.all_errors_are_fatal = false
+        parser.diagnostics.consumer = nil
+
         buf = ::Parser::Source::Buffer.new('(string)')
         buf.source = code.sub(BLOCK_EXPR, '')
         parsed = parser.parse(buf)

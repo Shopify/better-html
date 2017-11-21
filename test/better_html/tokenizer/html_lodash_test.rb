@@ -7,126 +7,91 @@ module BetterHtml
       test "matches text" do
         scanner = HtmlLodash.new("just some text")
         assert_equal 1, scanner.tokens.size
-        token = scanner.tokens[0]
-        assert_equal :text, token.type
-        assert_equal "just some text", token.text
-        assert_nil token.code
-        assert_equal 0, token.location.start
-        assert_equal 13, token.location.stop
-        assert_equal 1, token.location.line
-        assert_equal 0, token.location.column
+
+        assert_attributes ({ type: :text, loc: { start: 0, stop: 13, source: "just some text" } }), scanner.tokens[0]
       end
 
       test "matches strings to be escaped" do
         scanner = HtmlLodash.new("[%= foo %]")
-        assert_equal 1, scanner.tokens.size
-        token = scanner.tokens[0]
-        assert_equal :expr_literal, token.type
-        assert_equal "[%= foo %]", token.text
-        assert_equal " foo ", token.code
-        assert_equal 0, token.location.start
-        assert_equal 9, token.location.stop
-        assert_equal 1, token.location.line
-        assert_equal 0, token.location.column
+        assert_equal 4, scanner.tokens.size
+
+        assert_attributes ({ type: :lodash_begin, loc: { start: 0, stop: 1, source: "[%" } }), scanner.tokens[0]
+        assert_attributes ({ type: :indicator, loc: { start: 2, stop: 2, source: "=" } }), scanner.tokens[1]
+        assert_attributes ({ type: :code, loc: { start: 3, stop: 7, source: " foo " } }), scanner.tokens[2]
+        assert_attributes ({ type: :lodash_end, loc: { start: 8, stop: 9, source: "%]" } }), scanner.tokens[3]
       end
 
       test "matches interpolate" do
         scanner = HtmlLodash.new("[%! foo %]")
-        assert_equal 1, scanner.tokens.size
-        token = scanner.tokens[0]
-        assert_equal :expr_escaped, token.type
-        assert_equal "[%! foo %]", token.text
-        assert_equal " foo ", token.code
-        assert_equal 0, token.location.start
-        assert_equal 9, token.location.stop
-        assert_equal 1, token.location.line
-        assert_equal 0, token.location.column
+        assert_equal 4, scanner.tokens.size
+
+        assert_attributes ({ type: :lodash_begin, loc: { start: 0, stop: 1, source: "[%" } }), scanner.tokens[0]
+        assert_attributes ({ type: :indicator, loc: { start: 2, stop: 2, source: "!" } }), scanner.tokens[1]
+        assert_attributes ({ type: :code, loc: { start: 3, stop: 7, source: " foo " } }), scanner.tokens[2]
+        assert_attributes ({ type: :lodash_end, loc: { start: 8, stop: 9, source: "%]" } }), scanner.tokens[3]
       end
 
       test "matches statement" do
         scanner = HtmlLodash.new("[% foo %]")
-        assert_equal 1, scanner.tokens.size
-        token = scanner.tokens[0]
-        assert_equal :stmt, token.type
-        assert_equal "[% foo %]", token.text
-        assert_equal " foo ", token.code
-        assert_equal 0, token.location.start
-        assert_equal 8, token.location.stop
-        assert_equal 1, token.location.line
-        assert_equal 0, token.location.column
+        assert_equal 3, scanner.tokens.size
+
+        assert_attributes ({ type: :lodash_begin, loc: { start: 0, stop: 1, source: "[%" } }), scanner.tokens[0]
+        assert_attributes ({ type: :code, loc: { start: 2, stop: 6, source: " foo " } }), scanner.tokens[1]
+        assert_attributes ({ type: :lodash_end, loc: { start: 7, stop: 8, source: "%]" } }), scanner.tokens[2]
       end
 
       test "matches text before and after" do
         scanner = HtmlLodash.new("before\n[%= foo %]\nafter")
-        assert_equal 3, scanner.tokens.size
+        assert_equal 6, scanner.tokens.size
 
-        token = scanner.tokens[0]
-        assert_equal :text, token.type
-        assert_equal "before\n", token.text
-        assert_nil token.code
-        assert_equal 0, token.location.start
-        assert_equal 6, token.location.stop
-        assert_equal 1, token.location.line
-        assert_equal 0, token.location.column
-
-        token = scanner.tokens[1]
-        assert_equal :expr_literal, token.type
-        assert_equal "[%= foo %]", token.text
-        assert_equal " foo ", token.code
-        assert_equal 7, token.location.start
-        assert_equal 16, token.location.stop
-        assert_equal 2, token.location.line
-        assert_equal 0, token.location.column
-
-        token = scanner.tokens[2]
-        assert_equal :text, token.type
-        assert_equal "\nafter", token.text
-        assert_nil token.code
-        assert_equal 17, token.location.start
-        assert_equal 22, token.location.stop
-        assert_equal 2, token.location.line
-        assert_equal 10, token.location.column
+        assert_attributes ({ type: :text, loc: { start: 0, stop: 6, source: "before\n" } }), scanner.tokens[0]
+        assert_attributes ({ type: :lodash_begin, loc: { start: 7, stop: 8, source: "[%" } }), scanner.tokens[1]
+        assert_attributes ({ type: :indicator, loc: { start: 9, stop: 9, source: "=" } }), scanner.tokens[2]
+        assert_attributes ({ type: :code, loc: { start: 10, stop: 14, source: " foo " } }), scanner.tokens[3]
+        assert_attributes ({ type: :lodash_end, loc: { start: 15, stop: 16, source: "%]" } }), scanner.tokens[4]
+        assert_attributes ({ type: :text, loc: { start: 17, stop: 22, source: "\nafter" } }), scanner.tokens[5]
       end
 
       test "matches multiple" do
         scanner = HtmlLodash.new("[% if() { %][%= foo %][% } %]")
-        assert_equal 3, scanner.tokens.size
+        assert_equal 10, scanner.tokens.size
 
-        token = scanner.tokens[0]
-        assert_equal :stmt, token.type
-        assert_equal "[% if() { %]", token.text
-        assert_equal " if() { ", token.code
-        assert_equal 0, token.location.start
-        assert_equal 11, token.location.stop
-        assert_equal 1, token.location.line
-        assert_equal 0, token.location.column
+        assert_attributes ({ type: :lodash_begin, loc: { source: "[%" } }), scanner.tokens[0]
+        assert_attributes ({ type: :code, loc: { source: " if() { " } }), scanner.tokens[1]
+        assert_attributes ({ type: :lodash_end, loc: { source: "%]" } }), scanner.tokens[2]
 
-        token = scanner.tokens[1]
-        assert_equal :expr_literal, token.type
-        assert_equal "[%= foo %]", token.text
-        assert_equal " foo ", token.code
-        assert_equal 12, token.location.start
-        assert_equal 21, token.location.stop
-        assert_equal 1, token.location.line
-        assert_equal 12, token.location.column
+        assert_attributes ({ type: :lodash_begin, loc: { source: "[%" } }), scanner.tokens[3]
+        assert_attributes ({ type: :indicator, loc: { source: "=" } }), scanner.tokens[4]
+        assert_attributes ({ type: :code, loc: { source: " foo " } }), scanner.tokens[5]
+        assert_attributes ({ type: :lodash_end, loc: { source: "%]" } }), scanner.tokens[6]
 
-        token = scanner.tokens[2]
-        assert_equal :stmt, token.type
-        assert_equal "[% } %]", token.text
-        assert_equal " } ", token.code
-        assert_equal 22, token.location.start
-        assert_equal 28, token.location.stop
-        assert_equal 1, token.location.line
-        assert_equal 22, token.location.column
+        assert_attributes ({ type: :lodash_begin, loc: { source: "[%" } }), scanner.tokens[7]
+        assert_attributes ({ type: :code, loc: { source: " } " } }), scanner.tokens[8]
+        assert_attributes ({ type: :lodash_end, loc: { source: "%]" } }), scanner.tokens[9]
       end
 
       test "parses out html correctly" do
         scanner = HtmlLodash.new('<div class="[%= foo %]">')
-        assert_equal 9, scanner.tokens.size
+        assert_equal 12, scanner.tokens.size
         assert_equal [:tag_start, :tag_name, :whitespace, :attribute_name,
-          :equal, :attribute_quoted_value_start, :expr_literal,
+          :equal, :attribute_quoted_value_start,
+          :lodash_begin, :indicator, :code, :lodash_end,
           :attribute_quoted_value_end, :tag_end], scanner.tokens.map(&:type)
-        assert_equal ["<", "div", " ", "class", "=", "\"", "[%= foo %]", "\"", ">"], scanner.tokens.map(&:text)
+        assert_equal ["<", "div", " ", "class", "=", "\"", "[%", "=", " foo ", "%]", "\"", ">"], scanner.tokens.map(&:loc).map(&:source)
+      end
+
+      private
+
+      def assert_attributes(attributes, token)
+        attributes.each do |key, value|
+          if value.nil?
+            assert_nil token.send(key)
+          elsif value.is_a?(Hash)
+            assert_attributes(value, token.send(key))
+          else
+            assert_equal value, token.send(key)
+          end
+        end
       end
     end
   end

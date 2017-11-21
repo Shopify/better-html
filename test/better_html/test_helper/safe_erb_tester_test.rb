@@ -288,7 +288,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal 'type', errors.first.location.source
+        assert_equal 'type="text/bogus"', errors.first.location.source
         assert_equal "text/bogus is not a valid type, valid types are text/javascript, text/template, text/html", errors.first.message
       end
 

@@ -1,5 +1,6 @@
 require 'better_html/test_helper/safety_error'
-require 'better_html/parser'
+require 'better_html/ast/iterator'
+require 'better_html/tree/tag'
 
 module BetterHtml
   module TestHelper
@@ -61,14 +62,15 @@ EOF
         end
 
         def validate!
-          @parser.nodes_with_type(:element).each do |tag_node|
-            tag = Tree::Tag.new(tag_node)
-            validate_tag(tag)
+          @parser.nodes_with_type(:tag).each do |tag_node|
+            tag = Tree::Tag.from_node(tag_node)
+            validate_tag_attributes(tag)
+            validate_no_statements(tag_node)
 
             if tag.name == 'script' && !tag.closing?
               add_error(
                 "No script tags allowed nested in lodash templates",
-                location: tag.loc
+                location: tag_node.loc
               )
             end
           end
@@ -78,30 +80,27 @@ EOF
           end
         end
 
-        def lodash_nodes(array)
+        def lodash_nodes(node)
           Enumerator.new do |yielder|
-            array.each do |token|
-              yielder << token if [:expr_literal, :expr_escaped, :stmt].include?(token.type)
+            next if node.nil?
+            node.descendants(:lodash).each do |lodash_node|
+              indicator_node, code_node = *lodash_node
+              yielder.yield(lodash_node, indicator_node, code_node)
             end
           end
         end
 
-        def validate_tag(tag)
+        def validate_tag_attributes(tag)
           tag.attributes.each do |attribute|
-            lodash_nodes(attribute.node.name_parts).each do |token|
-              add_no_statement_error(token.location) if token.type == :stmt
-            end
+            lodash_nodes(attribute.value_node).each do |lodash_node, indicator_node, code_node|
+              next if indicator_node.nil?
 
-            lodash_nodes(attribute.node.value_parts).each do |lodash_node|
-              case lodash_node.type
-              when :stmt
-                add_no_statement_error(lodash_node.location)
-              when :expr_literal
+              if indicator_node.loc.source == '='
                 validate_tag_expression(attribute, lodash_node)
-              when :expr_escaped
+              elsif indicator_node.loc.source == '!'
                 add_error(
                   "lodash interpolation with '[%!' inside html attribute is never safe",
-                  location: lodash_node.location
+                  location: lodash_node.loc
                 )
               end
             end
@@ -109,19 +108,20 @@ EOF
         end
 
         def validate_tag_expression(attribute, lodash_node)
-          source = lodash_node.code.strip
+          _, code_node = *lodash_node
+          source = code_node.loc.source.strip
           if @config.javascript_attribute_name?(attribute.name) && !@config.lodash_safe_javascript_expression?(source)
             add_error(
               "lodash interpolation in javascript attribute "\
               "`#{attribute.name}` must call `JSON.stringify(#{source})`",
-              location: lodash_node.location
+              location: lodash_node.loc
             )
           end
         end
 
         def validate_no_statements(node)
-          lodash_nodes(node.content_parts).each do |token|
-            add_no_statement_error(token.location) if token.type == :stmt
+          lodash_nodes(node).each do |lodash_node, indicator_node, code_node|
+            add_no_statement_error(lodash_node.loc) if indicator_node.nil?
           end
         end
 
