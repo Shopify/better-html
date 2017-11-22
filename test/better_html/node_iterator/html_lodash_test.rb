@@ -11,7 +11,7 @@ module BetterHtml
         assert_equal "just some text", token.text
         assert_nil token.code
         assert_equal 0, token.location.start
-        assert_equal 14, token.location.stop
+        assert_equal 13, token.location.stop
         assert_equal 1, token.location.line
         assert_equal 0, token.location.column
       end
@@ -24,7 +24,7 @@ module BetterHtml
         assert_equal "[%= foo %]", token.text
         assert_equal " foo ", token.code
         assert_equal 0, token.location.start
-        assert_equal 10, token.location.stop
+        assert_equal 9, token.location.stop
         assert_equal 1, token.location.line
         assert_equal 0, token.location.column
       end
@@ -37,7 +37,7 @@ module BetterHtml
         assert_equal "[%! foo %]", token.text
         assert_equal " foo ", token.code
         assert_equal 0, token.location.start
-        assert_equal 10, token.location.stop
+        assert_equal 9, token.location.stop
         assert_equal 1, token.location.line
         assert_equal 0, token.location.column
       end
@@ -50,7 +50,7 @@ module BetterHtml
         assert_equal "[% foo %]", token.text
         assert_equal " foo ", token.code
         assert_equal 0, token.location.start
-        assert_equal 9, token.location.stop
+        assert_equal 8, token.location.stop
         assert_equal 1, token.location.line
         assert_equal 0, token.location.column
       end
@@ -64,7 +64,7 @@ module BetterHtml
         assert_equal "before\n", token.text
         assert_nil token.code
         assert_equal 0, token.location.start
-        assert_equal 7, token.location.stop
+        assert_equal 6, token.location.stop
         assert_equal 1, token.location.line
         assert_equal 0, token.location.column
 
@@ -73,7 +73,7 @@ module BetterHtml
         assert_equal "[%= foo %]", token.text
         assert_equal " foo ", token.code
         assert_equal 7, token.location.start
-        assert_equal 17, token.location.stop
+        assert_equal 16, token.location.stop
         assert_equal 2, token.location.line
         assert_equal 0, token.location.column
 
@@ -82,7 +82,7 @@ module BetterHtml
         assert_equal "\nafter", token.text
         assert_nil token.code
         assert_equal 17, token.location.start
-        assert_equal 23, token.location.stop
+        assert_equal 22, token.location.stop
         assert_equal 2, token.location.line
         assert_equal 10, token.location.column
       end
@@ -96,7 +96,7 @@ module BetterHtml
         assert_equal "[% if() { %]", token.text
         assert_equal " if() { ", token.code
         assert_equal 0, token.location.start
-        assert_equal 12, token.location.stop
+        assert_equal 11, token.location.stop
         assert_equal 1, token.location.line
         assert_equal 0, token.location.column
 
@@ -105,7 +105,7 @@ module BetterHtml
         assert_equal "[%= foo %]", token.text
         assert_equal " foo ", token.code
         assert_equal 12, token.location.start
-        assert_equal 22, token.location.stop
+        assert_equal 21, token.location.stop
         assert_equal 1, token.location.line
         assert_equal 12, token.location.column
 
@@ -114,7 +114,7 @@ module BetterHtml
         assert_equal "[% } %]", token.text
         assert_equal " } ", token.code
         assert_equal 22, token.location.start
-        assert_equal 29, token.location.stop
+        assert_equal 28, token.location.stop
         assert_equal 1, token.location.line
         assert_equal 22, token.location.column
       end

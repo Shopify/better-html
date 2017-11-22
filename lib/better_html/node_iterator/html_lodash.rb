@@ -61,7 +61,7 @@ module BetterHtml
 
       def add_text(text)
         @parser.parse(text) do |type, start, stop, line, column|
-          add_token(type, @parser.document[start...stop], start: start, stop: stop, line: line, column: column)
+          add_token(type, @parser.document[start...stop], start: start, stop: stop - 1, line: line, column: column)
         end
       end
 
@@ -82,7 +82,7 @@ module BetterHtml
 
       def add_token(type, text, code: nil, start: nil, stop: nil, line: nil, column: nil)
         start ||= @parser.document_length
-        stop ||= start + text.size
+        stop ||= start + text.size - 1
         extra_attributes = if type == :tag_end
           {
             self_closing: @parser.self_closing_tag?

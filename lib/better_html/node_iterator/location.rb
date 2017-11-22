@@ -4,6 +4,10 @@ module BetterHtml
       attr_accessor :start, :stop
 
       def initialize(document, start, stop, line = nil, column = nil)
+        raise ArgumentError, "start location #{start} is out of range for document of size #{document.size}" if start > document.size
+        raise ArgumentError, "stop location #{stop} is out of range for document of size #{document.size}" if stop > document.size
+        raise ArgumentError, "end of range must be greater than start of range (#{stop} < #{start})" if stop < start
+
         @document = document
         @start = start
         @stop = stop
@@ -12,7 +16,7 @@ module BetterHtml
       end
 
       def range
-        Range.new(start, stop-1)
+        Range.new(start, stop)
       end
 
       def source
@@ -31,7 +35,7 @@ module BetterHtml
         line_content = extract_line(line: line)
         spaces = line_content.scan(/\A\s*/).first
         column_without_spaces = [column - spaces.length, 0].max
-        underscore_length = [[stop - start, line_content.length - column_without_spaces].min, 1].max
+        underscore_length = [[stop - start + 1, line_content.length - column_without_spaces].min, 1].max
         "#{line_content.gsub(/\A\s*/, '')}\n#{' ' * column_without_spaces}#{'^' * underscore_length}"
       end
 
