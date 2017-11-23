@@ -100,21 +100,13 @@ EOF
         end
 
         def validate_tag_expression(node, attr_name, value_token)
-          if javascript_attribute_name?(attr_name) && !lodash_safe_javascript_expression?(value_token.code.strip)
+          if @config.javascript_attribute_name?(attr_name) && !@config.lodash_safe_javascript_expression?(value_token.code.strip)
             add_error(
               "lodash interpolation in javascript attribute "\
               "`#{attr_name}` must call `JSON.stringify(#{value_token.code.strip})`",
               location: value_token.location
             )
           end
-        end
-
-        def javascript_attribute_name?(name)
-          @config.javascript_attribute_names.any?{ |other| other === name }
-        end
-
-        def lodash_safe_javascript_expression?(code)
-          @config.lodash_safe_javascript_expression.any?{ |other| other === code }
         end
 
         def validate_no_statements(node)

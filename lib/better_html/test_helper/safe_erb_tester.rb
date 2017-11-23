@@ -185,7 +185,7 @@ EOF
         def validate_tag_expression(parent_token, expr, attr_name)
           return if expr.static_value?
 
-          if javascript_attribute_name?(attr_name) && expr.calls.empty?
+          if @config.javascript_attribute_name?(attr_name) && expr.calls.empty?
             add_error(
               "erb interpolation in javascript attribute must call '(...).to_json'",
               location: NodeIterator::Location.new(
@@ -216,7 +216,7 @@ EOF
                   parent_token.code_location.start + expr.end - 1
                 )
               )
-            elsif javascript_attribute_name?(attr_name) && !javascript_safe_method?(call.method)
+            elsif @config.javascript_attribute_name?(attr_name) && !@config.javascript_safe_method?(call.method)
               add_error(
                 "erb interpolation in javascript attribute must call '(...).to_json'",
                 location: NodeIterator::Location.new(
@@ -227,14 +227,6 @@ EOF
               )
             end
           end
-        end
-
-        def javascript_attribute_name?(name)
-          @config.javascript_attribute_names.any?{ |other| other === name.to_s }
-        end
-
-        def javascript_safe_method?(name)
-          @config.javascript_safe_methods.include?(name.to_s)
         end
 
         def validate_script_tag_content(node)
@@ -265,7 +257,7 @@ EOF
             elsif call.method == :html_safe
               instance_expr = RubyExpr.new(call.instance)
               validate_script_expression(node, token, instance_expr)
-            elsif !javascript_safe_method?(call.method)
+            elsif !@config.javascript_safe_method?(call.method)
               add_error(
                 "erb interpolation in javascript tag must call '(...).to_json'",
                 location: token.location,
