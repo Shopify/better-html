@@ -12,9 +12,9 @@ module BetterHtml
       self.lodash_evaluate = %r{(?:\[\%)(.+?)(?:\%\])}m
       self.lodash_interpolate = %r{(?:\[\%)!(.+?)(?:\%\])}m
 
-      def initialize(source)
-        @source = source
-        @scanner = StringScanner.new(source)
+      def initialize(document)
+        @document = document
+        @scanner = StringScanner.new(document)
         @parser = HtmlTokenizer::Parser.new
         @tokens = []
         scan!
@@ -28,20 +28,21 @@ module BetterHtml
           if scanned.present?
             captures = scan_pattern.match(scanned).captures
             if pre_match = captures[0]
-              add_text(pre_match) unless pre_match.blank?
+              add_text(pre_match) if pre_match.present?
             end
             match = captures[1]
-            if code = lodash_escape.match(match)
-              add_expr_escape(match, code.captures[0])
+            token = if code = lodash_escape.match(match)
+              add_lodash_tokens("=", code.captures[0])
             elsif code = lodash_interpolate.match(match)
-              add_expr_interpolate(match, code.captures[0])
+              add_lodash_tokens("!", code.captures[0])
             elsif code = lodash_evaluate.match(match)
-              add_stmt(match, code.captures[0])
+              add_lodash_tokens(nil, code.captures[0])
             else
               raise RuntimeError, 'unexpected match'
             end
+            @parser.append_placeholder(match)
           else
-            text = @source[(@scanner.pos)..(@source.size)]
+            text = @document[(@scanner.pos)..(@document.size)]
             add_text(text) unless text.blank?
             break
           end
@@ -61,40 +62,46 @@ module BetterHtml
 
       def add_text(text)
         @parser.parse(text) do |type, start, stop, line, column|
-          add_token(type, @parser.document[start...stop], start: start, stop: stop - 1, line: line, column: column)
+          extra_attributes = if type == :tag_end
+            {
+              self_closing: @parser.self_closing_tag?
+            }
+          end
+          add_token(type, start, stop, **(extra_attributes || {}))
         end
       end
 
-      def add_stmt(text, code)
-        add_token(:stmt, text, code: code)
-        @parser.append_placeholder(text)
-      end
-
-      def add_expr_interpolate(text, code)
-        add_token(:expr_escaped, text, code: code)
-        @parser.append_placeholder(text)
-      end
-
-      def add_expr_escape(text, code)
-        add_token(:expr_literal, text, code: code)
-        @parser.append_placeholder(text)
-      end
-
-      def add_token(type, text, code: nil, start: nil, stop: nil, line: nil, column: nil)
-        start ||= @parser.document_length
-        stop ||= start + text.size - 1
-        extra_attributes = if type == :tag_end
-          {
-            self_closing: @parser.self_closing_tag?
-          }
+      def add_lodash_tokens(indicator, code)
+        type = case indicator
+        when nil
+          :stmt
+        when '='
+          :expr_literal
+        when '!'
+          :expr_escaped
+        else
+          raise ArgumentError
         end
-        @tokens << Token.new(
-          type: type,
-          text: text,
-          code: code,
-          location: Location.new(@source, start, stop, line || @parser.line_number, column || @parser.column_number),
-          **(extra_attributes || {})
+
+        start = @parser.document_length
+        code_start = start + 2 + (indicator&.length || 0)
+        code_stop = code_start + code.length
+        stop = code_stop + 2
+
+        add_token(
+          type, start, stop,
+          code_location: Location.new(@document, code_start, code_stop - 1)
         )
+      end
+
+      def add_token(type, start, stop, **extra_attributes)
+        token = Token.new(
+          type: type,
+          location: Location.new(@document, start, stop - 1),
+          **extra_attributes
+        )
+        @tokens << token
+        token
       end
     end
   end
