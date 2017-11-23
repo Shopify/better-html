@@ -1,7 +1,7 @@
 require_relative 'base'
 
 module BetterHtml
-  class NodeIterator
+  class Parser
     class ContentNode < Base
       tokenized_attribute :content
 

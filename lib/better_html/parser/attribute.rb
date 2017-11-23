@@ -1,7 +1,7 @@
 require_relative 'base'
 
 module BetterHtml
-  class NodeIterator
+  class Parser
     class Attribute < Base
       tokenized_attribute :name
       tokenized_attribute :value

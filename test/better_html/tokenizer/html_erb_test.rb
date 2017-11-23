@@ -1,10 +1,11 @@
 require 'test_helper'
+require 'better_html/tokenizer/html_erb'
 
 module BetterHtml
-  class NodeIterator
+  module Tokenizer
     class HtmlErbTest < ActiveSupport::TestCase
       test "text" do
-        scanner = BetterHtml::NodeIterator::HtmlErb.new("just some text")
+        scanner = HtmlErb.new("just some text")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
         assert_attributes ({ type: :text, text: 'just some text', code: nil }), token
@@ -12,7 +13,7 @@ module BetterHtml
       end
 
       test "statement" do
-        scanner = BetterHtml::NodeIterator::HtmlErb.new("<% statement %>")
+        scanner = HtmlErb.new("<% statement %>")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
         assert_attributes ({ type: :stmt, text: '<% statement %>', code: ' statement ' }), token
@@ -21,7 +22,7 @@ module BetterHtml
 
       test "when multi byte characters are present in erb" do
         code = "<% ui_helper 'your store’s' %>"
-        scanner = BetterHtml::NodeIterator::HtmlErb.new(code)
+        scanner = HtmlErb.new(code)
         assert_equal 1, scanner.tokens.size
 
         token = scanner.tokens[0]
@@ -30,7 +31,7 @@ module BetterHtml
 
       test "when multi byte characters are present in text" do
         code = "your store’s"
-        scanner = BetterHtml::NodeIterator::HtmlErb.new(code)
+        scanner = HtmlErb.new(code)
         assert_equal 1, scanner.tokens.size
 
         token = scanner.tokens[0]
@@ -39,7 +40,7 @@ module BetterHtml
 
       test "when multi byte characters are present in html" do
         code = "<div title='your store’s'>foo</div>"
-        scanner = BetterHtml::NodeIterator::HtmlErb.new(code)
+        scanner = HtmlErb.new(code)
         assert_equal 14, scanner.tokens.size
 
         assert_attributes ({ type: :tag_start, text: '<', location: { start: 0, stop: 0 } }), scanner.tokens[0]
@@ -53,7 +54,7 @@ module BetterHtml
       end
 
       test "expression literal" do
-        scanner = BetterHtml::NodeIterator::HtmlErb.new("<%= literal %>")
+        scanner = HtmlErb.new("<%= literal %>")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
         assert_attributes ({ type: :expr_literal, text: '<%= literal %>', code: ' literal ' }), token
@@ -61,7 +62,7 @@ module BetterHtml
       end
 
       test "expression escaped" do
-        scanner = BetterHtml::NodeIterator::HtmlErb.new("<%== escaped %>")
+        scanner = HtmlErb.new("<%== escaped %>")
         assert_equal 1, scanner.tokens.size
         token = scanner.tokens[0]
         assert_attributes ({ type: :expr_escaped, text: '<%== escaped %>', code: ' escaped ' }), token
@@ -69,7 +70,7 @@ module BetterHtml
       end
 
       test "line number for multi-line statements" do
-        scanner = BetterHtml::NodeIterator::HtmlErb.new("before <% multi\nline %> after")
+        scanner = HtmlErb.new("before <% multi\nline %> after")
         assert_equal 3, scanner.tokens.size
 
         assert_attributes ({ type: :text, text: 'before ' }), scanner.tokens[0]
@@ -83,7 +84,7 @@ module BetterHtml
       end
 
       test "multi-line statements with trim" do
-        scanner = BetterHtml::NodeIterator::HtmlErb.new("before\n<% multi\nline -%>\nafter")
+        scanner = HtmlErb.new("before\n<% multi\nline -%>\nafter")
         assert_equal 4, scanner.tokens.size
 
         assert_attributes ({ type: :text, text: "before\n" }), scanner.tokens[0]
@@ -100,7 +101,7 @@ module BetterHtml
       end
 
       test "multi-line expression with trim" do
-        scanner = BetterHtml::NodeIterator::HtmlErb.new("before\n<%= multi\nline -%>\nafter")
+        scanner = HtmlErb.new("before\n<%= multi\nline -%>\nafter")
         assert_equal 4, scanner.tokens.size
 
         assert_attributes ({ type: :text, text: "before\n" }), scanner.tokens[0]
@@ -117,7 +118,7 @@ module BetterHtml
       end
 
       test "line counts with comments" do
-        scanner = BetterHtml::NodeIterator::HtmlErb.new("before\n<%# BO$$ Mode %>\nafter")
+        scanner = HtmlErb.new("before\n<%# BO$$ Mode %>\nafter")
         assert_equal 4, scanner.tokens.size
 
         assert_attributes ({ type: :text, text: "before\n" }), scanner.tokens[0]

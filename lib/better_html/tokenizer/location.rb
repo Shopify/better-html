@@ -1,5 +1,5 @@
 module BetterHtml
-  class NodeIterator
+  module Tokenizer
     class Location
       attr_accessor :start, :stop
 

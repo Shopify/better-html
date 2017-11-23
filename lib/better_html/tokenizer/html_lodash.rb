@@ -2,7 +2,7 @@ require_relative 'token'
 require_relative 'location'
 
 module BetterHtml
-  class NodeIterator
+  module Tokenizer
     class HtmlLodash
       attr_reader :tokens
       attr_reader :parser
