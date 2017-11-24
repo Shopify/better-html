@@ -44,7 +44,7 @@ module BetterHtml
         when nil
           :stmt
         when '#'
-          :debug
+          :comment
         when '='
           :expr_literal
         when '=='

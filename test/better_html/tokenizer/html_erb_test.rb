@@ -124,7 +124,7 @@ module BetterHtml
         assert_attributes ({ type: :text, text: "before\n" }), scanner.tokens[0]
         assert_attributes ({ line: 1 }), scanner.tokens[0].location
 
-        assert_attributes ({ type: :debug, text: "<%# BO$$ Mode %>" }), scanner.tokens[1]
+        assert_attributes ({ type: :comment, text: "<%# BO$$ Mode %>" }), scanner.tokens[1]
         assert_attributes ({ line: 2 }), scanner.tokens[1].location
 
         assert_attributes ({ type: :text, text: "\n" }), scanner.tokens[2]
