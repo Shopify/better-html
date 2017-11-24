@@ -90,14 +90,14 @@ module BetterHtml
         assert_attributes ({ type: :text, text: "before\n" }), scanner.tokens[0]
         assert_attributes ({ line: 1, start: 0, stop: 6 }), scanner.tokens[0].location
 
-        assert_attributes ({ type: :stmt, text: "<% multi\nline %>" }), scanner.tokens[1]
-        assert_attributes ({ line: 2, start: 7, stop: 22 }), scanner.tokens[1].location
+        assert_attributes ({ type: :stmt, text: "<% multi\nline -%>" }), scanner.tokens[1]
+        assert_attributes ({ line: 2, start: 7, stop: 23 }), scanner.tokens[1].location
 
         assert_attributes ({ type: :text, text: "\n" }), scanner.tokens[2]
-        assert_attributes ({ line: 3, start: 23, stop: 23 }), scanner.tokens[2].location
+        assert_attributes ({ line: 3, start: 24, stop: 24 }), scanner.tokens[2].location
 
         assert_attributes ({ type: :text, text: "after" }), scanner.tokens[3]
-        assert_attributes ({ line: 4, start: 24, stop: 28 }), scanner.tokens[3].location
+        assert_attributes ({ line: 4, start: 25, stop: 29 }), scanner.tokens[3].location
       end
 
       test "multi-line expression with trim" do
@@ -107,7 +107,7 @@ module BetterHtml
         assert_attributes ({ type: :text, text: "before\n" }), scanner.tokens[0]
         assert_attributes ({ line: 1 }), scanner.tokens[0].location
 
-        assert_attributes ({ type: :expr_literal, text: "<%= multi\nline %>" }), scanner.tokens[1]
+        assert_attributes ({ type: :expr_literal, text: "<%= multi\nline -%>" }), scanner.tokens[1]
         assert_attributes ({ line: 2 }), scanner.tokens[1].location
 
         assert_attributes ({ type: :text, text: "\n" }), scanner.tokens[2]
@@ -124,7 +124,7 @@ module BetterHtml
         assert_attributes ({ type: :text, text: "before\n" }), scanner.tokens[0]
         assert_attributes ({ line: 1 }), scanner.tokens[0].location
 
-        assert_attributes ({ type: :stmt, text: "<%# BO$$ Mode %>" }), scanner.tokens[1]
+        assert_attributes ({ type: :comment, text: "<%# BO$$ Mode %>" }), scanner.tokens[1]
         assert_attributes ({ line: 2 }), scanner.tokens[1].location
 
         assert_attributes ({ type: :text, text: "\n" }), scanner.tokens[2]

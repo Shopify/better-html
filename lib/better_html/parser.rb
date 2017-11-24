@@ -49,6 +49,9 @@ module BetterHtml
           nodes << consume_element(tokens)
         when :text, :stmt, :expr_literal, :expr_escaped
           nodes << consume_text(tokens)
+        when :comment
+          # <%# comments are ignored %>
+          tokens.shift
         else
           raise RuntimeError, "Unhandled token #{token.type} line #{token.location.line} column #{token.location.column}"
         end

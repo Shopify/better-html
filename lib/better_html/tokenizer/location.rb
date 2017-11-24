@@ -42,10 +42,12 @@ module BetterHtml
       private
 
       def calculate_line
+        return 1 if start == 0
         @document[0..start-1].scan("\n").count + 1
       end
 
       def calculate_column
+        return 0 if start == 0
         @document[0..start-1]&.split("\n", -1)&.last&.length || 0
       end
 
