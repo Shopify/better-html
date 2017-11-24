@@ -26,9 +26,9 @@ module BetterHtml
       end
 
       def add_code(code)
-        _, ltrim_or_debug, code, rtrim = *STMT_TRIM_MATCHER.match(code)
-        ltrim = ltrim_or_debug if ltrim_or_debug == '-'
-        indicator = ltrim_or_debug if ltrim_or_debug == '#'
+        _, ltrim_or_comment, code, rtrim = *STMT_TRIM_MATCHER.match(code)
+        ltrim = ltrim_or_comment if ltrim_or_comment == '-'
+        indicator = ltrim_or_comment if ltrim_or_comment == '#'
         add_erb_tokens(ltrim, indicator, code, rtrim)
         append("<%#{ltrim}#{indicator}#{code}#{rtrim}%>")
       end
