@@ -1,7 +1,7 @@
 require 'better_html/test_helper/ruby_expr'
 require 'better_html/test_helper/safety_error'
 require 'better_html/parser'
-require 'parser/current'
+require 'better_html/tree/tag'
 
 module BetterHtml
   module TestHelper
@@ -59,7 +59,7 @@ EOF
           @errors = Errors.new
           @options = options.present? ? options.dup : {}
           @options[:template_language] ||= :html
-          @nodes = BetterHtml::Parser.new(data, @options.slice(:template_language))
+          @parser = BetterHtml::Parser.new(data, @options.slice(:template_language))
           validate!
         end
 
@@ -68,33 +68,46 @@ EOF
         end
 
         def validate!
-          @nodes.each_with_index do |node, index|
-            case node
-            when BetterHtml::Parser::Element
-              validate_element(node)
+          @parser.nodes_with_type(:element).each do |tag_node|
+            tag = Tree::Tag.new(tag_node)
+            next if tag.closing?
 
-              if node.name == 'script'
-                next_node = @nodes[index + 1]
-                if next_node.is_a?(BetterHtml::Parser::ContentNode) && !node.closing?
-                  if javascript_tag_type?(node, "text/javascript")
-                    validate_script_tag_content(next_node)
-                  end
-                  validate_no_statements(next_node) unless javascript_tag_type?(node, "text/html")
+            validate_tag_attributes(tag)
+
+            if tag.name == 'script'
+              index = @parser.nodes.find_index(tag_node)
+              next_node = @parser.nodes[index + 1]
+              if next_node.is_a?(BetterHtml::Parser::ContentNode)
+                if (tag.attributes['type']&.value || "text/javascript") == "text/javascript"
+                  validate_script_tag_content(next_node)
                 end
-
-                validate_javascript_tag_type(node) unless node.closing?
+                validate_no_statements(next_node) unless tag.attributes['type']&.value == "text/html"
               end
-            when BetterHtml::Parser::Text
-              validate_text_content(node)
 
-              if @nodes.template_language == :javascript
-                validate_script_tag_content(node)
-                validate_no_statements(node)
-              else
-                validate_no_javascript_tag(node)
-              end
-            when BetterHtml::Parser::CData, BetterHtml::Parser::Comment
+              validate_javascript_tag_type(tag)
+            end
+          end
+
+          @parser.nodes_with_type(:text).each do |node|
+            validate_text_content(node)
+
+            if @parser.template_language == :javascript
+              validate_script_tag_content(node)
               validate_no_statements(node)
+            else
+              validate_no_javascript_tag(node)
+            end
+          end
+
+          @parser.nodes_with_type(:cdata, :comment).each do |node|
+            validate_no_statements(node)
+          end
+        end
+
+        def erb_nodes(array)
+          Enumerator.new do |yielder|
+            array.each do |token|
+              yielder << token if [:expr_literal, :expr_escaped, :stmt].include?(token.type)
             end
           end
         end
@@ -105,25 +118,24 @@ EOF
           value == which
         end
 
-        def validate_javascript_tag_type(element)
-          typeattr = element['type']
-          return if typeattr.nil?
-          if !VALID_JAVASCRIPT_TAG_TYPES.include?(typeattr.unescaped_value)
-            add_error(
-              "#{typeattr.value} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}",
-              location: typeattr.value_parts.first.location
-            )
-          end
+        def validate_javascript_tag_type(tag)
+          return unless type_attribute = tag.attributes['type']
+          return if VALID_JAVASCRIPT_TAG_TYPES.include?(type_attribute.value)
+
+          add_error(
+            "#{type_attribute.value} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(', ')}",
+            location: type_attribute.loc
+          )
         end
 
-        def validate_element(element)
-          element.attributes.each do |attr_token|
-            attr_token.value_parts.each do |value_token|
+        def validate_tag_attributes(tag)
+          tag.attributes.each do |attribute|
+            attribute.node.value_parts.each do |value_token|
               case value_token.type
               when :expr_literal
                 begin
                   expr = RubyExpr.parse(value_token.code)
-                  validate_tag_expression(value_token, expr, attr_token.name)
+                  validate_tag_expression(value_token, expr, attribute.name)
                 rescue RubyExpr::ParseError
                   nil
                 end
@@ -138,16 +150,14 @@ EOF
         end
 
         def validate_text_content(text)
-          text.content_parts.each do |text_token|
-            case text_token.type
-            when :stmt, :expr_literal, :expr_escaped
-              next if text_token.type == :stmt
-              begin
-                expr = RubyExpr.parse(text_token.code)
-                validate_ruby_helper(text_token, expr)
-              rescue RubyExpr::ParseError
-                nil
-              end
+          erb_nodes(text.content_parts).each do |text_token|
+            next unless [:expr_literal, :expr_escaped].include?(text_token.type)
+
+            begin
+              expr = RubyExpr.parse(text_token.code)
+              validate_ruby_helper(text_token, expr)
+            rescue RubyExpr::ParseError
+              nil
             end
           end
         end
@@ -231,11 +241,14 @@ EOF
         end
 
         def validate_script_tag_content(node)
-          node.content_parts.each do |token|
-            case token.type
-            when :expr_literal, :expr_escaped
+          erb_nodes(node.content_parts).each do |token|
+            next unless [:expr_literal, :expr_escaped].include?(token.type)
+
+            begin
               expr = RubyExpr.parse(token.code)
               validate_script_expression(node, token, expr)
+            rescue RubyExpr::ParseError
+              nil
             end
           end
         end
@@ -268,31 +281,31 @@ EOF
         end
 
         def validate_no_statements(node)
-          node.content_parts.each do |token|
-            if token.type == :stmt && !(/\A\s*end/m === token.code)
-              add_error(
-                "erb statement not allowed here; did you mean '<%=' ?",
-                location: token.location,
-              )
-            end
+          erb_nodes(node.content_parts).each do |token|
+            next unless token.type == :stmt && !(/\A\s*end/m === token.code)
+
+            add_error(
+              "erb statement not allowed here; did you mean '<%=' ?",
+              location: token.location,
+            )
           end
         end
 
         def validate_no_javascript_tag(node)
-          node.content_parts.each do |token|
-            next if token.type == :stmt
-            if [:stmt, :expr_literal, :expr_escaped].include?(token.type)
-              expr = begin
-                RubyExpr.parse(token.code)
-              rescue RubyExpr::ParseError
-                next
-              end
-              if expr.calls.size == 1 && expr.calls.first.method == :javascript_tag
-                add_error(
-                  "'javascript_tag do' syntax is deprecated; use inline <script> instead",
-                  location: token.location,
-                )
-              end
+          erb_nodes(node.content_parts).each do |token|
+            next unless [:expr_literal, :expr_escaped].include?(token.type)
+
+            expr = begin
+              RubyExpr.parse(token.code)
+            rescue RubyExpr::ParseError
+              next
+            end
+
+            if expr.calls.size == 1 && expr.calls.first.method == :javascript_tag
+              add_error(
+                "'javascript_tag do' syntax is deprecated; use inline <script> instead",
+                location: token.location,
+              )
             end
           end
         end

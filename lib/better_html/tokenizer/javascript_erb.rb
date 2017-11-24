@@ -1,4 +1,3 @@
-require 'erubi'
 require_relative 'base_erb'
 
 module BetterHtml

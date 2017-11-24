@@ -149,36 +149,6 @@ module BetterHtml
       assert_equal ['"', "some ", "<%= value %>", " foo", '"'], attribute.value_parts.map(&:text)
     end
 
-    test "attributes can be accessed through [] on Element object" do
-      tree = BetterHtml::Parser.new("<div foo=\"bar\">")
-
-      assert_equal 1, tree.nodes.size
-      element = tree.nodes.first
-      assert_equal BetterHtml::Parser::Element, element.class
-      assert_equal 1, element.attributes.size
-      assert_nil element['nonexistent']
-      refute_nil attribute = element['foo']
-      assert_equal BetterHtml::Parser::Attribute, attribute.class
-    end
-
-    test "attribute values can be read unescaped" do
-      tree = BetterHtml::Parser.new("<div foo=\"&lt;&quot;&gt;\">")
-
-      element = tree.nodes.first
-      assert_equal 1, element.attributes.size
-      attribute = element['foo']
-      assert_equal '<">', attribute.unescaped_value
-    end
-
-    test "attribute values does not unescape stuff inside erb" do
-      tree = BetterHtml::Parser.new("<div foo=\"&lt;<%= &gt; %>&gt;\">")
-
-      element = tree.nodes.first
-      assert_equal 1, element.attributes.size
-      attribute = element['foo']
-      assert_equal '<<%= &gt; %>>', attribute.unescaped_value
-    end
-
     test "consume text nodes" do
       tree = BetterHtml::Parser.new("here is <%= some %> text")
 
