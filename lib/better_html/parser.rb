@@ -27,7 +27,8 @@ module BetterHtml
     end
 
     def nodes_with_type(*type)
-      nodes.select{ |node| Array.wrap(type).include?(node.type) }
+      types = Array.wrap(type)
+      nodes.select{ |node| types.include?(node.type) }
     end
 
     def nodes
