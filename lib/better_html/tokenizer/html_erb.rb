@@ -6,8 +6,6 @@ module BetterHtml
     class HtmlErb < BaseErb
       attr_reader :parser
 
-      REGEXP_WITHOUT_TRIM = /<%(={1,2}|-|%)?(.*?)(?:[-=])?()?%>([ \t]*\r?\n)?/m
-
       def initialize(document)
         @parser = HtmlTokenizer::Parser.new
         super(document)

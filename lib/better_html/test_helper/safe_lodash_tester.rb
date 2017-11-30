@@ -52,7 +52,7 @@ EOF
           @data = data
           @config = config
           @errors = Errors.new
-          @nodes = BetterHtml::Parser.new(data, template_language: :lodash)
+          @parser = BetterHtml::Parser.new(data, template_language: :lodash)
           validate!
         end
 
@@ -61,65 +61,74 @@ EOF
         end
 
         def validate!
-          @nodes.each_with_index do |node, index|
-            case node
-            when BetterHtml::Parser::Element
-              validate_element(node)
+          @parser.nodes_with_type(:element).each do |tag_node|
+            tag = Tree::Tag.new(tag_node)
+            validate_tag(tag)
 
-              if node.name == 'script' && !node.closing?
-                add_error(
-                  "No script tags allowed nested in lodash templates",
-                  location: node.name_parts.first.location
-                )
-              end
-            when BetterHtml::Parser::CData, BetterHtml::Parser::Comment
-              validate_no_statements(node)
+            if tag.name == 'script' && !tag.closing?
+              add_error(
+                "No script tags allowed nested in lodash templates",
+                location: tag.loc
+              )
+            end
+          end
+
+          @parser.nodes_with_type(:cdata, :comment).each do |node|
+            validate_no_statements(node)
+          end
+        end
+
+        def lodash_nodes(array)
+          Enumerator.new do |yielder|
+            array.each do |token|
+              yielder << token if [:expr_literal, :expr_escaped, :stmt].include?(token.type)
             end
           end
         end
 
-        def validate_element(element)
-          element.attributes.each do |attribute|
-            attribute.name_parts.each do |token|
-              add_no_statement_error(attribute, token) if token.type == :stmt
+        def validate_tag(tag)
+          tag.attributes.each do |attribute|
+            lodash_nodes(attribute.node.name_parts).each do |token|
+              add_no_statement_error(token.location) if token.type == :stmt
             end
 
-            attribute.value_parts.each do |token|
-              case token.type
+            lodash_nodes(attribute.node.value_parts).each do |lodash_node|
+              case lodash_node.type
               when :stmt
-                add_no_statement_error(attribute, token)
+                add_no_statement_error(lodash_node.location)
               when :expr_literal
-                validate_tag_expression(element, attribute.name, token)
+                validate_tag_expression(attribute, lodash_node)
               when :expr_escaped
                 add_error(
                   "lodash interpolation with '[%!' inside html attribute is never safe",
-                  location: token.location
+                  location: lodash_node.location
                 )
               end
             end
           end
         end
 
-        def validate_tag_expression(node, attr_name, value_token)
-          if @config.javascript_attribute_name?(attr_name) && !@config.lodash_safe_javascript_expression?(value_token.code.strip)
+        def validate_tag_expression(attribute, lodash_node)
+          source = lodash_node.code.strip
+          if @config.javascript_attribute_name?(attribute.name) && !@config.lodash_safe_javascript_expression?(source)
             add_error(
               "lodash interpolation in javascript attribute "\
-              "`#{attr_name}` must call `JSON.stringify(#{value_token.code.strip})`",
-              location: value_token.location
+              "`#{attribute.name}` must call `JSON.stringify(#{source})`",
+              location: lodash_node.location
             )
           end
         end
 
         def validate_no_statements(node)
-          node.content_parts.each do |token|
-            add_no_statement_error(node, token) if token.type == :stmt
+          lodash_nodes(node.content_parts).each do |token|
+            add_no_statement_error(token.location) if token.type == :stmt
           end
         end
 
-        def add_no_statement_error(node, token)
+        def add_no_statement_error(loc)
           add_error(
             "javascript statement not allowed here; did you mean '[%=' ?",
-            location: token.location
+            location: loc
           )
         end
       end

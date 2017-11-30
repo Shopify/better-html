@@ -31,7 +31,7 @@ module BetterHtml
               add_text(pre_match) if pre_match.present?
             end
             match = captures[1]
-            token = if code = lodash_escape.match(match)
+            if code = lodash_escape.match(match)
               add_lodash_tokens("=", code.captures[0])
             elsif code = lodash_interpolate.match(match)
               add_lodash_tokens("!", code.captures[0])

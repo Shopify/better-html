@@ -13,14 +13,6 @@ module BetterHtml
         @name_parts = []
         @attributes = []
       end
-
-      def find_attr(wanted)
-        @attributes.each do |attribute|
-          return attribute if attribute.name == wanted
-        end
-        nil
-      end
-      alias_method :[], :find_attr
     end
   end
 end

@@ -50,6 +50,16 @@ module BetterHtml
         assert_equal "No script tags allowed nested in lodash templates", errors.first.message
       end
 
+      test "script tag names are unescaped" do
+        errors = parse(<<-EOF).errors
+          <script type="text/j&#x61;v&#x61;script"></script>
+        EOF
+
+        assert_equal 1, errors.size
+        assert_equal 'script', errors.first.location.source
+        assert_equal "No script tags allowed nested in lodash templates", errors.first.message
+      end
+
       test "statement not allowed in attribute name" do
         errors = parse(<<-EOF).errors
           <div class[% if (foo) %]="foo">

@@ -9,11 +9,7 @@ require_relative 'parser/text'
 
 module BetterHtml
   class Parser
-    attr_reader :nodes, :template_language
-
-    delegate :each, :each_with_index, :[], to: :nodes
-    delegate :parser, to: :@erb, allow_nil: true
-    delegate :errors, to: :parser, allow_nil: true, prefix: true
+    attr_reader :template_language
 
     def initialize(document, template_language: :html)
       @document = document
@@ -28,36 +24,40 @@ module BetterHtml
       else
         raise ArgumentError, "template_language can be :html or :javascript"
       end
-      @nodes = parse!
+    end
+
+    def nodes_with_type(*type)
+      types = Array.wrap(type)
+      nodes.select{ |node| types.include?(node.type) }
+    end
+
+    def nodes
+      @nodes ||= [].tap do |array|
+        tokens = @erb.tokens.dup
+        while token = tokens[0]
+          case token.type
+          when :cdata_start
+            tokens.shift
+            array << consume_cdata(tokens)
+          when :comment_start
+            tokens.shift
+            array << consume_comment(tokens)
+          when :tag_start
+            tokens.shift
+            array << consume_element(tokens)
+          when :text, :stmt, :expr_literal, :expr_escaped
+            array << consume_text(tokens)
+          when :comment
+            # <%# comments are ignored %>
+            tokens.shift
+          else
+            raise RuntimeError, "Unhandled token #{token.type} line #{token.location.line} column #{token.location.column}"
+          end
+        end
+      end
     end
 
     private
-
-    def parse!
-      nodes = []
-      tokens = @erb.tokens.dup
-      while token = tokens[0]
-        case token.type
-        when :cdata_start
-          tokens.shift
-          nodes << consume_cdata(tokens)
-        when :comment_start
-          tokens.shift
-          nodes << consume_comment(tokens)
-        when :tag_start
-          tokens.shift
-          nodes << consume_element(tokens)
-        when :text, :stmt, :expr_literal, :expr_escaped
-          nodes << consume_text(tokens)
-        when :comment
-          # <%# comments are ignored %>
-          tokens.shift
-        else
-          raise RuntimeError, "Unhandled token #{token.type} line #{token.location.line} column #{token.location.column}"
-        end
-      end
-      nodes
-    end
 
     def consume_cdata(tokens)
       node = CData.new
