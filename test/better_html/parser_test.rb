@@ -6,6 +6,12 @@ module BetterHtml
   class ParserTest < ActiveSupport::TestCase
     include ::AST::Sexp
 
+    test "parse empty document" do
+      tree = Parser.new('')
+
+      assert_equal s(:document), tree.ast
+    end
+
     test "consume cdata nodes" do
       code = "<![CDATA[ foo ]]>"
       tree = Parser.new(code)

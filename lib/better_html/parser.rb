@@ -170,8 +170,8 @@ module BetterHtml
     def build_node(type, tokens, pre: nil, post: nil)
       BetterHtml::AST::Node.new(
         type,
-        wrap_tokens(tokens),
-        loc: build_location([pre, *tokens, post])
+        tokens.present? ? wrap_tokens(tokens) : [],
+        loc: tokens.present? ? build_location([pre, *tokens, post]) : empty_location
       )
     end
 
@@ -179,6 +179,10 @@ module BetterHtml
       enumerable = enumerable.compact
       raise ArgumentError, "cannot build location for #{enumerable.inspect}" unless enumerable.first && enumerable.last
       Tokenizer::Location.new(@document, enumerable.first.loc.start, enumerable.last.loc.stop)
+    end
+
+    def empty_location
+      Tokenizer::Location.new(@document, 0, 0)
     end
 
     def shift_all(tokens, *types)
