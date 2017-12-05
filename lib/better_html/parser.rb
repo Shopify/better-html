@@ -33,6 +33,10 @@ module BetterHtml
       @ast ||= build_document_node
     end
 
+    def inspect
+      "#<#{self.class.name} ast=#{ast.inspect}>"
+    end
+
     private
 
     INTERPOLATION_TYPES = [:erb_begin, :lodash_begin]
