@@ -233,3 +233,33 @@ class ErbImplementationTest < ActiveSupport::TestCase
   end
 end
 ```
+
+## Working with the ERB parser
+
+This gem provides an ERB parser that builds an [AST](http://whitequark.github.io/ast/) from HTML+ERB templates.
+Unlike higher-level libraries like Nokogiri, this parser does not make assumptions about the validity of HTML
+documents (for example, opening tags being matched with closing tags). The parser also handles ERB tags as
+first class nodes in the syntax tree.
+
+```ruby
+require 'better_html/parser'
+
+data = '<div><%= value -%></div>'
+parser = BetterHtml::Parser.new(data)
+
+puts parser.inspect
+# => #<BetterHtml::Parser ast=s(:document,
+#   s(:tag, nil,
+#     s(:tag_name, "div"), nil, nil),
+#   s(:text,
+#     s(:erb,
+#       s(:indicator, "="), nil,
+#       s(:code, " value "),
+#       s(:trim))),
+#   s(:tag,
+#     s(:solidus),
+#     s(:tag_name, "div"), nil, nil))>
+```
+
+The _syntax tree_ exposed by this parser is not to be confused with the nested nature of HTML elements.
+At this stage, the parser does not build _html elements_, only tags which mark the beginning and end of elements.
