@@ -4,6 +4,7 @@ PATH
     better_html (0.0.12)
       actionview (>= 4.0)
       activesupport (>= 4.0)
+      ast (~> 2.0)
       erubi (~> 1.4)
       html_tokenizer (~> 0.0.5)
       parser (>= 2.4)

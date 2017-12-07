@@ -46,7 +46,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal 'script', errors.first.location.source
+        assert_equal '<script type="text/javascript">', errors.first.location.source
         assert_equal "No script tags allowed nested in lodash templates", errors.first.message
       end
 
@@ -56,7 +56,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal 'script', errors.first.location.source
+        assert_equal '<script type="text/j&#x61;v&#x61;script">', errors.first.location.source
         assert_equal "No script tags allowed nested in lodash templates", errors.first.message
       end
 

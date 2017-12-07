@@ -1,3 +1,4 @@
+require 'active_support'
 require_relative 'token'
 require_relative 'location'
 
@@ -62,43 +63,31 @@ module BetterHtml
 
       def add_text(text)
         @parser.parse(text) do |type, start, stop, line, column|
-          extra_attributes = if type == :tag_end
-            {
-              self_closing: @parser.self_closing_tag?
-            }
-          end
-          add_token(type, start, stop, **(extra_attributes || {}))
+          add_token(type, start: start, stop: stop, line: line, column: column)
         end
       end
 
       def add_lodash_tokens(indicator, code)
-        type = case indicator
-        when nil
-          :stmt
-        when '='
-          :expr_literal
-        when '!'
-          :expr_escaped
-        else
-          raise ArgumentError
+        pos = @parser.document_length
+
+        add_token(:lodash_begin, start: pos, stop: pos + 2)
+        pos += 2
+
+        if indicator
+          add_token(:indicator, start: pos, stop: pos + indicator.length)
+          pos += indicator.length
         end
 
-        start = @parser.document_length
-        code_start = start + 2 + (indicator&.length || 0)
-        code_stop = code_start + code.length
-        stop = code_stop + 2
+        add_token(:code, start: pos, stop: pos + code.length)
+        pos += code.length
 
-        add_token(
-          type, start, stop,
-          code_location: Location.new(@document, code_start, code_stop - 1)
-        )
+        add_token(:lodash_end, start: pos, stop: pos + 2)
       end
 
-      def add_token(type, start, stop, **extra_attributes)
+      def add_token(type, start: nil, stop: nil, line: nil, column: nil)
         token = Token.new(
           type: type,
-          location: Location.new(@document, start, stop - 1),
-          **extra_attributes
+          loc: Location.new(@document, start, stop-1, line, column)
         )
         @tokens << token
         token

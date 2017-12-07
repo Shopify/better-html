@@ -1,4 +1,5 @@
 require 'better_html/tree/attributes_list'
+require 'better_html/ast/iterator'
 
 module BetterHtml
   module Tree
@@ -7,26 +8,31 @@ module BetterHtml
 
       def initialize(node)
         @node = node
+        @start_solidus, @name_node, @attributes_node, @end_solidus = *node
+      end
+
+      def self.from_node(node)
+        new(node)
       end
 
       def loc
-        @node.name_parts.first&.location
+        @node.loc
       end
 
       def name
-        @node&.name&.downcase
+        @name_node&.loc&.source&.downcase
       end
 
       def closing?
-        @node.closing?
+        @start_solidus&.type == :solidus
       end
 
       def self_closing?
-        @node.self_closing?
+        @end_solidus&.type == :solidus
       end
 
       def attributes
-        @attributes ||= AttributesList.from_nodes(@node.attributes)
+        @attributes ||= AttributesList.from_nodes(@attributes_node.to_a)
       end
     end
   end

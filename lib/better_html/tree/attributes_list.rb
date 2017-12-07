@@ -8,7 +8,7 @@ module BetterHtml
       end
 
       def self.from_nodes(nodes)
-        new(nodes&.map { |node| Tree::Attribute.new(node) })
+        new(nodes&.map { |node| Tree::Attribute.from_node(node) })
       end
 
       def [](name)

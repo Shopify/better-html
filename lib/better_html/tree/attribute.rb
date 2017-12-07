@@ -1,26 +1,30 @@
+require 'ast'
+
 module BetterHtml
   module Tree
     class Attribute
-      attr_reader :node
-
-      QUOTES_TOKEN_TYPES = [:attribute_quoted_value_start, :attribute_quoted_value_end]
-      VALUE_TOKEN_TYPES = [:attribute_quoted_value, :attribute_unquoted_value]
+      attr_reader :node, :name_node, :equal_node, :value_node
 
       def initialize(node)
         @node = node
+        @name_node, @equal_node, @value_node = *node
+      end
+
+      def self.from_node(node)
+        new(node)
       end
 
       def loc
-        @node.name_parts.first&.location
+        @node.loc
       end
 
       def name
-        @node&.name&.downcase
+        @name_node&.loc&.source&.downcase
       end
 
       def value
-        parts = @node.value_parts.reject{ |node| QUOTES_TOKEN_TYPES.include?(node.type) }
-        parts.map { |s| VALUE_TOKEN_TYPES.include?(s.type) ? CGI.unescapeHTML(s.text) : s.text }.join
+        parts = value_node.to_a.reject{ |node| node.is_a?(::AST::Node) && node.type == :quote }
+        parts.map { |s| s.is_a?(::AST::Node) ? s.loc.source : CGI.unescapeHTML(s) }.join
       end
     end
   end
