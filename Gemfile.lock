@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    better_html (1.0.0)
+    better_html (1.0.1)
       actionview (>= 4.0)
       activesupport (>= 4.0)
       ast (~> 2.0)
@@ -74,4 +74,4 @@ DEPENDENCIES
   rake
 
 BUNDLED WITH
-   1.16.0
+   1.16.1
