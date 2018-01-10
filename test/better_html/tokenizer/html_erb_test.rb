@@ -95,7 +95,7 @@ module BetterHtml
 
         assert_attributes ({ type: :text, loc: { line: 1, source: 'before ' } }), scanner.tokens[0]
         assert_attributes ({ type: :erb_begin, loc: { line: 1, source: '<%' } }), scanner.tokens[1]
-        assert_attributes ({ type: :code, loc: { line: 1, source: " multi\nline " } }), scanner.tokens[2]
+        assert_attributes ({ type: :code, loc: { line: 1, start_line: 1, stop_line: 2, source: " multi\nline " } }), scanner.tokens[2]
         assert_attributes ({ type: :erb_end, loc: { line: 2, source: "%>" } }), scanner.tokens[3]
         assert_attributes ({ type: :text, loc: { line: 2, source: " after" } }), scanner.tokens[4]
       end

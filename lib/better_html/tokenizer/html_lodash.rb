@@ -62,8 +62,8 @@ module BetterHtml
       end
 
       def add_text(text)
-        @parser.parse(text) do |type, start, stop, line, column|
-          add_token(type, start: start, stop: stop, line: line, column: column)
+        @parser.parse(text) do |type, start, stop, _line, _column|
+          add_token(type, start: start, stop: stop)
         end
       end
 
@@ -84,10 +84,10 @@ module BetterHtml
         add_token(:lodash_end, start: pos, stop: pos + 2)
       end
 
-      def add_token(type, start: nil, stop: nil, line: nil, column: nil)
+      def add_token(type, start: nil, stop: nil)
         token = Token.new(
           type: type,
-          loc: Location.new(@document, start, stop-1, line, column)
+          loc: Location.new(@document, start, stop-1)
         )
         @tokens << token
         token

@@ -22,8 +22,8 @@ module BetterHtml
       end
 
       def add_text(text)
-        @parser.parse(text) do |type, start, stop, line, column|
-          add_token(type, start, stop, line, column)
+        @parser.parse(text) do |type, start, stop, _line, _column|
+          add_token(type, start, stop)
         end
       end
     end
