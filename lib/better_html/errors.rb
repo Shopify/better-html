@@ -7,16 +7,7 @@ module BetterHtml
   class UnsafeHtmlError < InterpolatorError; end
   class HtmlError < RuntimeError; end
 
-  class Errors
-    delegate :[], :each, :size, :first,
-      :empty?, :any?, :present?, to: :@errors
-
-    def initialize
-      @errors = []
-    end
-
-    def add(error)
-      @errors << error
-    end
+  class Errors < Array
+    alias_method :add, :<<
   end
 end

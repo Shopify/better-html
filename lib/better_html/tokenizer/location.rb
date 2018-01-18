@@ -1,7 +1,7 @@
 module BetterHtml
   module Tokenizer
     class Location
-      attr_accessor :start, :stop
+      attr_accessor :document, :start, :stop
 
       def initialize(document, start, stop)
         raise ArgumentError, "start location #{start} is out of range for document of size #{document.size}" if start > document.size
