@@ -1,5 +1,5 @@
 require_relative 'base'
-require 'better_html/test_helper/ruby_expr'
+require 'better_html/test_helper/ruby_node'
 
 module BetterHtml
   module TestHelper
@@ -28,16 +28,15 @@ module BetterHtml
             next if indicator == '#'
             source = code_node.loc.source
 
-            begin
-              expr = RubyExpr.parse(source)
-              validate_script_interpolation(erb_node, expr)
-            rescue RubyExpr::ParseError
-            end
+            next unless (ruby_node = RubyNode.parse(source))
+            validate_script_interpolation(erb_node, ruby_node)
           end
         end
 
-        def validate_script_interpolation(parent_node, expr)
-          if expr.calls.empty?
+        def validate_script_interpolation(parent_node, ruby_node)
+          method_calls = ruby_node.return_values.select(&:method_call?)
+
+          if method_calls.empty?
             add_error(
               "erb interpolation in javascript tag must call '(...).to_json'",
               location: parent_node.loc,
@@ -45,16 +44,14 @@ module BetterHtml
             return
           end
 
-          expr.calls.each do |call|
-            if call.method == :raw
-              call.arguments.each do |argument_node|
-                arguments_expr = RubyExpr.new(argument_node)
-                validate_script_interpolation(parent_node, arguments_expr)
+          method_calls.each do |call_node|
+            if call_node.method_name?(:raw)
+              call_node.arguments.each do |argument_node|
+                validate_script_interpolation(parent_node, argument_node)
               end
-            elsif call.method == :html_safe
-              instance_expr = RubyExpr.new(call.instance)
-              validate_script_interpolation(parent_node, instance_expr)
-            elsif !@config.javascript_safe_method?(call.method)
+            elsif call_node.method_name?(:html_safe)
+              validate_script_interpolation(parent_node, call_node.receiver)
+            elsif !@config.javascript_safe_method?(call_node.method_name)
               add_error(
                 "erb interpolation in javascript tag must call '(...).to_json'",
                 location: parent_node.loc,

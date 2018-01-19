@@ -6,8 +6,12 @@ module BetterHtml
     class Node < ::AST::Node
       attr_reader :loc
 
-      def descendants(type, &block)
-        AST::Iterator.descendants(self, type, &block)
+      def descendants(*types)
+        AST::Iterator.descendants(self, types)
+      end
+
+      def location
+        loc
       end
     end
   end

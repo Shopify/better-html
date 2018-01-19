@@ -1,5 +1,5 @@
 require_relative 'base'
-require 'better_html/test_helper/ruby_expr'
+require 'better_html/test_helper/ruby_node'
 
 module BetterHtml
   module TestHelper
@@ -28,12 +28,8 @@ module BetterHtml
             source = code_node.loc.source
 
             if indicator == '='
-              begin
-                expr = RubyExpr.parse(source)
-                validate_tag_interpolation(code_node, expr, attribute.name)
-              rescue RubyExpr::ParseError
-                nil
-              end
+              ruby_node = RubyNode.parse(source)
+              validate_tag_interpolation(code_node, ruby_node, attribute.name) if ruby_node
             elsif indicator == '=='
               add_error(
                 "erb interpolation with '<%==' inside html attribute is never safe",
@@ -49,88 +45,75 @@ module BetterHtml
             next if indicator == '#'
             source = code_node.loc.source
 
-            begin
-              expr = RubyExpr.parse(source)
-              validate_ruby_helper(code_node, expr)
-            rescue RubyExpr::ParseError
-              nil
-            end
+            ruby_node = RubyNode.parse(source)
+            validate_ruby_helper(code_node, ruby_node) if ruby_node
           end
         end
 
-        def validate_ruby_helper(parent_token, expr)
-          expr.traverse(only: [:send, :csend]) do |send_node|
-            expr.each_child_node(send_node, only: :hash) do |hash_node|
-              expr.each_child_node(hash_node, only: :pair) do |pair_node|
-                validate_ruby_helper_hash_entry(parent_token, expr, nil, *pair_node.children)
+        def validate_ruby_helper(parent_token, ruby_node)
+          ruby_node.descendants(:send, :csend).each do |send_node|
+            send_node.child_nodes.select(&:hash?).each do |hash_node|
+              hash_node.child_nodes.select(&:pair?).each do |pair_node|
+                validate_ruby_helper_hash_entry(parent_token, ruby_node, nil, *pair_node.children)
               end
             end
           end
         end
 
-        def validate_ruby_helper_hash_entry(parent_token, expr, key_prefix, key_node, value_node)
+        def validate_ruby_helper_hash_entry(parent_token, ruby_node, key_prefix, key_node, value_node)
           return unless [:sym, :str].include?(key_node.type)
           key = [key_prefix, key_node.children.first.to_s].compact.join('-').dasherize
           case value_node.type
           when :dstr
-            validate_ruby_helper_hash_value(parent_token, expr, key, value_node)
+            validate_ruby_helper_hash_value(parent_token, ruby_node, key, value_node)
           when :hash
             if key == 'data'
-              expr.each_child_node(value_node, only: :pair) do |pair_node|
-                validate_ruby_helper_hash_entry(parent_token, expr, key, *pair_node.children)
+              value_node.child_nodes.select(&:pair?).each do |pair_node|
+                validate_ruby_helper_hash_entry(parent_token, ruby_node, key, *pair_node.children)
               end
             end
           end
         end
 
-        def validate_ruby_helper_hash_value(parent_token, expr, attr_name, hash_value)
-          expr.each_child_node(hash_value, only: :begin) do |child|
-            validate_tag_interpolation(parent_token, RubyExpr.new(child), attr_name)
+        def validate_ruby_helper_hash_value(parent_token, ruby_node, attr_name, hash_value)
+          hash_value.child_nodes.select(&:begin?).each do |begin_node|
+            validate_tag_interpolation(parent_token, begin_node, attr_name)
           end
         end
 
-        def validate_tag_interpolation(parent_token, expr, attr_name)
-          return if expr.static_value?
+        def validate_tag_interpolation(parent_token, ruby_node, attr_name)
+          return if ruby_node.static_return_value?
 
-          if @config.javascript_attribute_name?(attr_name) && expr.calls.empty?
+          location = Tokenizer::Location.new(
+            parent_token.loc.document,
+            parent_token.loc.start + ruby_node.loc.expression.begin_pos,
+            parent_token.loc.start + ruby_node.loc.expression.end_pos - 1
+          )
+
+          method_calls = ruby_node.return_values.select(&:method_call?)
+          if @config.javascript_attribute_name?(attr_name) && method_calls.empty?
             add_error(
               "erb interpolation in javascript attribute must call '(...).to_json'",
-              location: Tokenizer::Location.new(
-                parent_token.loc.document,
-                parent_token.loc.start + expr.start,
-                parent_token.loc.start + expr.end - 1
-              )
+              location: location
             )
             return
           end
 
-          expr.calls.each do |call|
-            if call.method == :raw
+          method_calls.each do |call|
+            if call.method_name?(:raw)
               add_error(
                 "erb interpolation with '<%= raw(...) %>' inside html attribute is never safe",
-                location: Tokenizer::Location.new(
-                  parent_token.loc.document,
-                  parent_token.loc.start + expr.start,
-                  parent_token.loc.start + expr.end - 1
-                )
+                location: location
               )
-            elsif call.method == :html_safe
+            elsif call.method_name?(:html_safe)
               add_error(
                 "erb interpolation with '<%= (...).html_safe %>' inside html attribute is never safe",
-                location: Tokenizer::Location.new(
-                  parent_token.loc.document,
-                  parent_token.loc.start + expr.start,
-                  parent_token.loc.start + expr.end - 1
-                )
+                location: location
               )
-            elsif @config.javascript_attribute_name?(attr_name) && !@config.javascript_safe_method?(call.method)
+            elsif @config.javascript_attribute_name?(attr_name) && !@config.javascript_safe_method?(call.method_name)
               add_error(
                 "erb interpolation in javascript attribute must call '(...).to_json'",
-                location: Tokenizer::Location.new(
-                  parent_token.loc.document,
-                  parent_token.loc.start + expr.start,
-                  parent_token.loc.start + expr.end - 1
-                )
+                location: location
               )
             end
           end
