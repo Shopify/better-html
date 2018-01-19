@@ -1,5 +1,4 @@
 require 'better_html/parser'
-require 'better_html/test_helper/ruby_expr'
 require 'better_html/test_helper/safety_error'
 require 'better_html/test_helper/safe_erb/base'
 require 'better_html/test_helper/safe_erb/no_statements'

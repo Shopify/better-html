@@ -1,5 +1,5 @@
 require_relative 'base'
-require 'better_html/test_helper/ruby_expr'
+require 'better_html/test_helper/ruby_node'
 
 module BetterHtml
   module TestHelper
@@ -17,16 +17,14 @@ module BetterHtml
             next if indicator == '#'
             source = code_node.loc.source
 
-            begin
-              expr = RubyExpr.parse(source)
+            next unless (ruby_node = RubyNode.parse(source))
+            ruby_node.descendants(:send, :csend).each do |send_node|
+              next unless send_node.method_name?(:javascript_tag)
 
-              if expr.calls.size == 1 && expr.calls.first.method == :javascript_tag
-                add_error(
-                  "'javascript_tag do' syntax is deprecated; use inline <script> instead",
-                  location: erb_node.loc,
-                )
-              end
-            rescue RubyExpr::ParseError
+              add_error(
+                "'javascript_tag do' syntax is deprecated; use inline <script> instead",
+                location: erb_node.loc,
+              )
             end
           end
         end

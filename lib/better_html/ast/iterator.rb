@@ -5,13 +5,13 @@ module BetterHtml
   module AST
     class Iterator
       def initialize(types, &block)
-        @types = Array.wrap(types)
+        @types = types.nil? ? nil : Array.wrap(types)
         @block = block
       end
 
       def traverse(node)
         return unless node.is_a?(::AST::Node)
-        @block.call(node) if @types.include?(node.type)
+        @block.call(node) if @types.nil? || @types.include?(node.type)
         traverse_all(node)
       end
 
@@ -21,7 +21,7 @@ module BetterHtml
         end
       end
 
-      def self.descendants(root_node, type, &block)
+      def self.descendants(root_node, type)
         Enumerator.new do |yielder|
           t = new(type) { |node| yielder << node }
           t.traverse(root_node)
