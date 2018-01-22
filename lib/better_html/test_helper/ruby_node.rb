@@ -38,8 +38,9 @@ module BetterHtml
 
       STATIC_TYPES = [:str, :int, :true, :false, :nil]
 
-      def static_type?
-        type?(STATIC_TYPES)
+      def static_value?
+        type?(STATIC_TYPES) ||
+          (type?(:dstr) && !children.any? { |child| !child.type?(:str) })
       end
 
       def return_values
@@ -63,12 +64,7 @@ module BetterHtml
 
       def static_return_value?
         return false if (possible_values = return_values.to_a).empty?
-        possible_values.each do |node|
-          next if node.static_type?
-          return false unless node.type?(:dstr)
-          return false if node.children.any? { |child| !child.type?(:str) }
-        end
-        true
+        possible_values.all?(&:static_value?)
       end
 
       def method_call?
