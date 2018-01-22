@@ -14,11 +14,21 @@ module BetterHtml
           end
 
           @parser.nodes_with_type(:text).each do |node|
-            validate_text_node(node)
+            validate_text_node(node) unless in_script_tag?(node)
           end
         end
 
         private
+
+        def in_script_tag?(node)
+          ast = @parser.ast.to_a
+          index = ast.find_index(node)
+          return unless (previous_node = ast[index - 1])
+          return unless previous_node.type == :tag
+
+          tag = BetterHtml::Tree::Tag.from_node(previous_node)
+          tag.name == "script" && !tag.closing?
+        end
 
         def validate_attribute(attribute)
           erb_nodes(attribute.value_node).each do |erb_node, indicator_node, code_node|

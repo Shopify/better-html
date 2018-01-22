@@ -12,6 +12,30 @@ module BetterHtml
           )
         end
 
+        test "raw in <script> tag" do
+          errors = validate(<<-EOF).errors
+            <script>var myData = <%= raw(foo.to_json) %>;</script>
+          EOF
+
+          assert_equal 0, errors.size
+        end
+
+        test "html_safe in <script> tag" do
+          errors = validate(<<-EOF).errors
+            <script>var myData = <%= foo.to_json.html_safe %>;</script>
+          EOF
+
+          assert_equal 0, errors.size
+        end
+
+        test "<%== in <script> tag" do
+          errors = validate(<<-EOF).errors
+            <script>var myData = <%== foo.to_json %>;</script>
+          EOF
+
+          assert_equal 0, errors.size
+        end
+
         test "string without interpolation is safe" do
           errors = validate(<<-EOF).errors
             <a onclick="alert('<%= "something" %>')">
