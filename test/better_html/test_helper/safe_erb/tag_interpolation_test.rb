@@ -190,6 +190,24 @@ module BetterHtml
           assert_equal "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'", errors.first.message
         end
 
+        test "unsafe javascript methods in helper calls with more than one level of nested hash and :dstr" do
+          errors = validate(<<-EOF).errors
+            <%= ui_my_helper(:foo, inner_html: { onclick: "foo \#{unsafe}" }) %>
+          EOF
+
+          assert_equal 1, errors.size
+          assert_equal "unsafe", errors.first.location.source
+          assert_equal "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'", errors.first.message
+        end
+
+        test "safe javascript methods in helper calls with more than one level of nested hash and :dstr" do
+          errors = validate(<<-EOF).errors
+            <%= ui_my_helper(:foo, inner_html: { onclick: "foo \#{unsafe.to_json}" }) %>
+          EOF
+
+          assert_equal 0, errors.size
+        end
+
         test "unsafe javascript methods in helper calls with string as key" do
           errors = validate(<<-EOF).errors
             <%= ui_my_helper(:foo, 'data-eval' => "alert(\#{unsafe})") %>
