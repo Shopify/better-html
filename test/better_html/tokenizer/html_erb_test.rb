@@ -113,6 +113,16 @@ module BetterHtml
         assert_attributes ({ type: :text, loc: { line: 4, source: "after" } }), scanner.tokens[6]
       end
 
+      test "right trim with =%>" do
+        scanner = HtmlErb.new("<% trim =%>")
+        assert_equal 4, scanner.tokens.size
+
+        assert_attributes ({ type: :erb_begin, loc: { line: 1, source: '<%' } }), scanner.tokens[0]
+        assert_attributes ({ type: :code, loc: { line: 1, source: " trim " } }), scanner.tokens[1]
+        assert_attributes ({ type: :trim, loc: { line: 1, source: "=" } }), scanner.tokens[2]
+        assert_attributes ({ type: :erb_end, loc: { line: 1, source: "%>" } }), scanner.tokens[3]
+      end
+
       test "multi-line expression with trim" do
         scanner = HtmlErb.new("before\n<%= multi\nline -%>\nafter")
         assert_equal 8, scanner.tokens.size
