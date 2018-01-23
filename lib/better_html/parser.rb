@@ -9,6 +9,16 @@ module BetterHtml
   class Parser
     attr_reader :template_language
 
+    class Error < HtmlError
+      attr_reader :location
+      alias_method :loc, :location
+
+      def initialize(message, location:)
+        super(message)
+        @location = location
+      end
+    end
+
     def initialize(document, template_language: :html)
       @document = document
       @template_language = template_language
@@ -31,6 +41,15 @@ module BetterHtml
 
     def ast
       @ast ||= build_document_node
+    end
+
+    def parser_errors
+      @erb.parser.errors.map do |error|
+        Error.new(
+          error.message,
+          location: Tokenizer::Location.new(@document, error.position, error.position + 1)
+        )
+      end
     end
 
     def inspect
