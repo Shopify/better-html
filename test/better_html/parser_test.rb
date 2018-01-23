@@ -12,6 +12,18 @@ module BetterHtml
       assert_equal s(:document), tree.ast
     end
 
+    test "parser errors" do
+      tree = Parser.new('<>')
+
+      assert_equal 1, tree.parser_errors.size
+      assert_equal "expected '/' or tag name", tree.parser_errors[0].message
+      assert_equal 1..2, tree.parser_errors[0].location.range
+      assert_equal <<~EOF.strip, tree.parser_errors[0].location.line_source_with_underline
+        <>
+         ^
+      EOF
+    end
+
     test "consume cdata nodes" do
       code = "<![CDATA[ foo ]]>"
       tree = Parser.new(code)
