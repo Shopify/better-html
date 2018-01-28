@@ -4,7 +4,7 @@ require 'better_html/ast/iterator'
 module BetterHtml
   module Tree
     class Tag
-      attr_reader :node
+      attr_reader :node, :start_solidus, :name_node, :attributes_node, :end_solidus
 
       def initialize(node)
         @node = node
