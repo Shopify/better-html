@@ -43,9 +43,11 @@ EOF
           SafeErb::NoStatements,
           SafeErb::AllowedScriptType,
           SafeErb::NoJavascriptTagHelper,
-          SafeErb::TagInterpolation,
           SafeErb::ScriptInterpolation,
         ]
+        if options[:template_language] == :html
+          tester_classes << SafeErb::TagInterpolation
+        end
 
         testers = tester_classes.map do |tester_klass|
           tester = tester_klass.new(parser)

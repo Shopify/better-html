@@ -5,6 +5,12 @@ module BetterHtml
   module TestHelper
     module SafeErb
       class TagInterpolation < Base
+
+        NO_HTML_TAGS = %w(
+          title textarea script
+          style xmp iframe noembed noframes listing plaintext
+        )
+
         def validate
           @parser.nodes_with_type(:tag).each do |tag_node|
             tag = Tree::Tag.from_node(tag_node)
@@ -14,20 +20,20 @@ module BetterHtml
           end
 
           @parser.nodes_with_type(:text).each do |node|
-            validate_text_node(node) unless in_script_tag?(node)
+            validate_text_node(node) unless no_html_tag?(node)
           end
         end
 
         private
 
-        def in_script_tag?(node)
+        def no_html_tag?(node)
           ast = @parser.ast.to_a
           index = ast.find_index(node)
           return unless (previous_node = ast[index - 1])
           return unless previous_node.type == :tag
 
           tag = BetterHtml::Tree::Tag.from_node(previous_node)
-          tag.name == "script" && !tag.closing?
+          NO_HTML_TAGS.include?(tag.name) && !tag.closing?
         end
 
         def validate_attribute(attribute)
