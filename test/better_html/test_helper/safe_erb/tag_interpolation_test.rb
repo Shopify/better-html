@@ -20,6 +20,14 @@ module BetterHtml
           assert_equal 0, errors.size
         end
 
+        test "raw in <style> tag" do
+          errors = validate(<<-EOF).errors
+            <style>@import url(<%= raw url_for("all.css") %>);</style>
+          EOF
+
+          assert_equal 0, errors.size
+        end
+
         test "html_safe in <script> tag" do
           errors = validate(<<-EOF).errors
             <script>var myData = <%= foo.to_json.html_safe %>;</script>
