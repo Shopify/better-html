@@ -7,11 +7,15 @@ module BetterHtml
 
       def initialize(node)
         @node = node
-        @name_node, @equal_node, @value_node = *node
+        @name_node, @equal_node, @value_node = *node if @node.type == :attribute
       end
 
       def self.from_node(node)
         new(node)
+      end
+
+      def erb?
+        @node.type == :erb
       end
 
       def loc

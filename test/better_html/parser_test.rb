@@ -125,6 +125,29 @@ module BetterHtml
         )), tree.ast
     end
 
+    test "consume tag attributes with erb" do
+      tree = Parser.new("<div class=foo <%= erb %> name=bar>")
+      assert_equal s(:document,
+        s(:tag, nil,
+          s(:tag_name, "div"),
+          s(:tag_attributes,
+            s(:attribute,
+              s(:attribute_name, "class"),
+              s(:equal),
+              s(:attribute_value, "foo")
+            ),
+            s(:erb, s(:indicator, "="), nil,
+              s(:code, " erb "), nil),
+            s(:attribute,
+              s(:attribute_name, "name"),
+              s(:equal),
+              s(:attribute_value, "bar")
+            ),
+          ),
+          nil
+        )), tree.ast
+    end
+
     test "consume tag attributes nodes unquoted value" do
       tree = Parser.new("<div foo=bar>")
       assert_equal s(:document,

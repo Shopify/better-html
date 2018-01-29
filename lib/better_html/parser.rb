@@ -143,6 +143,8 @@ module BetterHtml
           attributes_tokens << build_attribute_node(tokens)
         elsif tokens.current.type == :attribute_quoted_value_start
           attributes_tokens << build_nameless_attribute_node(tokens)
+        elsif tokens.current.type == :erb_begin
+          attributes_tokens << build_erb_node(tokens)
         else
           # todo: warn about ignored things
           tokens.shift
