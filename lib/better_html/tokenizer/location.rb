@@ -31,6 +31,30 @@ module BetterHtml
         underscore_length = [[end_pos - begin_pos, source_line.length - column_without_spaces].min, 1].max
         "#{source_line.gsub(/\A\s*/, '')}\n#{' ' * column_without_spaces}#{'^' * underscore_length}"
       end
+
+      def with(begin_pos: @begin_pos, end_pos: @end_pos)
+        self.class.new(@source_buffer, begin_pos, end_pos)
+      end
+
+      def adjust(begin_pos: 0, end_pos: 0)
+        self.class.new(@source_buffer, @begin_pos + begin_pos, @end_pos + end_pos)
+      end
+
+      def resize(new_size)
+        with(end_pos: @begin_pos + new_size)
+      end
+
+      def offset(offset)
+        with(begin_pos: offset + @begin_pos, end_pos: offset + @end_pos)
+      end
+
+      def begin
+        with(end_pos: @begin_pos)
+      end
+
+      def end
+        with(begin_pos: @end_pos)
+      end
     end
   end
 end

@@ -68,10 +68,10 @@ module BetterHtml
         token = add_token(:erb_end, pos, pos + 2)
       end
 
-      def add_token(type, start, stop)
+      def add_token(type, begin_pos, end_pos)
         token = Token.new(
           type: type,
-          loc: Location.new(@buffer, start, stop)
+          loc: Location.new(@buffer, begin_pos, end_pos)
         )
         @tokens << token
         token
