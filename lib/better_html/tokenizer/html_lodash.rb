@@ -13,9 +13,9 @@ module BetterHtml
       self.lodash_evaluate = %r{(?:\[\%)(.+?)(?:\%\])}m
       self.lodash_interpolate = %r{(?:\[\%)!(.+?)(?:\%\])}m
 
-      def initialize(document)
-        @document = document
-        @scanner = StringScanner.new(document)
+      def initialize(buffer)
+        @buffer = buffer
+        @scanner = StringScanner.new(buffer.source)
         @parser = HtmlTokenizer::Parser.new
         @tokens = []
         scan!
@@ -43,7 +43,7 @@ module BetterHtml
             end
             @parser.append_placeholder(match)
           else
-            text = @document[(@scanner.pos)..(@document.size)]
+            text = @buffer.source[(@scanner.pos)..(@buffer.source.size)]
             add_text(text) unless text.blank?
             break
           end
@@ -87,7 +87,7 @@ module BetterHtml
       def add_token(type, start: nil, stop: nil)
         token = Token.new(
           type: type,
-          loc: Location.new(@document, start, stop-1)
+          loc: Location.new(@buffer, start, stop)
         )
         @tokens << token
         token

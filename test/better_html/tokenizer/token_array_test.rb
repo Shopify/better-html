@@ -8,10 +8,11 @@ module BetterHtml
     class TokenArrayTest < ActiveSupport::TestCase
       setup do
         @document = "<x>"
+        @buffer = buffer(@document)
         @tokens = [
-          Token.new(type: :lquote, loc: Location.new(@document, 0, 0)),
-          Token.new(type: :name, loc: Location.new(@document, 1, 1)),
-          Token.new(type: :rquote, loc: Location.new(@document, 2, 2)),
+          Token.new(type: :lquote, loc: Location.new(@buffer, 0, 0)),
+          Token.new(type: :name, loc: Location.new(@buffer, 1, 1)),
+          Token.new(type: :rquote, loc: Location.new(@buffer, 2, 2)),
         ]
         @array = TokenArray.new(@tokens)
       end

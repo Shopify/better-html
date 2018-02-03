@@ -6,9 +6,9 @@ module BetterHtml
     class HtmlErb < BaseErb
       attr_reader :parser
 
-      def initialize(document)
+      def initialize(buffer)
         @parser = HtmlTokenizer::Parser.new
-        super(document)
+        super(buffer)
       end
 
       def current_position

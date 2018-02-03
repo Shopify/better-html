@@ -18,3 +18,13 @@ if ActiveSupport::TestCase.respond_to?(:fixture_path=)
 end
 
 require 'mocha/mini_test'
+
+class ActiveSupport::TestCase
+  private
+
+  def buffer(string)
+    buffer = ::Parser::Source::Buffer.new('(test)')
+    buffer.source = string
+    buffer
+  end
+end

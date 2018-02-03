@@ -28,7 +28,9 @@ Never use <script> tags inside lodash template.
 EOF
 
       def assert_lodash_safety(data, **options)
-        tester = Tester.new(data, **options)
+        buffer = ::Parser::Source::Buffer.new(options[:filename] || '(buffer)')
+        buffer.source = data
+        tester = Tester.new(buffer, **options)
 
         message = ""
         tester.errors.each do |error|
@@ -49,11 +51,11 @@ EOF
       class Tester
         attr_reader :errors
 
-        def initialize(data, config: BetterHtml.config)
-          @data = data
+        def initialize(buffer, config: BetterHtml.config)
+          @buffer = buffer
           @config = config
           @errors = Errors.new
-          @parser = BetterHtml::Parser.new(data, template_language: :lodash)
+          @parser = BetterHtml::Parser.new(buffer, template_language: :lodash)
           validate!
         end
 
