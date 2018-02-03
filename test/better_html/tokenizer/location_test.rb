@@ -25,6 +25,21 @@ module BetterHtml
         assert_equal "end of range must be greater than start of range (2 < 5)", e.message
       end
 
+      test "location stop == start" do
+        loc = Location.new("aaaaaa", 5, 5)
+        assert_equal 0, loc.size
+      end
+
+      test "end_pos is stop+1" do
+        loc = Location.new("aaaaaa", 5, 5)
+        assert_equal 6, loc.end_pos
+      end
+
+      test "range is exclusive of last char" do
+        loc = Location.new("aaaaaa", 5, 5)
+        assert_equal 5...6, loc.range
+      end
+
       test "location calulates start and stop line and column" do
         loc = Location.new("foo\nbar\nbaz", 5, 9)
 

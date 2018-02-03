@@ -17,7 +17,7 @@ module BetterHtml
 
       assert_equal 1, tree.parser_errors.size
       assert_equal "expected '/' or tag name", tree.parser_errors[0].message
-      assert_equal 1..2, tree.parser_errors[0].location.range
+      assert_equal 1...3, tree.parser_errors[0].location.range
       assert_equal <<~EOF.strip, tree.parser_errors[0].location.line_source_with_underline
         <>
          ^
