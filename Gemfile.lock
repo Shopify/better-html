@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    better_html (1.0.5)
+    better_html (1.0.6)
       actionview (>= 4.0)
       activesupport (>= 4.0)
       ast (~> 2.0)
