@@ -158,9 +158,9 @@ module BetterHtml
 
         def nested_location(parent_node, ruby_node)
           Tokenizer::Location.new(
-            parent_node.loc.document,
-            parent_node.loc.start + ruby_node.loc.expression.begin_pos,
-            parent_node.loc.start + ruby_node.loc.expression.end_pos - 1
+            parent_node.loc.source_buffer,
+            parent_node.loc.begin_pos + ruby_node.loc.expression.begin_pos,
+            parent_node.loc.begin_pos + ruby_node.loc.expression.end_pos
           )
         end
       end

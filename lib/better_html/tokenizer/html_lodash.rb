@@ -13,9 +13,9 @@ module BetterHtml
       self.lodash_evaluate = %r{(?:\[\%)(.+?)(?:\%\])}m
       self.lodash_interpolate = %r{(?:\[\%)!(.+?)(?:\%\])}m
 
-      def initialize(document)
-        @document = document
-        @scanner = StringScanner.new(document)
+      def initialize(buffer)
+        @buffer = buffer
+        @scanner = StringScanner.new(buffer.source)
         @parser = HtmlTokenizer::Parser.new
         @tokens = []
         scan!
@@ -43,7 +43,7 @@ module BetterHtml
             end
             @parser.append_placeholder(match)
           else
-            text = @document[(@scanner.pos)..(@document.size)]
+            text = @buffer.source[(@scanner.pos)..(@buffer.source.size)]
             add_text(text) unless text.blank?
             break
           end
@@ -62,32 +62,32 @@ module BetterHtml
       end
 
       def add_text(text)
-        @parser.parse(text) do |type, start, stop, _line, _column|
-          add_token(type, start: start, stop: stop)
+        @parser.parse(text) do |type, begin_pos, end_pos, _line, _column|
+          add_token(type, begin_pos: begin_pos, end_pos: end_pos)
         end
       end
 
       def add_lodash_tokens(indicator, code)
         pos = @parser.document_length
 
-        add_token(:lodash_begin, start: pos, stop: pos + 2)
+        add_token(:lodash_begin, begin_pos: pos, end_pos: pos + 2)
         pos += 2
 
         if indicator
-          add_token(:indicator, start: pos, stop: pos + indicator.length)
+          add_token(:indicator, begin_pos: pos, end_pos: pos + indicator.length)
           pos += indicator.length
         end
 
-        add_token(:code, start: pos, stop: pos + code.length)
+        add_token(:code, begin_pos: pos, end_pos: pos + code.length)
         pos += code.length
 
-        add_token(:lodash_end, start: pos, stop: pos + 2)
+        add_token(:lodash_end, begin_pos: pos, end_pos: pos + 2)
       end
 
-      def add_token(type, start: nil, stop: nil)
+      def add_token(type, begin_pos: nil, end_pos: nil)
         token = Token.new(
           type: type,
-          loc: Location.new(@document, start, stop-1)
+          loc: Location.new(@buffer, begin_pos, end_pos)
         )
         @tokens << token
         token

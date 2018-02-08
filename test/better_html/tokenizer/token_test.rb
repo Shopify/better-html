@@ -6,7 +6,7 @@ module BetterHtml
   module Tokenizer
     class TokenTest < ActiveSupport::TestCase
       test "token inspect" do
-        loc = Location.new("foo", 0, 2)
+        loc = Location.new(buffer("foo"), 0, 3)
         token = Token.new(type: :foo, loc: loc)
         assert_equal "t(:foo, \"foo\")", token.inspect
       end

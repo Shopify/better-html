@@ -292,7 +292,7 @@ module BetterHtml
 
         private
         def validate(data, template_language: :html)
-          parser = BetterHtml::Parser.new(data, template_language: template_language)
+          parser = BetterHtml::Parser.new(buffer(data), template_language: template_language)
           tester = BetterHtml::TestHelper::SafeErb::TagInterpolation.new(parser, config: @config)
           tester.validate
           tester

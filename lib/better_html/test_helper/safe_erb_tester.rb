@@ -37,7 +37,9 @@ EOF
       def assert_erb_safety(data, **options)
         options = options.present? ? options.dup : {}
         options[:template_language] ||= :html
-        parser = BetterHtml::Parser.new(data, options)
+        buffer = ::Parser::Source::Buffer.new(options[:filename] || '(buffer)')
+        buffer.source = data
+        parser = BetterHtml::Parser.new(buffer, options)
 
         tester_classes = [
           SafeErb::NoStatements,
@@ -57,7 +59,7 @@ EOF
 
         messages = errors.map do |error|
           <<~EOL
-          On line #{error.location.line}
+          In #{buffer.name}:#{error.location.line}
           #{error.message}
           #{error.location.line_source_with_underline}\n
           EOL

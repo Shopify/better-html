@@ -1,76 +1,59 @@
+require 'parser/source/buffer'
+require 'parser/source/range'
+
 module BetterHtml
   module Tokenizer
-    class Location
-      attr_accessor :document, :start, :stop
+    class Location < ::Parser::Source::Range
+      def initialize(buffer, begin_pos, end_pos)
+        raise ArgumentError, 'first argument must be Parser::Source::Buffer' unless buffer.is_a?(::Parser::Source::Buffer)
+        raise ArgumentError, "begin_pos location #{begin_pos} is out of range for document of size #{buffer.source.size}" if begin_pos > buffer.source.size
+        raise ArgumentError, "end_pos location #{end_pos} is out of range for document of size #{buffer.source.size}" if (end_pos - 1) > buffer.source.size
 
-      def initialize(document, start, stop)
-        raise ArgumentError, "start location #{start} is out of range for document of size #{document.size}" if start > document.size
-        raise ArgumentError, "stop location #{stop} is out of range for document of size #{document.size}" if stop > document.size
-        raise ArgumentError, "end of range must be greater than start of range (#{stop} < #{start})" if stop < start
-
-        @document = document
-        @start = start
-        @stop = stop
+        super(buffer, begin_pos, end_pos)
       end
 
       def range
-        Range.new(start, stop)
+        Range.new(begin_pos, end_pos, true)
       end
 
       def line_range
         Range.new(start_line, stop_line)
       end
 
-      def source
-        @document[range]
-      end
-
-      def start_line
-        @start_line ||= calculate_line(start)
-      end
-
-      def line
-        start_line
-      end
-
-      def stop_line
-        @stop_line ||= calculate_line(stop)
-      end
-
-      def start_column
-        @start_column ||= calculate_column(start)
-      end
-
-      def column
-        start_column
-      end
-
-      def stop_column
-        @stop_column ||= calculate_column(stop)
-      end
+      alias_method :start_line, :line
+      alias_method :stop_line, :last_line
+      alias_method :start_column, :column
+      alias_method :stop_column, :last_column
 
       def line_source_with_underline
-        line_content = extract_line(line: start_line)
-        spaces = line_content.scan(/\A\s*/).first
+        spaces = source_line.scan(/\A\s*/).first
         column_without_spaces = [column - spaces.length, 0].max
-        underscore_length = [[stop - start + 1, line_content.length - column_without_spaces].min, 1].max
-        "#{line_content.gsub(/\A\s*/, '')}\n#{' ' * column_without_spaces}#{'^' * underscore_length}"
+        underscore_length = [[end_pos - begin_pos, source_line.length - column_without_spaces].min, 1].max
+        "#{source_line.gsub(/\A\s*/, '')}\n#{' ' * column_without_spaces}#{'^' * underscore_length}"
       end
 
-      private
-
-      def calculate_line(pos)
-        return 1 if pos == 0
-        @document[0..pos-1].scan("\n").count + 1
+      def with(begin_pos: @begin_pos, end_pos: @end_pos)
+        self.class.new(@source_buffer, begin_pos, end_pos)
       end
 
-      def calculate_column(pos)
-        return 0 if pos == 0
-        @document[0..pos-1]&.split("\n", -1)&.last&.length || 0
+      def adjust(begin_pos: 0, end_pos: 0)
+        self.class.new(@source_buffer, @begin_pos + begin_pos, @end_pos + end_pos)
       end
 
-      def extract_line(line:)
-        @document.split("\n", -1)[line - 1]&.gsub(/\n$/, '') || ""
+      def resize(new_size)
+        with(end_pos: @begin_pos + new_size)
+      end
+
+      def offset(offset)
+        with(begin_pos: offset + @begin_pos, end_pos: offset + @end_pos)
+      end
+
+      def begin
+        with(end_pos: @begin_pos)
+      end
+
+      def end
+        with(begin_pos: @end_pos)
       end
     end
   end

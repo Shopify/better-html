@@ -83,7 +83,7 @@ module BetterHtml
       private
 
       def parse(data)
-        SafeLodashTester::Tester.new(data)
+        SafeLodashTester::Tester.new(buffer(data))
       end
     end
   end

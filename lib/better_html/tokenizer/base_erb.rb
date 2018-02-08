@@ -1,6 +1,7 @@
 require 'erubi'
 require_relative 'token'
 require_relative 'location'
+require 'parser/source/buffer'
 
 module BetterHtml
   module Tokenizer
@@ -12,11 +13,12 @@ module BetterHtml
       attr_reader :tokens
       attr_reader :current_position
 
-      def initialize(document)
-        @document = document
+      def initialize(buffer)
+        raise ArgumentError, 'first argument must be Parser::Source::Buffer' unless buffer.is_a?(::Parser::Source::Buffer)
+        @buffer = buffer
         @tokens = []
         @current_position = 0
-        super(document, regexp: REGEXP_WITHOUT_TRIM, trim: false)
+        super(buffer.source, regexp: REGEXP_WITHOUT_TRIM, trim: false)
       end
 
       private
@@ -66,10 +68,10 @@ module BetterHtml
         token = add_token(:erb_end, pos, pos + 2)
       end
 
-      def add_token(type, start, stop)
+      def add_token(type, begin_pos, end_pos)
         token = Token.new(
           type: type,
-          loc: Location.new(@document, start, stop - 1)
+          loc: Location.new(@buffer, begin_pos, end_pos)
         )
         @tokens << token
         token

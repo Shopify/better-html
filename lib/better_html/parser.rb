@@ -4,6 +4,7 @@ require_relative 'tokenizer/html_lodash'
 require_relative 'tokenizer/location'
 require_relative 'tokenizer/token_array'
 require_relative 'ast/node'
+require 'parser/source/buffer'
 
 module BetterHtml
   class Parser
@@ -19,16 +20,17 @@ module BetterHtml
       end
     end
 
-    def initialize(document, template_language: :html)
-      @document = document
+    def initialize(buffer, template_language: :html)
+      raise ArgumentError, 'first argument must be Parser::Source::Buffer' unless buffer.is_a?(::Parser::Source::Buffer)
+      @buffer = buffer
       @template_language = template_language
       @erb = case template_language
       when :html
-        Tokenizer::HtmlErb.new(@document)
+        Tokenizer::HtmlErb.new(@buffer)
       when :lodash
-        Tokenizer::HtmlLodash.new(@document)
+        Tokenizer::HtmlLodash.new(@buffer)
       when :javascript
-        Tokenizer::JavascriptErb.new(@document)
+        Tokenizer::JavascriptErb.new(@buffer)
       else
         raise ArgumentError, "template_language can be :html or :javascript"
       end
@@ -47,7 +49,7 @@ module BetterHtml
       @erb.parser.errors.map do |error|
         Error.new(
           error.message,
-          location: Tokenizer::Location.new(@document, error.position, error.position + 1)
+          location: Tokenizer::Location.new(@buffer, error.position, error.position + 1)
         )
       end
     end
@@ -199,11 +201,11 @@ module BetterHtml
     def build_location(enumerable)
       enumerable = enumerable.compact
       raise ArgumentError, "cannot build location for #{enumerable.inspect}" unless enumerable.first && enumerable.last
-      Tokenizer::Location.new(@document, enumerable.first.loc.start, enumerable.last.loc.stop)
+      Tokenizer::Location.new(@buffer, enumerable.first.loc.begin_pos, enumerable.last.loc.end_pos)
     end
 
     def empty_location
-      Tokenizer::Location.new(@document, 0, 0)
+      Tokenizer::Location.new(@buffer, 0, 0)
     end
 
     def shift_all(tokens, *types)
