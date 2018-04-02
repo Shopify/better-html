@@ -6,7 +6,7 @@ require 'parser/source/buffer'
 module BetterHtml
   module Tokenizer
     class BaseErb < ::Erubi::Engine
-      REGEXP_WITHOUT_TRIM = /<%(={1,2}|%)?(.*?)()?%>([ \t]*\r?\n)?/m
+      REGEXP_WITHOUT_TRIM = /<%(={1,2})?(.*?)()?%>([ \t]*\r?\n)?/m
       STMT_TRIM_MATCHER = /\A(-|#)?(.*?)([-=])?\z/m
       EXPR_TRIM_MATCHER = /\A(.*?)(-)?\z/m
 
@@ -28,11 +28,15 @@ module BetterHtml
       end
 
       def add_code(code)
-        _, ltrim_or_comment, code, rtrim = *STMT_TRIM_MATCHER.match(code)
-        ltrim = ltrim_or_comment if ltrim_or_comment == '-'
-        indicator = ltrim_or_comment if ltrim_or_comment == '#'
-        add_erb_tokens(ltrim, indicator, code, rtrim)
-        append("<%#{ltrim}#{indicator}#{code}#{rtrim}%>")
+        if code[0] == '%'
+          add_text("<%#{code}%>")
+        else
+          _, ltrim_or_comment, code, rtrim = *STMT_TRIM_MATCHER.match(code)
+          ltrim = ltrim_or_comment if ltrim_or_comment == '-'
+          indicator = ltrim_or_comment if ltrim_or_comment == '#'
+          add_erb_tokens(ltrim, indicator, code, rtrim)
+          append("<%#{ltrim}#{indicator}#{code}#{rtrim}%>")
+        end
       end
 
       def add_expression(indicator, code)
