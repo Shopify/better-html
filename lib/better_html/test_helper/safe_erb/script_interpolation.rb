@@ -30,7 +30,7 @@ module BetterHtml
 
             ruby_node = begin
               RubyNode.parse(source)
-            rescue Parser::SyntaxError
+            rescue ::Parser::SyntaxError
               nil
             end
             next unless ruby_node
