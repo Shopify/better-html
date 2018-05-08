@@ -41,7 +41,7 @@ module BetterHtml
                 index = ast.to_a.find_index(tag_node)
                 next_node = ast.to_a[index + 1]
 
-                yielder.yield(tag, next_node.type == :text ? next_node : nil)
+                yielder.yield(tag, next_node&.type == :text ? next_node : nil)
               end
             end
           end
