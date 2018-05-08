@@ -44,7 +44,12 @@ module BetterHtml
             source = code_node.loc.source
 
             if indicator == '='
-              if (ruby_node = RubyNode.parse(source))
+              ruby_node = begin
+                RubyNode.parse(source)
+              rescue Parser::SyntaxError
+                nil
+              end
+              if ruby_node
                 no_unsafe_calls(code_node, ruby_node)
                 unless ruby_node.static_return_value?
                   handle_missing_safe_wrapper(code_node, ruby_node, attribute.name)
@@ -65,7 +70,12 @@ module BetterHtml
             next if indicator == '#'
             source = code_node.loc.source
 
-            next unless (ruby_node = RubyNode.parse(source))
+            ruby_node = begin
+              RubyNode.parse(source)
+            rescue Parser::SyntaxError
+              nil
+            end
+            next unless ruby_node
             no_unsafe_calls(code_node, ruby_node)
             validate_ruby_helper(code_node, ruby_node)
           end

@@ -28,7 +28,12 @@ module BetterHtml
             next if indicator == '#'
             source = code_node.loc.source
 
-            next unless (ruby_node = RubyNode.parse(source))
+            ruby_node = begin
+              RubyNode.parse(source)
+            rescue Parser::SyntaxError
+              nil
+            end
+            next unless ruby_node
             validate_script_interpolation(erb_node, ruby_node)
           end
         end

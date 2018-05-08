@@ -17,7 +17,12 @@ module BetterHtml
             next if indicator == '#'
             source = code_node.loc.source
 
-            next unless (ruby_node = RubyNode.parse(source))
+            ruby_node = begin
+              RubyNode.parse(source)
+            rescue Parser::SyntaxError
+              nil
+            end
+            next unless ruby_node
             ruby_node.descendants(:send, :csend).each do |send_node|
               next unless send_node.method_name?(:javascript_tag)
 
