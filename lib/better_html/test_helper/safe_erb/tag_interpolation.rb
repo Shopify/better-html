@@ -67,7 +67,7 @@ module BetterHtml
         def validate_text_node(text_node)
           erb_nodes(text_node).each do |erb_node, indicator_node, code_node|
             indicator = indicator_node&.loc&.source
-            next if indicator == '#'
+            next if indicator == '#' || indicator == '%'
             source = code_node.loc.source
 
             ruby_node = begin
