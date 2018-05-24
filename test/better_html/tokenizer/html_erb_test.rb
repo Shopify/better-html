@@ -152,19 +152,14 @@ module BetterHtml
 
       test "escaped opening ERB tag <%%" do
         scanner = HtmlErb.new(buffer("just some <%%= text %> no erb"))
-        assert_equal 11, scanner.tokens.size
+        assert_equal 6, scanner.tokens.size
 
         assert_attributes ({ type: :text, loc: { line: 1, source: "just some " } }), scanner.tokens[0]
-        assert_attributes ({ type: :tag_start, loc: { line: 1, source: '<' } }), scanner.tokens[1]
-        assert_attributes ({ type: :tag_name, loc: { line: 1, source: '%%=' } }), scanner.tokens[2]
-        assert_attributes ({ type: :whitespace, loc: { line: 1, source: " " } }), scanner.tokens[3]
-        assert_attributes ({ type: :attribute_name, loc: { line: 1, source: "text" } }), scanner.tokens[4]
-        assert_attributes ({ type: :whitespace, loc: { line: 1, source: " " } }), scanner.tokens[5]
-        assert_attributes ({ type: :malformed, loc: { line: 1, source: "%>" } }), scanner.tokens[6]
-        assert_attributes ({ type: :whitespace, loc: { line: 1, source: " " } }), scanner.tokens[7]
-        assert_attributes ({ type: :attribute_name, loc: { line: 1, source: "no" } }), scanner.tokens[8]
-        assert_attributes ({ type: :whitespace, loc: { line: 1, source: " " } }), scanner.tokens[9]
-        assert_attributes ({ type: :attribute_name, loc: { line: 1, source: "erb" } }), scanner.tokens[10]
+        assert_attributes ({ type: :erb_begin, loc: { line: 1, source: '<%' } }), scanner.tokens[1]
+        assert_attributes ({ type: :indicator, loc: { line: 1, source: "%" } }), scanner.tokens[2]
+        assert_attributes ({ type: :code, loc: { line: 1, source: "= text " } }), scanner.tokens[3]
+        assert_attributes ({ type: :erb_end, loc: { line: 1, source: "%>" } }), scanner.tokens[4]
+        assert_attributes ({ type: :text, loc: { line: 1, source: " no erb" } }), scanner.tokens[5]
       end
 
       private

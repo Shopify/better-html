@@ -29,7 +29,8 @@ module BetterHtml
 
       def add_code(code)
         if code[0] == '%'
-          add_text("<%#{code}%>")
+          add_erb_tokens(nil, '%', code[1..-1], nil)
+          append("<%#{code}%>")
         else
           _, ltrim_or_comment, code, rtrim = *STMT_TRIM_MATCHER.match(code)
           ltrim = ltrim_or_comment if ltrim_or_comment == '-'
