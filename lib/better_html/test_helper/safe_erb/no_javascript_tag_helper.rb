@@ -14,7 +14,7 @@ module BetterHtml
         def no_javascript_tag_helper(node)
           erb_nodes(node).each do |erb_node, indicator_node, code_node|
             indicator = indicator_node&.loc&.source
-            next if indicator == '#'
+            next if indicator == '#' || indicator == '%'
             source = code_node.loc.source
 
             ruby_node = begin

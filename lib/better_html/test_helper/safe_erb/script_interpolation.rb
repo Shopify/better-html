@@ -25,7 +25,7 @@ module BetterHtml
           erb_nodes(node).each do |erb_node, indicator_node, code_node|
             next unless indicator_node.present?
             indicator = indicator_node.loc.source
-            next if indicator == '#'
+            next if indicator == '#' || indicator == '%'
             source = code_node.loc.source
 
             ruby_node = begin
