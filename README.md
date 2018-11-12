@@ -200,16 +200,20 @@ data, but never becomes javascript code.
 Simply create `test/unit/erb_safety_test.rb` and add code like this:
 
 ```ruby
-require 'test_helper'
-require 'better_html/test_helper/safe_erb_tester'
+# frozen_string_literal: true
+
+require "test_helper"
+require "better_html/test_helper/safe_erb_tester"
 
 class ErbSafetyTest < ActiveSupport::TestCase
   include BetterHtml::TestHelper::SafeErbTester
-
-  ERB_GLOB = File.join(Rails.root, 'app/views/**/{*.htm,*.html,*.htm.erb,*.html.erb,*.html+*.erb}')
+  ERB_GLOB = Rails.root.join(
+    "app", "views", "**", "{*.htm,*.html,*.htm.erb,*.html.erb,*.html+*.erb}"
+  )
 
   Dir[ERB_GLOB].each do |filename|
-    test "missing javascript escapes in #{Pathname.new(filename).relative_path_from(Rails.root)}" do
+    pathname = Pathname.new(filename).relative_path_from(Rails.root)
+    test "missing javascript escapes in #{pathname}" do
       assert_erb_safety File.read(filename)
     end
   end
@@ -220,13 +224,18 @@ You may also want to assert that all `.html.erb` templates are parseable, to avo
 broken templates to production. Add this code in `test/unit/erb_implementation_test.rb`
 
 ```ruby
-require 'test_helper'
+# frozen_string_literal: true
+
+require "test_helper"
 
 class ErbImplementationTest < ActiveSupport::TestCase
-  ERB_GLOB = File.join(Rails.root, 'app/views/**/{*.htm,*.html,*.htm.erb,*.html.erb,*.html+*.erb}')
+  ERB_GLOB = Rails.root.join(
+    "app", "views", "**", "{*.htm,*.html,*.htm.erb,*.html.erb,*.html+*.erb}"
+  )
 
   Dir[ERB_GLOB].each do |filename|
-    test "html errors in #{Pathname.new(filename).relative_path_from(Rails.root)}" do
+    pathname = Pathname.new(filename).relative_path_from(Rails.root)
+    test "html errors in #{pathname}" do
       data = File.read(filename)
       BetterHtml::BetterErb::ErubiImplementation.new(data).validate!
     end
