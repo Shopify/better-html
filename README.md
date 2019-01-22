@@ -244,8 +244,9 @@ first class nodes in the syntax tree.
 ```ruby
 require 'better_html/parser'
 
-data = '<div><%= value -%></div>'
-parser = BetterHtml::Parser.new(data)
+buffer = Parser::Source::Buffer.new('(buffer)')
+buffer.source = '<div><%= value -%></div>'
+parser = BetterHtml::Parser.new(buffer)
 
 puts parser.inspect
 # => #<BetterHtml::Parser ast=s(:document,
