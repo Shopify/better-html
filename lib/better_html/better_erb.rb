@@ -27,27 +27,28 @@ class BetterHtml::BetterErb
 
   module ConditionalImplementation
 
-    def call(template)
-      generate(template)
+    def call(template, source = nil)
+      generate(template, source)
     end
 
     private
 
-    def generate(template)
+    def generate(template, source)
       # First, convert to BINARY, so in case the encoding is
       # wrong, we can still find an encoding tag
       # (<%# encoding %>) inside the String using a regular
       # expression
 
+      source ||= template.source
       filename = template.identifier.split("/").last
       exts = filename.split(".")
       exts = exts[1..exts.length].join(".")
-      template_source = template.source.dup.force_encoding(Encoding::ASCII_8BIT)
+      template_source = source.dup.force_encoding(Encoding::ASCII_8BIT)
 
       erb = template_source.gsub(ActionView::Template::Handlers::ERB::ENCODING_TAG, '')
       encoding = $2
 
-      erb.force_encoding valid_encoding(template.source.dup, encoding)
+      erb.force_encoding valid_encoding(source.dup, encoding)
 
       # Always make sure we return a String in the default_internal
       erb.encode!
