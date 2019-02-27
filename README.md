@@ -143,7 +143,7 @@ double-quote character (`"`) at runtime, then the resulting HTML would be invali
 and the application would be vulnerable to XSS when `value` is user-controlled.
 
 With HTML-aware ERB parsing, we wrap `value` into a runtime safety check that raises
-and exception when `value` contains a dobule-quote character that would terminate
+and exception when `value` contains a double-quote character that would terminate
 the html attribute. The safety check is performed after normal ERB escaping rules
 are applied, so the standard html_safe helper can be used.
 
@@ -160,7 +160,7 @@ Consider the following ERB template
 
 When `value` is user-controlled, an attacker may achieve XSS quite easily in this
 situation. We wrap `value` in a runtime check that ensures it only contains characters
-that are valid in a attribute name. This excludes `=`, `/` or space, which should
+that are valid in an attribute name. This excludes `=`, `/` or space, which should
 prevent any risk of injection.
 
 The `html_attributes` helper works the same way, it will raise when attribute names
