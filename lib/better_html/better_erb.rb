@@ -57,9 +57,14 @@ class BetterHtml::BetterErb
       klass = BetterHtml::BetterErb.content_types[exts] unless excluded_template
       klass ||= self.class.erb_implementation
 
+      escape = if ActionView::VERSION::MAJOR <= 5
+        self.class.escape_whitelist.include?(template.type)
+      else
+        self.class.escape_ignore_list.include?(template.type)
+      end
       generator = klass.new(
         erb,
-        :escape => (self.class.escape_whitelist.include? template.type),
+        :escape => escape,
         :trim => (self.class.erb_trim_mode == "-")
       )
       generator.validate! if generator.respond_to?(:validate!)
