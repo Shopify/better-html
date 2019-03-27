@@ -171,23 +171,23 @@ contain dangerous characters.
 Consider the following ERB template:
 
 ```erb
-<script>
-  var myValue = <%== value.to_json %>;
-</script>
+<textarea>
+  <%== value %>
+</textarea>
 ```
 
-In circumstances where `value` may contain input such as `</script><script>`,
+In circumstances where `value` may contain input such as `</textarea><script>alert(1)</script>`,
 an attacker can easily achieve XSS. We make
 best-effort runtime validations on this value in order to make it safe against
 some obvious attacks.
 
-We wrap the contents of the script tag, including everything between the
-original `<script>` and `</script>`, into a safety check that raises an exception
-if a rogue `</script>` tag is inserted as a result of ruby data being interpolated
+We wrap the contents of the textarea tag, including everything between the
+original `<textarea>` and `</textarea>`, into a safety check that raises an exception
+if a rogue `</textarea>` tag is inserted as a result of ruby data being interpolated
 anywhere.
 
 The same strategy is applied to other tags which contain non-html data,
-such as `<textarea>`, html comments and CDATA tags.
+such as `<script>`, html comments and CDATA tags.
 
 ## Testing for valid HTML and ERB
 
