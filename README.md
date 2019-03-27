@@ -181,10 +181,9 @@ an attacker can easily achieve XSS. We make
 best-effort runtime validations on this value in order to make it safe against
 some obvious attacks.
 
-We wrap the contents of the textarea tag, including everything between the
-original `<textarea>` and `</textarea>`, into a safety check that raises an exception
-if a rogue `</textarea>` tag is inserted as a result of ruby data being interpolated
-anywhere.
+We check for any interpolation containing `</textarea>` and raise an exception
+if this substring occurs. Note that this won't catch cases where an end tag is
+split across multiple adjacent interpolations.
 
 The same strategy is applied to other tags which contain non-html data,
 such as `<script>`, html comments and CDATA tags.
