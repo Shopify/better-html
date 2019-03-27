@@ -181,7 +181,7 @@ an attacker can easily achieve XSS. We make
 best-effort runtime validations on this value in order to make it safe against
 some obvious attacks.
 
-We check for any interpolation containing `</textarea>` and raise an exception
+We check for any interpolation containing `</textarea` and raise an exception
 if this substring occurs. Note that this won't catch cases where an end tag is
 split across multiple adjacent interpolations.
 
