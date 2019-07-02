@@ -56,7 +56,7 @@ GEM
     rails-html-sanitizer (1.0.3)
       loofah (~> 2.0)
     rake (11.1.2)
-    smart_properties (1.13.1)
+    smart_properties (1.15.0)
     thread_safe (0.3.6)
     tzinfo (1.2.3)
       thread_safe (~> 0.1)
