@@ -40,9 +40,6 @@ class BetterHtml::BetterErb
       # expression
 
       source ||= template.source
-      filename = template.identifier.split("/").last
-      exts = filename.split(".")
-      exts = exts[1..exts.length].join(".")
       template_source = source.dup.force_encoding(Encoding::ASCII_8BIT)
 
       erb = template_source.gsub(ActionView::Template::Handlers::ERB::ENCODING_TAG, '')
@@ -54,7 +51,15 @@ class BetterHtml::BetterErb
       erb.encode!
 
       excluded_template = !!BetterHtml.config.template_exclusion_filter&.call(template.identifier)
-      klass = BetterHtml::BetterErb.content_types[exts] unless excluded_template
+
+      unless excluded_template
+        filename = template.identifier.split("/").last
+        exts = filename.split(".")
+        exts = exts[1..exts.length].join(".")
+
+        klass = BetterHtml::BetterErb.content_types[exts]
+      end
+
       klass ||= self.class.erb_implementation
 
       escape = if ActionView::VERSION::MAJOR <= 5
