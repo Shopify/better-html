@@ -1,6 +1,7 @@
 require 'better_html/test_helper/safety_error'
 require 'better_html/ast/iterator'
 require 'better_html/tree/tag'
+require 'better_html/parser'
 
 module BetterHtml
   module TestHelper
