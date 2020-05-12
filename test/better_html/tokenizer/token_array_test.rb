@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'active_support/core_ext/array/access'
 require 'better_html/tokenizer/token'
 require 'better_html/tokenizer/location'
 require 'better_html/tokenizer/token_array'

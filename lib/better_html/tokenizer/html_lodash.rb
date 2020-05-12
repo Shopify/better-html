@@ -1,4 +1,5 @@
 require 'active_support'
+require 'html_tokenizer'
 require_relative 'token'
 require_relative 'location'
 

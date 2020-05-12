@@ -1,7 +1,6 @@
 require "active_support"
 require "minitest/autorun"
 require 'better_html'
-require 'better_html/parser'
 
 # Filter out Minitest backtrace while allowing backtrace from other libraries
 # to be shown.

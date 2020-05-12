@@ -1,3 +1,4 @@
+require 'better_html/parser'
 require 'parser/current'
 
 module BetterHtml
