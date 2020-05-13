@@ -52,7 +52,7 @@ EOF
         end
 
         testers = tester_classes.map do |tester_klass|
-          tester = tester_klass.new(parser)
+          tester_klass.new(parser)
         end
         testers.each(&:validate)
         errors = testers.map(&:errors).flatten
