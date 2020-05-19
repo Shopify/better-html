@@ -14,6 +14,13 @@ Gem::Specification.new do |s|
   s.description = "Better HTML for Rails. Provides sane html helpers that make it easier to do the right thing."
   s.license     = "MIT"
 
+  s.metadata = {
+    "bug_tracker_uri" => "https://github.com/Shopify/better-html/issues",
+    "changelog_uri" => "https://github.com/Shopify/better-html/releases",
+    "source_code_uri" => "https://github.com/Shopify/better-html/tree/v#{s.version}",
+    "allowed_push_host" => "https://rubygems.org"
+  }
+
   s.files = Dir["{app,config,db,lib,ext}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.test_files = Dir["test/**/*"]
   s.require_paths = ["lib"]
