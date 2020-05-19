@@ -39,7 +39,7 @@ EOF
         options[:template_language] ||= :html
         buffer = ::Parser::Source::Buffer.new(options[:filename] || '(buffer)')
         buffer.source = data
-        parser = BetterHtml::Parser.new(buffer, options)
+        parser = BetterHtml::Parser.new(buffer, **options)
 
         tester_classes = [
           SafeErb::NoStatements,

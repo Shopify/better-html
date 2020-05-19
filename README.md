@@ -79,6 +79,7 @@ approach to what ERB syntax is allowed given any HTML context. The next section
 describes the allowed syntax.
 
 Use ruby expressions inside quoted html attributes.
+
 ```erb
 Allowed ✅
 <img class="<%= value %>">
@@ -91,6 +92,7 @@ Not allowed ❌
 ```
 
 Use interpolation into tag or attribute names.
+
 ```erb
 Allowed ✅
 <img data-<%= value %>="true">
@@ -106,6 +108,7 @@ Not allowed ❌
 ```
 
 Insert conditional attributes using `html_attributes` helper.
+
 ```erb
 Allowed ✅
 <img <%= html_attributes(class: 'hidden') if condition? %>>
@@ -115,6 +118,7 @@ Not allowed ❌
 ```
 
 Only insert expressions (`<%=` or `<%==`) inside script tags, never statements (`<%`)
+
 ```erb
 <script>
   // Allowed ✅
