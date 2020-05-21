@@ -1,3 +1,4 @@
+require_relative 'errors'
 require_relative 'tokenizer/javascript_erb'
 require_relative 'tokenizer/html_erb'
 require_relative 'tokenizer/html_lodash'
