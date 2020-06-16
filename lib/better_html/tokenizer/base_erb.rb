@@ -49,28 +49,28 @@ module BetterHtml
       def add_erb_tokens(ltrim, indicator, code, rtrim)
         pos = current_position
 
-        token = add_token(:erb_begin, pos, pos + 2)
+        add_token(:erb_begin, pos, pos + 2)
         pos += 2
 
         if ltrim
-          token = add_token(:trim, pos, pos + ltrim.length)
+          add_token(:trim, pos, pos + ltrim.length)
           pos += ltrim.length
         end
 
         if indicator
-          token = add_token(:indicator, pos, pos + indicator.length)
+          add_token(:indicator, pos, pos + indicator.length)
           pos += indicator.length
         end
 
-        token = add_token(:code, pos, pos + code.length)
+        add_token(:code, pos, pos + code.length)
         pos += code.length
 
         if rtrim
-          token = add_token(:trim, pos, pos + rtrim.length)
+          add_token(:trim, pos, pos + rtrim.length)
           pos += rtrim.length
         end
 
-        token = add_token(:erb_end, pos, pos + 2)
+        add_token(:erb_end, pos, pos + 2)
       end
 
       def add_token(type, begin_pos, end_pos)
