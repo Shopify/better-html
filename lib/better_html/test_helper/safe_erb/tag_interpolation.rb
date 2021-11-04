@@ -153,11 +153,10 @@ module BetterHtml
         def no_unsafe_calls(parent_node, ruby_node)
           raw_error = false
           to_json_input_to_raw = false
+          
           ruby_node.descendants(:send, :csend).each do |call|
             if call.method_name?(:raw)
-              puts "found raw error"
               raw_error = true
-              
             elsif call.method_name?(:html_safe)
               add_error(
                 "erb interpolation with '<%= (...).html_safe %>' in this context is never safe",
@@ -170,15 +169,11 @@ module BetterHtml
             end
           end
 
-          if raw_error
-            if to_json_input_to_raw
-              puts "WILL NOT ERROR"
-            else 
-              add_error(
-                "erb interpolation with '<%= raw(...) %>' in this context is never safe",
-                location: nested_location(parent_node, ruby_node)
-              )
-            end
+          if raw_error && !to_json_input_to_raw
+            add_error(
+              "erb interpolation with '<%= raw(...) %>' in this context is never safe",
+              location: nested_location(parent_node, ruby_node)
+            )
           end
         end
 
