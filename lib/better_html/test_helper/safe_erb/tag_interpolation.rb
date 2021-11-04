@@ -159,7 +159,7 @@ module BetterHtml
               raw_error = true
             elsif call.method_name?(:html_safe)
               add_error(
-                "erb interpolation with '<%= (...).html_safe %>' in this context is never safe",
+                "erb interpolation with '<%= (...).html_safe %>' in this context may introduce XSS. Please request security review.",
                 location: nested_location(parent_node, ruby_node)
               )
             end
@@ -171,7 +171,7 @@ module BetterHtml
 
           if raw_error && !to_json_input_to_raw
             add_error(
-              "erb interpolation with '<%= raw(...) %>' in this context is never safe",
+              "erb interpolation with '<%= raw(...) %>' without .to_json may introduce XSS. Please request security review.",
               location: nested_location(parent_node, ruby_node)
             )
           end
