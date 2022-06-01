@@ -66,7 +66,7 @@ module BetterHtml
         pos += code.length
 
         if rtrim
-          token = add_token(:trim, pos, pos + rtrim.length)
+          add_token(:trim, pos, pos + rtrim.length)
           pos += rtrim.length
         end
 
