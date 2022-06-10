@@ -4,7 +4,7 @@ module BetterHtml
   module TestHelper
     module SafeErb
       class AllowedScriptType < Base
-        VALID_JAVASCRIPT_TAG_TYPES = ['text/javascript', 'text/template', 'text/html']
+        VALID_JAVASCRIPT_TAG_TYPES = ['text/javascript', 'text/template', 'text/html', 'module']
 
         def validate
           script_tags.each do |tag, _|
