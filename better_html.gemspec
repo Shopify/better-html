@@ -33,5 +33,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'smart_properties'
   s.add_dependency 'html_tokenizer', '~> 0.0.6'
 
-  s.add_development_dependency 'rake', '~> 0'
+  s.add_development_dependency 'rake', '~> 13'
 end
