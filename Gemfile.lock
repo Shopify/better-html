@@ -59,7 +59,7 @@ GEM
       nokogiri (>= 1.6)
     rails-html-sanitizer (1.4.3)
       loofah (~> 2.3)
-    rake (11.1.2)
+    rake (13.0.6)
     smart_properties (1.15.0)
     thread_safe (0.3.6)
     tzinfo (1.2.3)
