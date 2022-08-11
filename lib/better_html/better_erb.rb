@@ -1,4 +1,6 @@
 require 'action_view'
+
+require 'better_html_ext'
 if ActionView.version < Gem::Version.new("5.1")
 require 'better_html/better_erb/erubis_implementation'
 else
@@ -6,6 +8,18 @@ require 'better_html/better_erb/erubi_implementation'
 end
 require 'better_html/better_erb/validated_output_buffer'
 
+module BetterHtml
+  class ParserError < RuntimeError
+    attr_reader :position, :line, :column
+
+    def initialize(message, position, line, column)
+      super(message)
+      @position = position
+      @line = line
+      @column = column
+    end
+  end
+end
 
 class BetterHtml::BetterErb
   cattr_accessor :content_types
