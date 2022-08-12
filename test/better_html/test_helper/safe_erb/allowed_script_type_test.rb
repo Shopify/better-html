@@ -30,7 +30,9 @@ module BetterHtml
 
           assert_equal 1, errors.size
           assert_equal 'type="text/bogus"', errors.first.location.source
-          assert_equal "text/bogus is not a valid type, valid types are text/javascript, text/template, text/html", errors.first.message
+
+          expected_message = "text/bogus is not a valid type, valid types are #{BetterHtml::TestHelper::SafeErb::AllowedScriptType::VALID_JAVASCRIPT_TAG_TYPES.join(", ")}"
+          assert_equal expected_message, errors.first.message
         end
 
         private
