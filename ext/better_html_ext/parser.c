@@ -734,7 +734,7 @@ static VALUE create_parser_error(struct parser_document_error_t *error)
   return rb_class_new_instance(4, args, klass);
 }
 
-static VALUE parser_errors_method(VALUE self, VALUE error_p)
+static VALUE parser_errors_method(VALUE self)
 {
   struct parser_t *parser = NULL;
   VALUE list;

@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.extensions    = ['ext/better_html_ext/extconf.rb']
   s.files = Dir["{app,config,db,lib,ext}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.test_files = Dir["test/**/*"]
-  s.require_paths = ["lib", "ext"]
+  s.require_paths = ["lib"]
 
   s.add_dependency 'ast', '~> 2.0'
   s.add_dependency 'erubi', '~> 1.4'
