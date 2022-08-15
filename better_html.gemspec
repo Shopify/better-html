@@ -14,6 +14,8 @@ Gem::Specification.new do |s|
   s.description = "Better HTML for Rails. Provides sane html helpers that make it easier to do the right thing."
   s.license     = "MIT"
 
+  s.required_ruby_version = ">= 2.7.0"
+
   s.metadata = {
     "bug_tracker_uri" => "https://github.com/Shopify/better-html/issues",
     "changelog_uri" => "https://github.com/Shopify/better-html/releases",
