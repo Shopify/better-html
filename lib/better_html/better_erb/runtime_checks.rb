@@ -1,4 +1,3 @@
-require 'html_tokenizer'
 require 'action_view'
 
 class BetterHtml::BetterErb

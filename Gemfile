@@ -4,8 +4,8 @@ gemspec
 
 gem 'actionview'
 gem 'rake'
+gem 'rake-compiler'
 gem 'minitest'
-gem 'html_tokenizer'
 gem 'mocha'
 
 group :deployment, :test do

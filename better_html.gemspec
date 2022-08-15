@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
     "allowed_push_host" => "https://rubygems.org"
   }
 
+  s.extensions    = ['ext/better_html_ext/extconf.rb']
   s.files = Dir["{app,config,db,lib,ext}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.test_files = Dir["test/**/*"]
   s.require_paths = ["lib"]
@@ -31,7 +32,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'actionview', '>= 4.0'
   s.add_dependency 'parser', '>= 2.4'
   s.add_dependency 'smart_properties'
-  s.add_dependency 'html_tokenizer', '~> 0.0.6'
 
   s.add_development_dependency 'rake', '~> 13'
 end
