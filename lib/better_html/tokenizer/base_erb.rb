@@ -1,7 +1,9 @@
-require 'erubi'
-require_relative 'token'
-require_relative 'location'
-require 'parser/source/buffer'
+# frozen_string_literal: true
+
+require "erubi"
+require_relative "token"
+require_relative "location"
+require "parser/source/buffer"
 
 module BetterHtml
   module Tokenizer
@@ -14,7 +16,9 @@ module BetterHtml
       attr_reader :current_position
 
       def initialize(buffer)
-        raise ArgumentError, 'first argument must be Parser::Source::Buffer' unless buffer.is_a?(::Parser::Source::Buffer)
+        raise ArgumentError,
+          "first argument must be Parser::Source::Buffer" unless buffer.is_a?(::Parser::Source::Buffer)
+
         @buffer = buffer
         @tokens = []
         @current_position = 0
@@ -28,13 +32,13 @@ module BetterHtml
       end
 
       def add_code(code)
-        if code[0] == '%'
-          add_erb_tokens(nil, '%', code[1..-1], nil)
+        if code[0] == "%"
+          add_erb_tokens(nil, "%", code[1..-1], nil)
           append("<%#{code}%>")
         else
           _, ltrim_or_comment, code, rtrim = *STMT_TRIM_MATCHER.match(code)
-          ltrim = ltrim_or_comment if ltrim_or_comment == '-'
-          indicator = ltrim_or_comment if ltrim_or_comment == '#'
+          ltrim = ltrim_or_comment if ltrim_or_comment == "-"
+          indicator = ltrim_or_comment if ltrim_or_comment == "#"
           add_erb_tokens(ltrim, indicator, code, rtrim)
           append("<%#{ltrim}#{indicator}#{code}#{rtrim}%>")
         end

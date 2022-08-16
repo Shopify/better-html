@@ -1,13 +1,17 @@
-source 'https://rubygems.org'
+# frozen_string_literal: true
+
+source "https://rubygems.org"
 
 gemspec
 
-gem 'actionview'
-gem 'rake'
-gem 'rake-compiler'
-gem 'minitest'
-gem 'mocha'
+gem "actionview"
+gem "minitest"
+gem "mocha"
+gem "rake"
+gem "rake-compiler"
 
 group :deployment, :test do
-  gem 'pry-byebug'
+  gem "pry-byebug"
 end
+
+gem "rubocop-shopify"

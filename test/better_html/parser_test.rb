@@ -1,19 +1,21 @@
-require 'test_helper'
-require 'better_html/parser'
-require 'ast'
+# frozen_string_literal: true
+
+require "test_helper"
+require "better_html/parser"
+require "ast"
 
 module BetterHtml
   class ParserTest < ActiveSupport::TestCase
     include ::AST::Sexp
 
     test "parse empty document" do
-      tree = Parser.new(buffer(''))
+      tree = Parser.new(buffer(""))
 
       assert_equal s(:document), tree.ast
     end
 
     test "parser errors" do
-      tree = Parser.new(buffer('<>'))
+      tree = Parser.new(buffer("<>"))
 
       assert_equal 1, tree.parser_errors.size
       assert_equal "expected '/' or tag name", tree.parser_errors[0].message
@@ -28,7 +30,7 @@ module BetterHtml
       code = "<![CDATA[ foo ]]>"
       tree = Parser.new(buffer(code))
 
-      assert_equal s(:document, s(:cdata, ' foo ')), tree.ast
+      assert_equal s(:document, s(:cdata, " foo ")), tree.ast
       assert_equal code, tree.ast.loc.source
     end
 
@@ -36,7 +38,7 @@ module BetterHtml
       code = "<![CDATA[ foo"
       tree = Parser.new(buffer(code))
 
-      assert_equal s(:document, s(:cdata, ' foo')), tree.ast
+      assert_equal s(:document, s(:cdata, " foo")), tree.ast
       assert_equal code, tree.ast.loc.source
     end
 
@@ -47,9 +49,8 @@ module BetterHtml
       assert_equal s(:document,
         s(:cdata,
           " foo ",
-          s(:erb, s(:indicator, '='), nil, s(:code, " bar "), nil),
-          " baz "
-        )),
+          s(:erb, s(:indicator, "="), nil, s(:code, " bar "), nil),
+          " baz ")),
         tree.ast
       assert_equal code, tree.ast.loc.source
     end
@@ -57,13 +58,13 @@ module BetterHtml
     test "consume comment nodes" do
       tree = Parser.new(buffer("<!-- foo -->"))
 
-      assert_equal s(:document, s(:comment, ' foo ')), tree.ast
+      assert_equal s(:document, s(:comment, " foo ")), tree.ast
     end
 
     test "unterminated comment nodes are consumed until end" do
       tree = Parser.new(buffer("<!-- foo"))
 
-      assert_equal s(:document, s(:comment, ' foo')), tree.ast
+      assert_equal s(:document, s(:comment, " foo")), tree.ast
     end
 
     test "consume comment with interpolation" do
@@ -73,8 +74,7 @@ module BetterHtml
         s(:comment,
           " foo ",
           s(:erb, s(:indicator, "="), nil, s(:code, " bar "), nil),
-          " baz "
-        )),
+          " baz ")),
         tree.ast
     end
 
@@ -89,11 +89,8 @@ module BetterHtml
         s(:text, "foo "),
         s(:tag, nil, nil,
           s(:tag_attributes,
-            s(:attribute, s(:attribute_name, 'bar'), nil, nil)
-          ),
-          nil
-        )
-      ), tree.ast
+            s(:attribute, s(:attribute_name, "bar"), nil, nil)),
+          nil)), tree.ast
     end
 
     test "consume tag nodes with solidus" do
@@ -121,8 +118,7 @@ module BetterHtml
           nil,
           s(:tag_name, "ns:", s(:erb, s(:indicator, "="), nil, s(:code, " name "), nil), "-thing"),
           nil,
-          nil
-        )), tree.ast
+          nil)), tree.ast
     end
 
     test "consume tag attributes with erb" do
@@ -134,18 +130,14 @@ module BetterHtml
             s(:attribute,
               s(:attribute_name, "class"),
               s(:equal),
-              s(:attribute_value, "foo")
-            ),
+              s(:attribute_value, "foo")),
             s(:erb, s(:indicator, "="), nil,
               s(:code, " erb "), nil),
             s(:attribute,
               s(:attribute_name, "name"),
               s(:equal),
-              s(:attribute_value, "bar")
-            ),
-          ),
-          nil
-        )), tree.ast
+              s(:attribute_value, "bar")),),
+          nil)), tree.ast
     end
 
     test "consume tag attributes nodes unquoted value" do
@@ -157,11 +149,8 @@ module BetterHtml
             s(:attribute,
               s(:attribute_name, "foo"),
               s(:equal),
-              s(:attribute_value, "bar")
-            )
-          ),
-          nil
-        )), tree.ast
+              s(:attribute_value, "bar"))),
+          nil)), tree.ast
     end
 
     test "consume attributes without name" do
@@ -173,11 +162,8 @@ module BetterHtml
             s(:attribute,
               nil,
               nil,
-              s(:attribute_value, s(:quote, "'"), "thing", s(:quote, "'"))
-            )
-          ),
-          nil
-        )), tree.ast
+              s(:attribute_value, s(:quote, "'"), "thing", s(:quote, "'")))),
+          nil)), tree.ast
     end
 
     test "consume tag attributes nodes quoted value" do
@@ -189,11 +175,8 @@ module BetterHtml
             s(:attribute,
               s(:attribute_name, "foo"),
               s(:equal),
-              s(:attribute_value, s(:quote, "\""), "bar", s(:quote, "\""))
-            )
-          ),
-          nil
-        )), tree.ast
+              s(:attribute_value, s(:quote, "\""), "bar", s(:quote, "\"")))),
+          nil)), tree.ast
     end
 
     test "consume tag attributes nodes interpolation in name and value" do
@@ -210,12 +193,8 @@ module BetterHtml
                 "some ",
                 s(:erb, s(:indicator, "="), nil, s(:code, " value "), nil),
                 " foo",
-                s(:quote, "\""),
-              ),
-            )
-          ),
-          nil
-        )), tree.ast
+                s(:quote, "\""),),)),
+          nil)), tree.ast
     end
 
     test "consume text nodes" do
@@ -225,8 +204,7 @@ module BetterHtml
         s(:text,
           "here is ",
           s(:erb, s(:indicator, "="), nil, s(:code, " some "), nil),
-          " text"
-        )), tree.ast
+          " text")), tree.ast
     end
 
     test "javascript template parsing works" do
@@ -236,8 +214,7 @@ module BetterHtml
         s(:text,
           "here is ",
           s(:erb, s(:indicator, "="), nil, s(:code, " some "), nil),
-          " text"
-        )), tree.ast
+          " text")), tree.ast
     end
 
     test "javascript template does not consume html tags" do
@@ -247,8 +224,7 @@ module BetterHtml
         s(:text,
           "<div ",
           s(:erb, s(:indicator, "="), nil, s(:code, " some "), nil),
-          " />"
-        )), tree.ast
+          " />")), tree.ast
     end
 
     test "lodash template parsing works" do
@@ -265,13 +241,8 @@ module BetterHtml
               s(:attribute_value,
                 s(:quote, "\""),
                 s(:lodash, s(:indicator, "="), s(:code, " foo ")),
-                s(:quote, "\"")
-              )
-            )
-          ),
-          nil
-        )
-      ), tree.ast
+                s(:quote, "\"")))),
+          nil)), tree.ast
     end
 
     test "nodes are all nested under document" do
@@ -290,9 +261,8 @@ module BetterHtml
         s(:comment, " a comment "),
         s(:text,
           "\nsome more text\n",
-          s(:erb, s(:indicator, '='), nil, s(:code, ' an erb tag '), s(:trim)),
-          "\n"
-        ),
+          s(:erb, s(:indicator, "="), nil, s(:code, " an erb tag "), s(:trim)),
+          "\n"),
         s(:tag,
           nil,
           s(:tag_name, "div"),
@@ -300,15 +270,11 @@ module BetterHtml
             s(:attribute,
               s(:attribute_name, "class"),
               s(:equal),
-              s(:attribute_value, s(:quote, "\""), "foo", s(:quote, "\""))
-            )
-          ),
-          nil
-        ),
+              s(:attribute_value, s(:quote, "\""), "foo", s(:quote, "\"")))),
+          nil),
         s(:text, "\n  content\n"),
-        s(:tag, s(:solidus), s(:tag_name, 'div'), nil, nil),
-        s(:text, "\n"),
-      ), tree.ast
+        s(:tag, s(:solidus), s(:tag_name, "div"), nil, nil),
+        s(:text, "\n"),), tree.ast
     end
   end
 end

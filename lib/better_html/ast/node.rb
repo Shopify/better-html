@@ -1,5 +1,7 @@
-require 'ast'
-require_relative 'iterator'
+# frozen_string_literal: true
+
+require "ast"
+require_relative "iterator"
 
 module BetterHtml
   module AST

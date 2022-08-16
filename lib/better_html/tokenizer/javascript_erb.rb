@@ -1,4 +1,6 @@
-require_relative 'base_erb'
+# frozen_string_literal: true
+
+require_relative "base_erb"
 
 module BetterHtml
   module Tokenizer

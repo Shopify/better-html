@@ -1,14 +1,18 @@
-require 'better_html/tree/attribute'
+# frozen_string_literal: true
+
+require "better_html/tree/attribute"
 
 module BetterHtml
   module Tree
     class AttributesList
-      def initialize(list)
-        @list = list || []
+      class << self
+        def from_nodes(nodes)
+          new(nodes&.map { |node| Tree::Attribute.from_node(node) })
+        end
       end
 
-      def self.from_nodes(nodes)
-        new(nodes&.map { |node| Tree::Attribute.from_node(node) })
+      def initialize(list)
+        @list = list || []
       end
 
       def [](name)

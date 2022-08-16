@@ -1,5 +1,7 @@
-require 'better_html/parser'
-require 'parser/current'
+# frozen_string_literal: true
+
+require "better_html/parser"
+require "parser/current"
 
 module BetterHtml
   module TestHelper
@@ -14,15 +16,17 @@ module BetterHtml
         end
       end
 
-      def self.parse(code)
-        parser = ::Parser::CurrentRuby.new(Builder.new)
-        parser.diagnostics.ignore_warnings = true
-        parser.diagnostics.all_errors_are_fatal = false
-        parser.diagnostics.consumer = nil
+      class << self
+        def parse(code)
+          parser = ::Parser::CurrentRuby.new(Builder.new)
+          parser.diagnostics.ignore_warnings = true
+          parser.diagnostics.all_errors_are_fatal = false
+          parser.diagnostics.consumer = nil
 
-        buf = ::Parser::Source::Buffer.new('(string)')
-        buf.source = code.sub(BLOCK_EXPR, '')
-        parser.parse(buf)
+          buf = ::Parser::Source::Buffer.new("(string)")
+          buf.source = code.sub(BLOCK_EXPR, "")
+          parser.parse(buf)
+        end
       end
 
       def child_nodes
@@ -65,6 +69,7 @@ module BetterHtml
 
       def static_return_value?
         return false if (possible_values = return_values.to_a).empty?
+
         possible_values.all?(&:static_value?)
       end
 

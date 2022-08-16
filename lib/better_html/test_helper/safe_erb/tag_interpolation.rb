@@ -1,15 +1,14 @@
-require_relative 'base'
-require 'better_html/test_helper/ruby_node'
+# frozen_string_literal: true
+
+require_relative "base"
+require "better_html/test_helper/ruby_node"
 
 module BetterHtml
   module TestHelper
     module SafeErb
       class TagInterpolation < Base
-
-        NO_HTML_TAGS = %w(
-          title textarea script
-          style xmp iframe noembed noframes listing plaintext
-        )
+        NO_HTML_TAGS = ["title", "textarea", "script", "style", "xmp", "iframe", "noembed", "noframes", "listing",
+                        "plaintext",]
 
         def validate
           @parser.nodes_with_type(:tag).each do |tag_node|
@@ -43,7 +42,7 @@ module BetterHtml
             indicator = indicator_node.loc.source
             source = code_node.loc.source
 
-            if indicator == '='
+            if indicator == "="
               ruby_node = begin
                 RubyNode.parse(source)
               rescue ::Parser::SyntaxError
@@ -55,7 +54,7 @@ module BetterHtml
                   handle_missing_safe_wrapper(code_node, ruby_node, attribute.name)
                 end
               end
-            elsif indicator == '=='
+            elsif indicator == "=="
               add_error(
                 "erb interpolation with '<%==' inside html attribute is never safe",
                 location: erb_node.loc
@@ -65,9 +64,10 @@ module BetterHtml
         end
 
         def validate_text_node(text_node)
-          erb_nodes(text_node).each do |erb_node, indicator_node, code_node|
+          erb_nodes(text_node).each do |_erb_node, indicator_node, code_node|
             indicator = indicator_node&.loc&.source
-            next if indicator == '#' || indicator == '%'
+            next if indicator == "#" || indicator == "%"
+
             source = code_node.loc.source
 
             ruby_node = begin
@@ -76,6 +76,7 @@ module BetterHtml
               nil
             end
             next unless ruby_node
+
             no_unsafe_calls(code_node, ruby_node)
             validate_ruby_helper(code_node, ruby_node)
           end
@@ -93,12 +94,13 @@ module BetterHtml
 
         def validate_ruby_helper_hash_entry(parent_node, ruby_node, key_prefix, key_node, value_node)
           return unless [:sym, :str].include?(key_node.type)
-          key = [key_prefix, key_node.children.first.to_s].compact.join('-').dasherize
+
+          key = [key_prefix, key_node.children.first.to_s].compact.join("-").dasherize
           case value_node.type
           when :dstr
             validate_ruby_helper_hash_value(parent_node, ruby_node, key, value_node)
           when :hash
-            if key == 'data'
+            if key == "data"
               value_node.child_nodes.select(&:pair?).each do |pair_node|
                 validate_ruby_helper_hash_entry(parent_node, ruby_node, key, *pair_node.children)
               end
@@ -114,6 +116,7 @@ module BetterHtml
 
         def handle_missing_safe_wrapper(parent_node, ruby_node, attr_name)
           return unless @config.javascript_attribute_name?(attr_name)
+
           method_calls = ruby_node.return_values.select(&:method_call?)
           unsafe_calls = method_calls.select { |node| !@config.javascript_safe_method?(node.method_name) }
           if method_calls.empty?
@@ -140,13 +143,13 @@ module BetterHtml
           ruby_node.return_values.each do |call_node|
             next if call_node.static_return_value?
 
-            if @config.javascript_attribute_name?(attr_name) &&
-                  !@config.javascript_safe_method?(call_node.method_name)
-              add_error(
-                "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-                location: nested_location(parent_node, ruby_node)
-              )
-            end
+            next unless @config.javascript_attribute_name?(attr_name) &&
+              !@config.javascript_safe_method?(call_node.method_name)
+
+            add_error(
+              "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
+              location: nested_location(parent_node, ruby_node)
+            )
           end
         end
 

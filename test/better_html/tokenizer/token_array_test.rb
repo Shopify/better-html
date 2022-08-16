@@ -1,8 +1,10 @@
-require 'test_helper'
-require 'active_support/core_ext/array/access'
-require 'better_html/tokenizer/token'
-require 'better_html/tokenizer/location'
-require 'better_html/tokenizer/token_array'
+# frozen_string_literal: true
+
+require "test_helper"
+require "active_support/core_ext/array/access"
+require "better_html/tokenizer/token"
+require "better_html/tokenizer/location"
+require "better_html/tokenizer/token_array"
 
 module BetterHtml
   module Tokenizer
@@ -106,7 +108,7 @@ module BetterHtml
         e = assert_raises(RuntimeError) do
           @array.shift
         end
-        assert_equal 'no tokens left to shift', e.message
+        assert_equal "no tokens left to shift", e.message
       end
 
       test "pop raises for empty array" do
@@ -114,7 +116,7 @@ module BetterHtml
         e = assert_raises(RuntimeError) do
           @array.pop
         end
-        assert_equal 'no tokens left to pop', e.message
+        assert_equal "no tokens left to pop", e.message
       end
 
       test "trim takes elements from the beginning of array" do

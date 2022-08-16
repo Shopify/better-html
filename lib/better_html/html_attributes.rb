@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module BetterHtml
   class HtmlAttributes
     def initialize(data)
@@ -7,10 +9,12 @@ module BetterHtml
     def to_s
       @data.map do |key, value|
         unless key =~ BetterHtml.config.partial_attribute_name_pattern
-          raise ArgumentError, "Attribute names must match the pattern #{BetterHtml.config.partial_attribute_name_pattern.inspect}"
+          raise ArgumentError,
+            "Attribute names must match the pattern #{BetterHtml.config.partial_attribute_name_pattern.inspect}"
         end
+
         if value.nil?
-          "#{key}"
+          key.to_s
         else
           value = value.to_s
           escaped_value = value.html_safe? ? value : CGI.escapeHTML(value)
