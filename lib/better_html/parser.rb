@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "better_html_ext"
 require_relative "tokenizer/javascript_erb"
 require_relative "tokenizer/html_erb"
 require_relative "tokenizer/html_lodash"
