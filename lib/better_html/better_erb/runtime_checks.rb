@@ -9,7 +9,7 @@ class BetterHtml::BetterErb
     end
 
     def validate!
-      check_parser_errors
+      check_parser_errors unless @config.disable_parser_validation
 
       unless @parser.context == :none
         raise BetterHtml::HtmlError, 'Detected an open tag at the end of this document.'
