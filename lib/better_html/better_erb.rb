@@ -7,19 +7,6 @@ require "better_html/better_erb/erubi_implementation"
 require "better_html/better_erb/validated_output_buffer"
 
 module BetterHtml
-  class ParserError < RuntimeError
-    attr_reader :position, :line, :column
-
-    def initialize(message, position, line, column)
-      super(message)
-      @position = position
-      @line = line
-      @column = column
-    end
-  end
-end
-
-module BetterHtml
   class BetterErb
     cattr_accessor :content_types
 

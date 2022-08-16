@@ -12,4 +12,15 @@ module BetterHtml
   class Errors < Array
     alias_method :add, :<<
   end
+
+  class ParserError < RuntimeError
+    attr_reader :position, :line, :column
+
+    def initialize(message, position, line, column)
+      super(message)
+      @position = position
+      @line = line
+      @column = column
+    end
+  end
 end
