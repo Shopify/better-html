@@ -574,8 +574,10 @@ static int scan_cdata(struct tokenizer_t *tk)
 
   if(is_cdata_end(&tk->scan, &length, &cdata_end)) {
     tokenizer_callback(tk, TOKEN_TEXT, length);
-    if(cdata_end)
+    if(cdata_end) {
       tokenizer_callback(tk, TOKEN_CDATA_END, 3);
+      pop_context(tk); // back to document
+    }
     return 1;
   }
   else {

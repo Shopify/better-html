@@ -88,6 +88,12 @@ module HtmlTokenizer
                     [:text, " foo "], [:text, " baz "], [:cdata_end, "]]>"],], result)
     end
 
+    def test_tokenizer_cdata_context
+      result = tokenize("<![CDATA[foo]]><")
+      assert_equal([[:cdata_start, "<![CDATA["],
+                    [:text, "foo"], [:cdata_end, "]]>"], [:tag_start, "<"],], result)
+    end
+
     def test_tokenizer_comment_regression
       result = tokenize("<!-- foo ", " baz -->")
       assert_equal([[:comment_start, "<!--"],
