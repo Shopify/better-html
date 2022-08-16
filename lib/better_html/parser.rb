@@ -1,10 +1,12 @@
-require_relative 'tokenizer/javascript_erb'
-require_relative 'tokenizer/html_erb'
-require_relative 'tokenizer/html_lodash'
-require_relative 'tokenizer/location'
-require_relative 'tokenizer/token_array'
-require_relative 'ast/node'
-require 'parser/source/buffer'
+# frozen_string_literal: true
+
+require_relative "tokenizer/javascript_erb"
+require_relative "tokenizer/html_erb"
+require_relative "tokenizer/html_lodash"
+require_relative "tokenizer/location"
+require_relative "tokenizer/token_array"
+require_relative "ast/node"
+require "parser/source/buffer"
 
 module BetterHtml
   class Parser
@@ -21,7 +23,8 @@ module BetterHtml
     end
 
     def initialize(buffer, template_language: :html)
-      raise ArgumentError, 'first argument must be Parser::Source::Buffer' unless buffer.is_a?(::Parser::Source::Buffer)
+      raise ArgumentError, "first argument must be Parser::Source::Buffer" unless buffer.is_a?(::Parser::Source::Buffer)
+
       @buffer = buffer
       @template_language = template_language
       @erb = case template_language
@@ -38,7 +41,7 @@ module BetterHtml
 
     def nodes_with_type(*type)
       types = Array.wrap(type)
-      ast.children.select{ |node| node.is_a?(::AST::Node) && types.include?(node.type) }
+      ast.children.select { |node| node.is_a?(::AST::Node) && types.include?(node.type) }
     end
 
     def ast
@@ -76,7 +79,8 @@ module BetterHtml
         when :text, *INTERPOLATION_TYPES
           children << build_text_node(tokens)
         else
-          raise RuntimeError, "Unhandled token #{tokens.current.type} line #{tokens.current.loc.line} column #{tokens.current.loc.column}, #{children.inspect}"
+          raise "Unhandled token #{tokens.current.type} line #{tokens.current.loc.line} column " \
+            "#{tokens.current.loc.column}, #{children.inspect}"
         end
       end
 
@@ -141,6 +145,7 @@ module BetterHtml
       attributes_tokens = []
       while tokens.any?
         break if tokens.size == 1 && tokens.last.type == :solidus
+
         if tokens.current.type == :attribute_name
           attributes_tokens << build_attribute_node(tokens)
         elsif tokens.current.type == :attribute_quoted_value_start
@@ -148,7 +153,7 @@ module BetterHtml
         elsif tokens.current.type == :erb_begin
           attributes_tokens << build_erb_node(tokens)
         else
-          # todo: warn about ignored things
+          # TODO: warn about ignored things
           tokens.shift
         end
       end
@@ -179,8 +184,7 @@ module BetterHtml
     def build_attribute_value_node(tokens)
       children = shift_all_with_interpolation(tokens,
         :attribute_quoted_value_start, :attribute_quoted_value,
-        :attribute_quoted_value_end, :attribute_unquoted_value
-      )
+        :attribute_quoted_value_end, :attribute_unquoted_value)
 
       build_node(:attribute_value, children)
     end
@@ -201,6 +205,7 @@ module BetterHtml
     def build_location(enumerable)
       enumerable = enumerable.compact
       raise ArgumentError, "cannot build location for #{enumerable.inspect}" unless enumerable.first && enumerable.last
+
       Tokenizer::Location.new(@buffer, enumerable.first.loc.begin_pos, enumerable.last.loc.end_pos)
     end
 
@@ -289,9 +294,11 @@ module BetterHtml
 
     def wrap_token(object)
       return unless object
+
       if object.is_a?(::AST::Node)
         object
-      elsif [:text, :tag_name, :attribute_name, :attribute_quoted_value, :attribute_unquoted_value].include?(object.type)
+      elsif [:text, :tag_name, :attribute_name, :attribute_quoted_value,
+             :attribute_unquoted_value,].include?(object.type)
         object.loc.source
       elsif [:attribute_quoted_value_start, :attribute_quoted_value_end].include?(object.type)
         BetterHtml::AST::Node.new(:quote, [object.loc.source], loc: object.loc)

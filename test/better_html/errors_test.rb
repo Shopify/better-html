@@ -1,5 +1,7 @@
-require 'test_helper'
-require 'better_html/errors'
+# frozen_string_literal: true
+
+require "test_helper"
+require "better_html/errors"
 
 module BetterHtml
   class ErrorsTest < ActiveSupport::TestCase

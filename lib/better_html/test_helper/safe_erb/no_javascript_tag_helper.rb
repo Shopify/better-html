@@ -1,5 +1,7 @@
-require_relative 'base'
-require 'better_html/test_helper/ruby_node'
+# frozen_string_literal: true
+
+require_relative "base"
+require "better_html/test_helper/ruby_node"
 
 module BetterHtml
   module TestHelper
@@ -14,7 +16,8 @@ module BetterHtml
         def no_javascript_tag_helper(node)
           erb_nodes(node).each do |erb_node, indicator_node, code_node|
             indicator = indicator_node&.loc&.source
-            next if indicator == '#' || indicator == '%'
+            next if indicator == "#" || indicator == "%"
+
             source = code_node.loc.source
 
             ruby_node = begin
@@ -23,6 +26,7 @@ module BetterHtml
               nil
             end
             next unless ruby_node
+
             ruby_node.descendants(:send, :csend).each do |send_node|
               next unless send_node.method_name?(:javascript_tag)
 

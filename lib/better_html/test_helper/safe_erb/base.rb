@@ -1,7 +1,9 @@
-require 'better_html/errors'
-require 'better_html/tree/tag'
-require 'better_html/test_helper/safety_error'
-require 'ast'
+# frozen_string_literal: true
+
+require "better_html/errors"
+require "better_html/tree/tag"
+require "better_html/test_helper/safety_error"
+require "ast"
 
 module BetterHtml
   module TestHelper
@@ -24,6 +26,7 @@ module BetterHtml
         def erb_nodes(root_node)
           Enumerator.new do |yielder|
             next if root_node.nil?
+
             root_node.descendants(:erb).each do |erb_node|
               indicator_node, _, code_node, _ = *erb_node
               yielder.yield(erb_node, indicator_node, code_node)
@@ -37,12 +40,12 @@ module BetterHtml
               tag = Tree::Tag.from_node(tag_node)
               next if tag.closing?
 
-              if tag.name == 'script'
-                index = ast.to_a.find_index(tag_node)
-                next_node = ast.to_a[index + 1]
+              next unless tag.name == "script"
 
-                yielder.yield(tag, next_node&.type == :text ? next_node : nil)
-              end
+              index = ast.to_a.find_index(tag_node)
+              next_node = ast.to_a[index + 1]
+
+              yielder.yield(tag, next_node&.type == :text ? next_node : nil)
             end
           end
         end

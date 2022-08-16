@@ -1,5 +1,7 @@
-require 'test_helper'
-require 'better_html/test_helper/ruby_node'
+# frozen_string_literal: true
+
+require "test_helper"
+require "better_html/test_helper/ruby_node"
 
 module BetterHtml
   module TestHelper
@@ -36,7 +38,7 @@ module BetterHtml
       test "instance call with parenthesis" do
         expr = BetterHtml::TestHelper::RubyNode.parse("(foo).bar")
         assert_equal 1, expr.return_values.count
-        assert_equal s(:begin,  s(:send, nil, :foo)), expr.return_values.first.receiver
+        assert_equal s(:begin, s(:send, nil, :foo)), expr.return_values.first.receiver
         assert_equal :bar, expr.return_values.first.method_name
         assert_equal [], expr.return_values.first.arguments
         refute_predicate expr, :static_return_value?
@@ -166,7 +168,7 @@ module BetterHtml
       end
 
       test "assignment to variable" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('x = foo.bar')
+        expr = BetterHtml::TestHelper::RubyNode.parse("x = foo.bar")
         assert_equal 1, expr.return_values.count
         assert_equal s(:send, nil, :foo), expr.return_values.first.receiver
         assert_equal :bar, expr.return_values.first.method_name
@@ -175,7 +177,7 @@ module BetterHtml
       end
 
       test "assignment to variable with command call" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('raw x = foo.bar')
+        expr = BetterHtml::TestHelper::RubyNode.parse("raw x = foo.bar")
         assert_equal 1, expr.return_values.count
         assert_nil expr.return_values.first.receiver
         assert_equal :raw, expr.return_values.first.method_name
@@ -184,7 +186,7 @@ module BetterHtml
       end
 
       test "assignment with instance call" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('(x = foo).bar')
+        expr = BetterHtml::TestHelper::RubyNode.parse("(x = foo).bar")
         assert_equal 1, expr.return_values.count
         assert_equal s(:begin, s(:lvasgn, :x, s(:send, nil, :foo))), expr.return_values.first.receiver
         assert_equal :bar, expr.return_values.first.method_name
@@ -193,7 +195,7 @@ module BetterHtml
       end
 
       test "assignment to multiple variables" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('x, y = foo.bar')
+        expr = BetterHtml::TestHelper::RubyNode.parse("x, y = foo.bar")
         assert_equal 1, expr.return_values.count
         assert_equal s(:send, nil, :foo), expr.return_values.first.receiver
         assert_equal :bar, expr.return_values.first.method_name
@@ -202,7 +204,7 @@ module BetterHtml
       end
 
       test "safe navigation operator" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('foo&.bar')
+        expr = BetterHtml::TestHelper::RubyNode.parse("foo&.bar")
         assert_equal 1, expr.return_values.count
         assert_equal s(:send, nil, :foo), expr.return_values.to_a[0].receiver
         assert_equal :bar, expr.return_values.to_a[0].method_name
@@ -211,13 +213,13 @@ module BetterHtml
       end
 
       test "instance variable" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('@foo')
+        expr = BetterHtml::TestHelper::RubyNode.parse("@foo")
         assert_equal 0, expr.return_values.select(&:method_call?).count
         refute_predicate expr, :static_return_value?
       end
 
       test "instance method on variable" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('@foo.bar')
+        expr = BetterHtml::TestHelper::RubyNode.parse("@foo.bar")
         assert_equal 1, expr.return_values.count
         assert_equal s(:ivar, :@foo), expr.return_values.first.receiver
         assert_equal :bar, expr.return_values.first.method_name
@@ -226,7 +228,7 @@ module BetterHtml
       end
 
       test "index into array" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('local_assigns[:text_class] if local_assigns[:text_class]')
+        expr = BetterHtml::TestHelper::RubyNode.parse("local_assigns[:text_class] if local_assigns[:text_class]")
         assert_equal 1, expr.return_values.count
         assert_equal s(:send, nil, :local_assigns), expr.return_values.first.receiver
         assert_equal :[], expr.return_values.first.method_name
@@ -235,7 +237,7 @@ module BetterHtml
       end
 
       test "static_return_value? for ivar" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('@foo')
+        expr = BetterHtml::TestHelper::RubyNode.parse("@foo")
         refute_predicate expr, :static_return_value?
       end
 
@@ -270,17 +272,17 @@ module BetterHtml
       end
 
       test "static_return_value? with safe ternary" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('foo ? \'a\' : \'b\'')
+        expr = BetterHtml::TestHelper::RubyNode.parse("foo ? 'a' : 'b'")
         assert_predicate expr, :static_return_value?
       end
 
       test "static_return_value? with safe conditional" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('\'foo\' if bar?')
+        expr = BetterHtml::TestHelper::RubyNode.parse("'foo' if bar?")
         assert_predicate expr, :static_return_value?
       end
 
       test "static_return_value? with safe assignment" do
-        expr = BetterHtml::TestHelper::RubyNode.parse('x = \'foo\'')
+        expr = BetterHtml::TestHelper::RubyNode.parse("x = 'foo'")
         assert_predicate expr, :static_return_value?
       end
     end

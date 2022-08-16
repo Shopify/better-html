@@ -1,6 +1,8 @@
-require 'test_helper'
-require 'better_html/parser'
-require 'better_html/test_helper/safe_erb/no_statements'
+# frozen_string_literal: true
+
+require "test_helper"
+require "better_html/parser"
+require "better_html/test_helper/safe_erb/no_statements"
 
 module BetterHtml
   module TestHelper
@@ -8,8 +10,8 @@ module BetterHtml
       class NoStatementsTest < ActiveSupport::TestCase
         setup do
           @config = BetterHtml::Config.new(
-            javascript_safe_methods: ['j', 'escape_javascript', 'to_json'],
-            javascript_attribute_names: [/\Aon/i, 'data-eval'],
+            javascript_safe_methods: ["j", "escape_javascript", "to_json"],
+            javascript_attribute_names: [/\Aon/i, "data-eval"],
           )
         end
 
@@ -117,6 +119,7 @@ module BetterHtml
         end
 
         private
+
         def validate(data, template_language: :html)
           parser = BetterHtml::Parser.new(buffer(data), template_language: template_language)
           tester = BetterHtml::TestHelper::SafeErb::NoStatements.new(parser, config: @config)

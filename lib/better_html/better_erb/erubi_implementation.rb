@@ -1,50 +1,54 @@
-require 'action_view'
-require_relative 'runtime_checks'
+# frozen_string_literal: true
 
-class BetterHtml::BetterErb
-  class ErubiImplementation < ActionView::Template::Handlers::ERB::Erubi
-    include RuntimeChecks
+require "action_view"
+require_relative "runtime_checks"
 
-    def add_text(text)
-      return if text.empty?
+module BetterHtml
+  class BetterErb
+    class ErubiImplementation < ActionView::Template::Handlers::ERB::Erubi
+      include RuntimeChecks
 
-      if text == "\n"
-        @parser.parse("\n")
-        @newline_pending += 1
-      else
-        src << "@output_buffer.safe_append='"
-        src << "\n" * @newline_pending if @newline_pending > 0
-        src << escape_text(text)
-        src << "'.freeze;"
+      def add_text(text)
+        return if text.empty?
 
-        @parser.parse(text) do |*args|
-          check_token(*args)
+        if text == "\n"
+          @parser.parse("\n")
+          @newline_pending += 1
+        else
+          src << "@output_buffer.safe_append='"
+          src << "\n" * @newline_pending if @newline_pending > 0
+          src << escape_text(text)
+          src << "'.freeze;"
+
+          @parser.parse(text) do |*args|
+            check_token(*args)
+          end
+
+          @newline_pending = 0
         end
-
-        @newline_pending = 0
       end
-    end
 
-    def add_expression(indicator, code)
-      if (indicator == "==") || @escape
-        add_expr_auto_escaped(src, code, false)
-      else
-        add_expr_auto_escaped(src, code, true)
+      def add_expression(indicator, code)
+        if (indicator == "==") || @escape
+          add_expr_auto_escaped(src, code, false)
+        else
+          add_expr_auto_escaped(src, code, true)
+        end
       end
-    end
 
-    def add_code(code)
-      flush_newline_if_pending(src)
+      def add_code(code)
+        flush_newline_if_pending(src)
 
-      block_check(src, "<%#{code}%>")
-      @parser.append_placeholder(code)
-      super
-    end
+        block_check(src, "<%#{code}%>")
+        @parser.append_placeholder(code)
+        super
+      end
 
-    private
+      private
 
-    def escape_text(text)
-      text.gsub(/['\\]/, '\\\\\&')
+      def escape_text(text)
+        text.gsub(/['\\]/, '\\\\\&')
+      end
     end
   end
 end

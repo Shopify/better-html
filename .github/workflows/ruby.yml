@@ -32,3 +32,24 @@ jobs:
         bundler-cache: true
     - name: Run tests
       run: bundle exec rake
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1
+          bundler-cache: true
+      - name: Run style checks
+        run: bundle exec rubocop
+  buildall:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    name: Build (matrix)
+    needs: [lint, test]
+    steps:
+      - name: Check build matrix status
+        if: ${{ needs.test.result != 'success' || needs.lint.result != 'success' }}
+        run: exit 1

@@ -1,18 +1,22 @@
-require 'better_html/tree/attributes_list'
-require 'better_html/ast/iterator'
+# frozen_string_literal: true
+
+require "better_html/tree/attributes_list"
+require "better_html/ast/iterator"
 
 module BetterHtml
   module Tree
     class Tag
       attr_reader :node, :start_solidus, :name_node, :attributes_node, :end_solidus
 
+      class << self
+        def from_node(node)
+          new(node)
+        end
+      end
+
       def initialize(node)
         @node = node
         @start_solidus, @name_node, @attributes_node, @end_solidus = *node
-      end
-
-      def self.from_node(node)
-        new(node)
       end
 
       def loc

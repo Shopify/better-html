@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module BetterHtml
   module Tokenizer
     class TokenArray
@@ -8,26 +10,24 @@ module BetterHtml
       end
 
       def shift
-        raise RuntimeError, 'no tokens left to shift' if empty?
+        raise "no tokens left to shift" if empty?
+
         item = @list[@current]
         @current += 1
         item
       end
 
       def pop
-        raise RuntimeError, 'no tokens left to pop' if empty?
+        raise "no tokens left to pop" if empty?
+
         item = @list[@last - 1]
         @last -= 1
         item
       end
 
       def trim(type)
-        while current&.type == type
-          shift
-        end
-        while last&.type == type
-          pop
-        end
+        shift while current&.type == type
+        pop while last&.type == type
       end
 
       def empty?

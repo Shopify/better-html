@@ -1,6 +1,8 @@
-require File.expand_path('../boot', __FILE__)
+# frozen_string_literal: true
 
-require 'rails/all'
+require File.expand_path("../boot", __FILE__)
+
+require "rails/all"
 
 Bundler.require(*Rails.groups)
 require "better_html"
@@ -23,4 +25,3 @@ module Dummy
     config.active_record.raise_in_transactional_callbacks = true
   end
 end
-

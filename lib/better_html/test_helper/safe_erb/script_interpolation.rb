@@ -1,5 +1,7 @@
-require_relative 'base'
-require 'better_html/test_helper/ruby_node'
+# frozen_string_literal: true
+
+require_relative "base"
+require "better_html/test_helper/ruby_node"
 
 module BetterHtml
   module TestHelper
@@ -7,7 +9,7 @@ module BetterHtml
       class ScriptInterpolation < Base
         def validate
           script_tags.each do |tag, content_node|
-            if content_node.present? && (tag.attributes['type']&.value || "text/javascript") == "text/javascript"
+            if content_node.present? && (tag.attributes["type"]&.value || "text/javascript") == "text/javascript"
               validate_script(content_node)
             end
           end
@@ -24,8 +26,10 @@ module BetterHtml
         def validate_script(node)
           erb_nodes(node).each do |erb_node, indicator_node, code_node|
             next unless indicator_node.present?
+
             indicator = indicator_node.loc.source
-            next if indicator == '#' || indicator == '%'
+            next if indicator == "#" || indicator == "%"
+
             source = code_node.loc.source
 
             ruby_node = begin
@@ -34,6 +38,7 @@ module BetterHtml
               nil
             end
             next unless ruby_node
+
             validate_script_interpolation(erb_node, ruby_node)
           end
         end

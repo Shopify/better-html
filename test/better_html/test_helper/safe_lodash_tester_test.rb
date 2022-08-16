@@ -1,5 +1,7 @@
-require 'test_helper'
-require 'better_html/test_helper/safe_lodash_tester'
+# frozen_string_literal: true
+
+require "test_helper"
+require "better_html/test_helper/safe_lodash_tester"
 
 module BetterHtml
   module TestHelper
@@ -10,7 +12,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '[%! foo %]', errors.first.location.source
+        assert_equal "[%! foo %]", errors.first.location.source
         assert_equal "lodash interpolation with '[%!' inside html attribute is never safe", errors.first.message
       end
 
@@ -28,8 +30,9 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '[%= foo %]', errors.first.location.source
-        assert_equal "lodash interpolation in javascript attribute `onclick` must call `JSON.stringify(foo)`", errors.first.message
+        assert_equal "[%= foo %]", errors.first.location.source
+        assert_equal "lodash interpolation in javascript attribute `onclick` must call `JSON.stringify(foo)`",
+          errors.first.message
       end
 
       test "escape in javascript attribute with JSON.stringify is allowed" do
@@ -66,7 +69,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '[% if (foo) %]', errors.first.location.source
+        assert_equal "[% if (foo) %]", errors.first.location.source
         assert_equal "javascript statement not allowed here; did you mean '[%=' ?", errors.first.message
       end
 
@@ -76,7 +79,7 @@ module BetterHtml
         EOF
 
         assert_equal 1, errors.size
-        assert_equal '[% if (foo) %]', errors.first.location.source
+        assert_equal "[% if (foo) %]", errors.first.location.source
         assert_equal "javascript statement not allowed here; did you mean '[%=' ?", errors.first.message
       end
 

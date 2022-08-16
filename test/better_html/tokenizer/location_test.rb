@@ -1,5 +1,7 @@
-require 'test_helper'
-require 'better_html/tokenizer/location'
+# frozen_string_literal: true
+
+require "test_helper"
+require "better_html/tokenizer/location"
 
 module BetterHtml
   module Tokenizer

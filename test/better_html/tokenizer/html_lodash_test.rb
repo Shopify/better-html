@@ -1,5 +1,7 @@
-require 'test_helper'
-require 'better_html/tokenizer/html_lodash'
+# frozen_string_literal: true
+
+require "test_helper"
+require "better_html/tokenizer/html_lodash"
 
 module BetterHtml
   module Tokenizer
@@ -8,7 +10,8 @@ module BetterHtml
         scanner = HtmlLodash.new(buffer("just some text"))
         assert_equal 1, scanner.tokens.size
 
-        assert_attributes ({ type: :text, loc: { begin_pos: 0, end_pos: 14, source: "just some text" } }), scanner.tokens[0]
+        assert_attributes ({ type: :text, loc: { begin_pos: 0, end_pos: 14, source: "just some text" } }),
+          scanner.tokens[0]
       end
 
       test "matches strings to be escaped" do
@@ -74,10 +77,11 @@ module BetterHtml
         scanner = HtmlLodash.new(buffer('<div class="[%= foo %]">'))
         assert_equal 12, scanner.tokens.size
         assert_equal [:tag_start, :tag_name, :whitespace, :attribute_name,
-          :equal, :attribute_quoted_value_start,
-          :lodash_begin, :indicator, :code, :lodash_end,
-          :attribute_quoted_value_end, :tag_end], scanner.tokens.map(&:type)
-        assert_equal ["<", "div", " ", "class", "=", "\"", "[%", "=", " foo ", "%]", "\"", ">"], scanner.tokens.map(&:loc).map(&:source)
+                      :equal, :attribute_quoted_value_start,
+                      :lodash_begin, :indicator, :code, :lodash_end,
+                      :attribute_quoted_value_end, :tag_end,], scanner.tokens.map(&:type)
+        assert_equal ["<", "div", " ", "class", "=", "\"", "[%", "=", " foo ", "%]", "\"", ">"],
+          scanner.tokens.map(&:loc).map(&:source)
       end
 
       private
@@ -85,11 +89,11 @@ module BetterHtml
       def assert_attributes(attributes, token)
         attributes.each do |key, value|
           if value.nil?
-            assert_nil token.send(key)
+            assert_nil(token.send(key))
           elsif value.is_a?(Hash)
             assert_attributes(value, token.send(key))
           else
-            assert_equal value, token.send(key)
+            assert_equal(value, token.send(key))
           end
         end
       end
