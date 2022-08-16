@@ -8,11 +8,13 @@ Gem::Specification.new do |s|
   s.name        = "better_html"
   s.version     = BetterHtml::VERSION
   s.authors     = ["Francois Chagnon"]
-  s.email       = ["francois.chagnon@shopify.com"]
+  s.email       = ["ruby@shopify.com"]
   s.homepage    = "https://github.com/Shopify/better-html"
   s.summary     = "Better HTML for Rails."
   s.description = "Better HTML for Rails. Provides sane html helpers that make it easier to do the right thing."
   s.license     = "MIT"
+
+  s.required_ruby_version = ">= 2.7.0"
 
   s.metadata = {
     "bug_tracker_uri" => "https://github.com/Shopify/better-html/issues",
@@ -23,13 +25,12 @@ Gem::Specification.new do |s|
 
   s.extensions    = ['ext/better_html_ext/extconf.rb']
   s.files = Dir["{app,config,db,lib,ext}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
-  s.test_files = Dir["test/**/*"]
   s.require_paths = ["lib"]
 
   s.add_dependency 'ast', '~> 2.0'
   s.add_dependency 'erubi', '~> 1.4'
-  s.add_dependency 'activesupport', '>= 4.0'
-  s.add_dependency 'actionview', '>= 4.0'
+  s.add_dependency 'activesupport', '>= 6.0'
+  s.add_dependency 'actionview', '>= 6.0'
   s.add_dependency 'parser', '>= 2.4'
   s.add_dependency 'smart_properties'
 

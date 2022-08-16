@@ -16,7 +16,7 @@ if ActiveSupport::TestCase.respond_to?(:fixture_path=)
   ActiveSupport::TestCase.fixtures :all
 end
 
-require 'mocha/mini_test'
+require 'mocha/minitest'
 
 class ActiveSupport::TestCase
   private

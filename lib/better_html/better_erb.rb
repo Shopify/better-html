@@ -1,11 +1,7 @@
 require 'action_view'
 
 require 'better_html_ext'
-if ActionView.version < Gem::Version.new("5.1")
-require 'better_html/better_erb/erubis_implementation'
-else
 require 'better_html/better_erb/erubi_implementation'
-end
 require 'better_html/better_erb/validated_output_buffer'
 
 module BetterHtml
@@ -23,15 +19,10 @@ end
 
 class BetterHtml::BetterErb
   cattr_accessor :content_types
-  if ActionView.version < Gem::Version.new("5.1")
-    self.content_types = {
-      'html.erb' => BetterHtml::BetterErb::ErubisImplementation
-    }
-  else
-    self.content_types = {
-      'html.erb' => BetterHtml::BetterErb::ErubiImplementation
-    }
-  end
+
+  self.content_types = {
+    'html.erb' => BetterHtml::BetterErb::ErubiImplementation
+  }
 
   def self.prepend!
     ActionView::Template::Handlers::ERB.prepend(ConditionalImplementation)
@@ -71,11 +62,7 @@ class BetterHtml::BetterErb
       klass = BetterHtml::BetterErb.content_types[exts] unless excluded_template
       klass ||= self.class.erb_implementation
 
-      escape = if ActionView::VERSION::MAJOR <= 5
-        self.class.escape_whitelist.include?(template.type)
-      else
-        self.class.escape_ignore_list.include?(template.type)
-      end
+      escape = self.class.escape_ignore_list.include?(template.type)
       generator = klass.new(
         erb,
         :escape => escape,
