@@ -24,7 +24,7 @@ module BetterHtml
           end
           "#{key}=\"#{escaped_value}\""
         end
-      end.join(" ")
+      end.join(" ").html_safe
     end
   end
 end
