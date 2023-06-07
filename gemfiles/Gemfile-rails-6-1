@@ -9,6 +9,7 @@ gem "rake"
 gem "rake-compiler"
 gem "minitest"
 gem "mocha"
+gem "ruby_memcheck"
 
 group :deployment, :test do
   gem "pry-byebug"
