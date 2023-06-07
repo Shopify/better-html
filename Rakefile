@@ -8,7 +8,9 @@ rescue LoadError
 end
 
 require "rake/extensiontask"
+require "ruby_memcheck"
 
+RubyMemcheck.config(binary_name: "better_html_ext")
 Rake::ExtensionTask.new("better_html_ext")
 
 require "rdoc/task"
@@ -23,11 +25,15 @@ end
 
 require "rake/testtask"
 
-Rake::TestTask.new(:test) do |t|
+test_config = lambda do |t|
   t.libs << "lib"
   t.libs << "test"
   t.pattern = "test/**/*_test.rb"
   t.verbose = false
+end
+Rake::TestTask.new(test: :compile, &test_config)
+namespace :test do
+  RubyMemcheck::TestTask.new(valgrind: :compile, &test_config)
 end
 
 task default: [:compile, :test]

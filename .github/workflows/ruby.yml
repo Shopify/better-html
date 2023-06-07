@@ -32,6 +32,20 @@ jobs:
         bundler-cache: true
     - name: Run tests
       run: bundle exec rake
+  memcheck:
+    name: Memcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
+          bundler-cache: true
+      - name: Install Valgrind
+        run: sudo apt-get install valgrind
+      - name: Run tests
+        run: bundle exec rake test:valgrind
   lint:
     runs-on: ubuntu-latest
     name: Lint
