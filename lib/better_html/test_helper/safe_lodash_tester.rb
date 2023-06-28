@@ -35,7 +35,7 @@ module BetterHtml
         buffer.source = data
         tester = Tester.new(buffer, **options)
 
-        message = ""
+        message = +""
         tester.errors.each do |error|
           message << <<~EOL
             On line #{error.location.line}

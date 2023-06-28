@@ -6,6 +6,8 @@ require "better_html/test_helper/safe_lodash_tester"
 module BetterHtml
   module TestHelper
     class SafeLodashTesterTest < ActiveSupport::TestCase
+      include SafeLodashTester
+
       test "interpolate in attribute not allowed" do
         errors = parse(<<-EOF).errors
           <div class="[%! foo %]">
@@ -81,6 +83,43 @@ module BetterHtml
         assert_equal 1, errors.size
         assert_equal "[% if (foo) %]", errors.first.location.source
         assert_equal "javascript statement not allowed here; did you mean '[%=' ?", errors.first.message
+      end
+
+      test "assertion failure" do
+        error = assert_raises(Minitest::Assertion) do
+          assert_lodash_safety(<<-EOF)
+            <div class="foo[% if (foo) %]">
+          EOF
+        end
+
+        assert_equal <<~MESSAGE.chomp, error.message
+          On line 1
+          javascript statement not allowed here; did you mean '[%=' ?
+          <div class="foo[% if (foo) %]">
+                         ^^^^^^^^^^^^^^
+
+          -----------
+
+          The javascript snippets listed above do not appear to be escaped properly
+          in their context. Here are some tips:
+
+          Always use lodash's escape syntax inside a html tag:
+            <a href="[%= value %]">
+                     ^^^^
+
+          Always use JSON.stringify() for html attributes which contain javascript, like 'onclick',
+          or twine attributes like 'data-define', 'data-context', 'data-eval', 'data-bind', etc:
+            <div onclick="[%= JSON.stringify(value) %]">
+                              ^^^^^^^^^^^^^^
+
+          Never use <script> tags inside lodash template.
+            <script type="text/javascript">
+            ^^^^^^^
+
+          -----------
+          .
+          Expected [#<BetterHtml::TestHelper::SafetyError: javascript statement not allowed here; did you mean '[%=' ?>] to be empty?.
+        MESSAGE
       end
 
       private
