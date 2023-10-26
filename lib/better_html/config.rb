@@ -15,6 +15,7 @@ module BetterHtml
     property :template_exclusion_filter
     property :lodash_safe_javascript_expression, default: -> { [/\AJSON\.stringify\(/] }
     property :disable_parser_validation, default: false
+    property :annotate_rendered_view_with_filenames, default: false
 
     def javascript_attribute_name?(name)
       javascript_attribute_names.any? { |other| other === name.to_s } # rubocop:disable Style/CaseEquality
