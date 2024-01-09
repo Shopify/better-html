@@ -10,7 +10,7 @@ module BetterHtml
     class BaseErb < ::Erubi::Engine
       REGEXP_WITHOUT_TRIM = /<%(={1,2})?(.*?)()?%>([ \t]*\r?\n)?/m
       STMT_TRIM_MATCHER = /\A(-|#)?(.*?)([-=])?\z/m
-      EXPR_TRIM_MATCHER = /\A(.*?)(-)?\z/m
+      EXPR_TRIM_MATCHER = /\A(.*?)([-=])?\z/m
 
       attr_reader :tokens
       attr_reader :current_position

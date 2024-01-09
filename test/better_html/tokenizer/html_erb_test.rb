@@ -101,6 +101,17 @@ module BetterHtml
         assert_attributes ({ type: :erb_end, loc: { begin_pos: 13, end_pos: 15, source: "%>" } }), scanner.tokens[3]
       end
 
+      test "expression right trim with =%>" do
+        scanner = HtmlErb.new(buffer("<%= literal =%>"))
+        assert_equal 5, scanner.tokens.size
+
+        assert_attributes ({ type: :erb_begin, loc: { begin_pos: 0, end_pos: 2, source: "<%" } }), scanner.tokens[0]
+        assert_attributes ({ type: :indicator, loc: { begin_pos: 2, end_pos: 3, source: "=" } }), scanner.tokens[1]
+        assert_attributes ({ type: :code, loc: { begin_pos: 3, end_pos: 12, source: " literal " } }), scanner.tokens[2]
+        assert_attributes ({ type: :trim, loc: { begin_pos: 12, source: "=" } }), scanner.tokens[3]
+        assert_attributes ({ type: :erb_end, loc: { begin_pos: 13, end_pos: 15, source: "%>" } }), scanner.tokens[4]
+      end
+
       test "line number for multi-line statements" do
         scanner = HtmlErb.new(buffer("before <% multi\nline %> after"))
         assert_equal 5, scanner.tokens.size
