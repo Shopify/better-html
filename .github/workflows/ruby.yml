@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: [3.2, 3.1, '3.0', 2.7]
+        ruby: [3.3, 3.2, 3.1, '3.0', 2.7]
         gemfile:
           - Gemfile
           - gemfiles/Gemfile-rails-6-0
@@ -40,7 +40,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
+          ruby-version: 3.3
           bundler-cache: true
       - name: Install Valgrind
         run: sudo apt-get install valgrind
@@ -62,8 +62,8 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     name: Build (matrix)
-    needs: [lint, test]
+    needs: [lint, test, memcheck]
     steps:
       - name: Check build matrix status
-        if: ${{ needs.test.result != 'success' || needs.lint.result != 'success' }}
+        if: ${{ needs.test.result != 'success' || needs.lint.result != 'success' || needs.memcheck.result != 'success' }}
         run: exit 1
