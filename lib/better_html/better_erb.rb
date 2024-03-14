@@ -65,7 +65,7 @@ module BetterHtml
 
         generator = klass.new(
           erb,
-          **options
+          **options,
         )
         generator.validate! if generator.respond_to?(:validate!)
         generator.src

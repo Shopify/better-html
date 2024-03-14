@@ -26,8 +26,9 @@ module BetterHtml
       e = assert_raises(ArgumentError) do
         html_attributes("something": 'with "> double quote'.html_safe).to_s
       end
-      assert_equal "The value provided for attribute 'something' contains a `\"` character which is not allowed. "\
-        "Did you call .html_safe without properly escaping this data?", e.message
+      assert_equal "The value provided for attribute 'something' contains a `\"` character which is not allowed. " \
+        "Did you call .html_safe without properly escaping this data?",
+        e.message
     end
 
     test "#html_attributes accepts correctly escaped html_safe values" do

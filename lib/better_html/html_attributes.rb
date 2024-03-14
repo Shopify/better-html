@@ -19,7 +19,7 @@ module BetterHtml
           value = value.to_s
           escaped_value = value.html_safe? ? value : CGI.escapeHTML(value)
           if escaped_value.include?('"')
-            raise ArgumentError, "The value provided for attribute '#{key}' contains a `\"` "\
+            raise ArgumentError, "The value provided for attribute '#{key}' contains a `\"` " \
               "character which is not allowed. Did you call .html_safe without properly escaping this data?"
           end
           "#{key}=\"#{escaped_value}\""

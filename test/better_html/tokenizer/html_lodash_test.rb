@@ -76,10 +76,21 @@ module BetterHtml
       test "parses out html correctly" do
         scanner = HtmlLodash.new(buffer('<div class="[%= foo %]">'))
         assert_equal 12, scanner.tokens.size
-        assert_equal [:tag_start, :tag_name, :whitespace, :attribute_name,
-                      :equal, :attribute_quoted_value_start,
-                      :lodash_begin, :indicator, :code, :lodash_end,
-                      :attribute_quoted_value_end, :tag_end,], scanner.tokens.map(&:type)
+        assert_equal [
+          :tag_start,
+          :tag_name,
+          :whitespace,
+          :attribute_name,
+          :equal,
+          :attribute_quoted_value_start,
+          :lodash_begin,
+          :indicator,
+          :code,
+          :lodash_end,
+          :attribute_quoted_value_end,
+          :tag_end,
+        ],
+          scanner.tokens.map(&:type)
         assert_equal ["<", "div", " ", "class", "=", "\"", "[%", "=", " foo ", "%]", "\"", ">"],
           scanner.tokens.map(&:loc).map(&:source)
       end

@@ -119,7 +119,7 @@ module BetterHtml
         return if text.upcase == "!DOCTYPE"
         return if @config.partial_tag_name_pattern.match?(text)
 
-        s = +"Invalid tag name #{text.inspect} does not match "\
+        s = +"Invalid tag name #{text.inspect} does not match " \
           "regular expression #{@config.partial_tag_name_pattern.inspect}\n"
         s << build_location(line, column, text.size)
         raise BetterHtml::HtmlError, s
@@ -129,7 +129,7 @@ module BetterHtml
         text = @parser.document[start...stop]
         return if @config.partial_attribute_name_pattern.match?(text)
 
-        s = +"Invalid attribute name #{text.inspect} does not match "\
+        s = +"Invalid attribute name #{text.inspect} does not match " \
           "regular expression #{@config.partial_attribute_name_pattern.inspect}\n"
         s << build_location(line, column, text.size)
         raise BetterHtml::HtmlError, s

@@ -63,7 +63,7 @@ module BetterHtml
           assert_equal "name", errors.first.location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors.first.message
+            errors.first.message,
           )
         end
 
@@ -77,13 +77,13 @@ module BetterHtml
           assert_equal "bar", errors[0].location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors[0].message
+            errors[0].message,
           )
 
           assert_equal "baz", errors[1].location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors[1].message
+            errors[1].message,
           )
         end
 
@@ -96,7 +96,7 @@ module BetterHtml
           assert_equal "unsafe", errors.first.location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors.first.message
+            errors.first.message,
           )
         end
 
@@ -123,7 +123,7 @@ module BetterHtml
           assert_equal "bar", errors.first.location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors.first.message
+            errors.first.message,
           )
         end
 
@@ -178,7 +178,7 @@ module BetterHtml
           assert_equal "unsafe.to_json.html_safe", errors[1].location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors[1].message
+            errors[1].message,
           )
         end
 
@@ -223,7 +223,7 @@ module BetterHtml
           assert_equal "raw unsafe.to_json", errors[1].location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors[1].message
+            errors[1].message,
           )
         end
 
@@ -236,7 +236,7 @@ module BetterHtml
           assert_equal "unsafe", errors[0].location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors[0].message
+            errors[0].message,
           )
         end
 
@@ -249,7 +249,7 @@ module BetterHtml
           assert_equal "unsafe", errors.first.location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors.first.message
+            errors.first.message,
           )
         end
 
@@ -262,7 +262,7 @@ module BetterHtml
           assert_equal "unsafe", errors.first.location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors.first.message
+            errors.first.message,
           )
         end
 
@@ -283,7 +283,7 @@ module BetterHtml
           assert_equal "unsafe", errors.first.location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors.first.message
+            errors.first.message,
           )
         end
 
@@ -296,7 +296,7 @@ module BetterHtml
           assert_equal "unsafe", errors.first.location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors.first.message
+            errors.first.message,
           )
         end
 
@@ -309,7 +309,7 @@ module BetterHtml
           assert_equal "unsafe", errors.first.location.source
           assert_equal(
             "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-            errors.first.message
+            errors.first.message,
           )
         end
 

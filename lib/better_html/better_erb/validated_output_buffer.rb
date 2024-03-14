@@ -17,7 +17,7 @@ module BetterHtml
           value = properly_escaped(value)
 
           if value.include?(@context[:quote_character])
-            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation " \
               "into a quoted attribute value. The value cannot contain the character #{@context[:quote_character]}."
           end
 
@@ -25,15 +25,15 @@ module BetterHtml
         end
 
         def safe_unquoted_value_append=(value)
-          raise DontInterpolateHere, "Do not interpolate without quotes around this "\
-            "attribute value. Instead of "\
-            "<#{@context[:tag_name]} #{@context[:attribute_name]}=#{@context[:attribute_value]}<%=#{@code}%>> "\
+          raise DontInterpolateHere, "Do not interpolate without quotes around this " \
+            "attribute value. Instead of " \
+            "<#{@context[:tag_name]} #{@context[:attribute_name]}=#{@context[:attribute_value]}<%=#{@code}%>> " \
             "try <#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}<%=#{@code}%>\">."
         end
 
         def safe_space_after_attribute_append=(value)
-          raise DontInterpolateHere, "Add a space after this attribute value. Instead of "\
-            "<#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}\"<%=#{@code}%>> "\
+          raise DontInterpolateHere, "Add a space after this attribute value. Instead of " \
+            "<#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}\"<%=#{@code}%>> " \
             "try <#{@context[:tag_name]} #{@context[:attribute_name]}=\"#{@context[:attribute_value]}\" <%=#{@code}%>>."
         end
 
@@ -43,7 +43,7 @@ module BetterHtml
           value = value.to_s
 
           unless value =~ /\A[a-z0-9\-]*\z/
-            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation " \
               "into a attribute name around '#{@context[:attribute_name]}<%=#{@code}%>'."
           end
 
@@ -54,8 +54,8 @@ module BetterHtml
           return if value.nil?
 
           unless value.is_a?(BetterHtml::HtmlAttributes)
-            raise DontInterpolateHere, "Do not interpolate #{value.class} in a tag. "\
-              "Instead of <#{@context[:tag_name]} <%=#{@code}%>> please "\
+            raise DontInterpolateHere, "Do not interpolate #{value.class} in a tag. " \
+              "Instead of <#{@context[:tag_name]} <%=#{@code}%>> please " \
               "try <#{@context[:tag_name]} <%= html_attributes(attr: value) %>>."
           end
 
@@ -63,7 +63,7 @@ module BetterHtml
         end
 
         def safe_after_equal_append=(value)
-          raise DontInterpolateHere, "Do not interpolate without quotes after "\
+          raise DontInterpolateHere, "Do not interpolate without quotes after " \
             "attribute around '#{@context[:attribute_name]}=<%=#{@code}%>'."
         end
 
@@ -71,8 +71,8 @@ module BetterHtml
           return if value.nil?
 
           unless value.is_a?(BetterHtml::HtmlAttributes)
-            raise DontInterpolateHere, "Do not interpolate #{value.class} in a tag. "\
-              "Instead of <#{@context[:tag_name]} <%=#{@code}%>> please "\
+            raise DontInterpolateHere, "Do not interpolate #{value.class} in a tag. " \
+              "Instead of <#{@context[:tag_name]} <%=#{@code}%>> please " \
               "try <#{@context[:tag_name]} <%= html_attributes(attr: value) %>>."
           end
 
@@ -85,7 +85,7 @@ module BetterHtml
           value = value.to_s
 
           unless value =~ /\A[a-z0-9\:\-]*\z/
-            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation " \
               "into a tag name around: <#{@context[:tag_name]}<%=#{@code}%>>."
           end
 
@@ -100,12 +100,12 @@ module BetterHtml
           if @context[:tag_name].downcase == "script" &&
               (value =~ /<script/i || value =~ %r{</script}i)
             # https://www.w3.org/TR/html5/scripting-1.html#restrictions-for-contents-of-script-elements
-            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
-              "into a script tag around: <#{@context[:tag_name]}>#{@context[:rawtext_text]}<%=#{@code}%>. "\
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation " \
+              "into a script tag around: <#{@context[:tag_name]}>#{@context[:rawtext_text]}<%=#{@code}%>. " \
               "A script tag cannot contain <script or </script anywhere inside of it."
           elsif value =~ /<#{Regexp.escape(@context[:tag_name].downcase)}/i ||
               value =~ %r{</#{Regexp.escape(@context[:tag_name].downcase)}}i
-            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation " \
               "into a #{@context[:tag_name].downcase} tag around: " \
               "<#{@context[:tag_name]}>#{@context[:rawtext_text]}<%=#{@code}%>."
           end
@@ -120,7 +120,7 @@ module BetterHtml
 
           # in a <!-- ...here --> we disallow -->
           if value =~ /-->/
-            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation "\
+            raise UnsafeHtmlError, "Detected invalid characters as part of the interpolation " \
               "into a html comment around: <!--#{@context[:comment_text]}<%=#{@code}%>."
           end
 

@@ -533,17 +533,20 @@ module HtmlTokenizer
       assert_equal(data.join, @parser.document)
       assert_equal(data.join.size, @parser.document_length)
       assert_equal(data.join.size, @parser.column_number)
-      assert_equal([
-        [:tag_start, 0, 1, "<"],
-        [:tag_name, 1, 4, "div"],
-        [:whitespace, 4, 5, " "],
-        [:attribute_name, 5, 10, "title"],
-        [:equal, 10, 11, "="],
-        [:attribute_quoted_value_start, 11, 12, "'"],
-        [:attribute_quoted_value, 12, 24, "your store’s"],
-        [:attribute_quoted_value_end, 24, 25, "'"],
-        [:tag_end, 25, 26, ">"],
-      ], tokens)
+      assert_equal(
+        [
+          [:tag_start, 0, 1, "<"],
+          [:tag_name, 1, 4, "div"],
+          [:whitespace, 4, 5, " "],
+          [:attribute_name, 5, 10, "title"],
+          [:equal, 10, 11, "="],
+          [:attribute_quoted_value_start, 11, 12, "'"],
+          [:attribute_quoted_value, 12, 24, "your store’s"],
+          [:attribute_quoted_value_end, 24, 25, "'"],
+          [:tag_end, 25, 26, ">"],
+        ],
+        tokens,
+      )
     end
 
     def test_valid_syntaxes
