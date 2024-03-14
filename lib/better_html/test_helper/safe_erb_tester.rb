@@ -41,7 +41,7 @@ module BetterHtml
         options[:template_language] ||= :html
         buffer = ::Parser::Source::Buffer.new(options[:filename] || "(buffer)")
         buffer.source = data
-        parser = BetterHtml::Parser.new(buffer, **options)
+        parser = BetterHtml::Parser.new(buffer, template_language: options[:template_language])
 
         tester_classes = [
           SafeErb::NoStatements,

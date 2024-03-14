@@ -217,7 +217,7 @@ class ErbSafetyTest < ActiveSupport::TestCase
   Dir[ERB_GLOB].each do |filename|
     pathname = Pathname.new(filename).relative_path_from(Rails.root)
     test "missing javascript escapes in #{pathname}" do
-      assert_erb_safety File.read(filename)
+      assert_erb_safety(File.read(filename), filename:)
     end
   end
 end
