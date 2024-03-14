@@ -1,4 +1,5 @@
 #include <ruby.h>
+#include <ruby/util.h>
 #include <ruby/encoding.h>
 #include "html_tokenizer.h"
 #include "parser.h"
@@ -81,7 +82,7 @@ static inline void parser_append_ref(struct token_reference_t *dest, struct toke
 static void parser_add_error(struct parser_t *parser, const char *message)
 {
   REALLOC_N(parser->errors, struct parser_document_error_t, parser->errors_count + 1);
-  parser->errors[parser->errors_count].message = strdup(message);
+  parser->errors[parser->errors_count].message = ruby_strdup(message);
   parser->errors[parser->errors_count].pos = parser->tk.scan.cursor;
   parser->errors[parser->errors_count].mb_pos = parser->tk.scan.mb_cursor;
   parser->errors[parser->errors_count].line_number = parser->doc.line_number;
