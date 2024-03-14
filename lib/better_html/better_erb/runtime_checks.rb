@@ -155,7 +155,8 @@ module BetterHtml
       end
 
       def build_location(line, column, length)
-        s = +"On line #{line} column #{column}:\n"
+        s = filename ? +"In #{filename}\n" : +""
+        s << "On line #{line} column #{column}:\n"
         s << "#{extract_line(line)}\n"
         s << "#{" " * column}#{"^" * length}"
       end

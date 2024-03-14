@@ -240,7 +240,7 @@ class ErbImplementationTest < ActiveSupport::TestCase
     pathname = Pathname.new(filename).relative_path_from(Rails.root)
     test "html errors in #{pathname}" do
       data = File.read(filename)
-      BetterHtml::BetterErb::ErubiImplementation.new(data).validate!
+      BetterHtml::BetterErb::ErubiImplementation.new(data, filename:).validate!
     end
   end
 end
@@ -261,7 +261,9 @@ RSpec.describe "BetterHtml" do
 
     Dir[erb_glob].each do |filename|
       data = File.read(filename)
-      expect { BetterHtml::BetterErb::ErubiImplementation.new(data).validate! }.not_to raise_exception
+      expect {
+        BetterHtml::BetterErb::ErubiImplementation.new(data, filename:).validate!
+      }.not_to raise_exception
     end
   end
 end
