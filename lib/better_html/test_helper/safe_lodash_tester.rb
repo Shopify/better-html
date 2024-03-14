@@ -74,7 +74,7 @@ module BetterHtml
 
             add_error(
               "No script tags allowed nested in lodash templates",
-              location: tag_node.loc
+              location: tag_node.loc,
             )
           end
 
@@ -104,7 +104,7 @@ module BetterHtml
               elsif indicator_node.loc.source == "!"
                 add_error(
                   "lodash interpolation with '[%!' inside html attribute is never safe",
-                  location: lodash_node.loc
+                  location: lodash_node.loc,
                 )
               end
             end
@@ -116,9 +116,9 @@ module BetterHtml
           source = code_node.loc.source.strip
           if @config.javascript_attribute_name?(attribute.name) && !@config.lodash_safe_javascript_expression?(source)
             add_error(
-              "lodash interpolation in javascript attribute "\
+              "lodash interpolation in javascript attribute " \
                 "`#{attribute.name}` must call `JSON.stringify(#{source})`",
-              location: lodash_node.loc
+              location: lodash_node.loc,
             )
           end
         end
@@ -132,7 +132,7 @@ module BetterHtml
         def add_no_statement_error(loc)
           add_error(
             "javascript statement not allowed here; did you mean '[%=' ?",
-            location: loc
+            location: loc,
           )
         end
       end

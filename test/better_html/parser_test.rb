@@ -46,11 +46,15 @@ module BetterHtml
       code = "<![CDATA[ foo <%= bar %> baz ]]>"
       tree = Parser.new(buffer(code))
 
-      assert_equal s(:document,
-        s(:cdata,
+      assert_equal s(
+        :document,
+        s(
+          :cdata,
           " foo ",
           s(:erb, s(:indicator, "="), nil, s(:code, " bar "), nil),
-          " baz ")),
+          " baz ",
+        ),
+      ),
         tree.ast
       assert_equal code, tree.ast.loc.source
     end
@@ -70,11 +74,15 @@ module BetterHtml
     test "consume comment with interpolation" do
       tree = Parser.new(buffer("<!-- foo <%= bar %> baz -->"))
 
-      assert_equal s(:document,
-        s(:comment,
+      assert_equal s(
+        :document,
+        s(
+          :comment,
           " foo ",
           s(:erb, s(:indicator, "="), nil, s(:code, " bar "), nil),
-          " baz ")),
+          " baz ",
+        ),
+      ),
         tree.ast
     end
 
@@ -85,12 +93,21 @@ module BetterHtml
 
     test "tag without name" do
       tree = Parser.new(buffer("foo < bar"))
-      assert_equal s(:document,
+      assert_equal s(
+        :document,
         s(:text, "foo "),
-        s(:tag, nil, nil,
-          s(:tag_attributes,
-            s(:attribute, s(:attribute_name, "bar"), nil, nil)),
-          nil)), tree.ast
+        s(
+          :tag,
+          nil,
+          nil,
+          s(
+            :tag_attributes,
+            s(:attribute, s(:attribute_name, "bar"), nil, nil),
+          ),
+          nil,
+        ),
+      ),
+        tree.ast
     end
 
     test "consume tag nodes with solidus" do
@@ -113,136 +130,226 @@ module BetterHtml
 
     test "consume tag nodes with interpolation" do
       tree = Parser.new(buffer("<ns:<%= name %>-thing>"))
-      assert_equal s(:document,
-        s(:tag,
+      assert_equal s(
+        :document,
+        s(
+          :tag,
           nil,
           s(:tag_name, "ns:", s(:erb, s(:indicator, "="), nil, s(:code, " name "), nil), "-thing"),
           nil,
-          nil)), tree.ast
+          nil,
+        ),
+      ),
+        tree.ast
     end
 
     test "consume tag attributes with erb" do
       tree = Parser.new(buffer("<div class=foo <%= erb %> name=bar>"))
-      assert_equal s(:document,
-        s(:tag, nil,
+      assert_equal s(
+        :document,
+        s(
+          :tag,
+          nil,
           s(:tag_name, "div"),
-          s(:tag_attributes,
-            s(:attribute,
+          s(
+            :tag_attributes,
+            s(
+              :attribute,
               s(:attribute_name, "class"),
               s(:equal),
-              s(:attribute_value, "foo")),
-            s(:erb, s(:indicator, "="), nil,
-              s(:code, " erb "), nil),
-            s(:attribute,
+              s(:attribute_value, "foo"),
+            ),
+            s(
+              :erb,
+              s(:indicator, "="),
+              nil,
+              s(:code, " erb "),
+              nil,
+            ),
+            s(
+              :attribute,
               s(:attribute_name, "name"),
               s(:equal),
-              s(:attribute_value, "bar")),),
-          nil)), tree.ast
+              s(:attribute_value, "bar"),
+            ),
+          ),
+          nil,
+        ),
+      ),
+        tree.ast
     end
 
     test "consume tag attributes nodes unquoted value" do
       tree = Parser.new(buffer("<div foo=bar>"))
-      assert_equal s(:document,
-        s(:tag, nil,
+      assert_equal s(
+        :document,
+        s(
+          :tag,
+          nil,
           s(:tag_name, "div"),
-          s(:tag_attributes,
-            s(:attribute,
+          s(
+            :tag_attributes,
+            s(
+              :attribute,
               s(:attribute_name, "foo"),
               s(:equal),
-              s(:attribute_value, "bar"))),
-          nil)), tree.ast
+              s(:attribute_value, "bar"),
+            ),
+          ),
+          nil,
+        ),
+      ),
+        tree.ast
     end
 
     test "consume attributes without name" do
       tree = Parser.new(buffer("<div 'thing'>"))
-      assert_equal s(:document,
-        s(:tag, nil,
+      assert_equal s(
+        :document,
+        s(
+          :tag,
+          nil,
           s(:tag_name, "div"),
-          s(:tag_attributes,
-            s(:attribute,
+          s(
+            :tag_attributes,
+            s(
+              :attribute,
               nil,
               nil,
-              s(:attribute_value, s(:quote, "'"), "thing", s(:quote, "'")))),
-          nil)), tree.ast
+              s(:attribute_value, s(:quote, "'"), "thing", s(:quote, "'")),
+            ),
+          ),
+          nil,
+        ),
+      ),
+        tree.ast
     end
 
     test "consume tag attributes nodes quoted value" do
       tree = Parser.new(buffer("<div foo=\"bar\">"))
-      assert_equal s(:document,
-        s(:tag, nil,
+      assert_equal s(
+        :document,
+        s(
+          :tag,
+          nil,
           s(:tag_name, "div"),
-          s(:tag_attributes,
-            s(:attribute,
+          s(
+            :tag_attributes,
+            s(
+              :attribute,
               s(:attribute_name, "foo"),
               s(:equal),
-              s(:attribute_value, s(:quote, "\""), "bar", s(:quote, "\"")))),
-          nil)), tree.ast
+              s(:attribute_value, s(:quote, "\""), "bar", s(:quote, "\"")),
+            ),
+          ),
+          nil,
+        ),
+      ),
+        tree.ast
     end
 
     test "consume tag attributes nodes interpolation in name and value" do
       tree = Parser.new(buffer("<div data-<%= foo %>=\"some <%= value %> foo\">"))
-      assert_equal s(:document,
-        s(:tag, nil,
+      assert_equal s(
+        :document,
+        s(
+          :tag,
+          nil,
           s(:tag_name, "div"),
-          s(:tag_attributes,
-            s(:attribute,
+          s(
+            :tag_attributes,
+            s(
+              :attribute,
               s(:attribute_name, "data-", s(:erb, s(:indicator, "="), nil, s(:code, " foo "), nil)),
               s(:equal),
-              s(:attribute_value,
+              s(
+                :attribute_value,
                 s(:quote, "\""),
                 "some ",
                 s(:erb, s(:indicator, "="), nil, s(:code, " value "), nil),
                 " foo",
-                s(:quote, "\""),),)),
-          nil)), tree.ast
+                s(:quote, "\""),
+              ),
+            ),
+          ),
+          nil,
+        ),
+      ),
+        tree.ast
     end
 
     test "consume text nodes" do
       tree = Parser.new(buffer("here is <%= some %> text"))
 
-      assert_equal s(:document,
-        s(:text,
+      assert_equal s(
+        :document,
+        s(
+          :text,
           "here is ",
           s(:erb, s(:indicator, "="), nil, s(:code, " some "), nil),
-          " text")), tree.ast
+          " text",
+        ),
+      ),
+        tree.ast
     end
 
     test "javascript template parsing works" do
       tree = Parser.new(buffer("here is <%= some %> text"), template_language: :javascript)
 
-      assert_equal s(:document,
-        s(:text,
+      assert_equal s(
+        :document,
+        s(
+          :text,
           "here is ",
           s(:erb, s(:indicator, "="), nil, s(:code, " some "), nil),
-          " text")), tree.ast
+          " text",
+        ),
+      ),
+        tree.ast
     end
 
     test "javascript template does not consume html tags" do
       tree = Parser.new(buffer("<div <%= some %> />"), template_language: :javascript)
 
-      assert_equal s(:document,
-        s(:text,
+      assert_equal s(
+        :document,
+        s(
+          :text,
           "<div ",
           s(:erb, s(:indicator, "="), nil, s(:code, " some "), nil),
-          " />")), tree.ast
+          " />",
+        ),
+      ),
+        tree.ast
     end
 
     test "lodash template parsing works" do
       tree = Parser.new(buffer('<div class="[%= foo %]">'), template_language: :lodash)
 
-      assert_equal s(:document,
-        s(:tag,
+      assert_equal s(
+        :document,
+        s(
+          :tag,
           nil,
           s(:tag_name, "div"),
-          s(:tag_attributes,
-            s(:attribute,
+          s(
+            :tag_attributes,
+            s(
+              :attribute,
               s(:attribute_name, "class"),
               s(:equal),
-              s(:attribute_value,
+              s(
+                :attribute_value,
                 s(:quote, "\""),
                 s(:lodash, s(:indicator, "="), s(:code, " foo ")),
-                s(:quote, "\"")))),
-          nil)), tree.ast
+                s(:quote, "\""),
+              ),
+            ),
+          ),
+          nil,
+        ),
+      ),
+        tree.ast
     end
 
     test "nodes are all nested under document" do
@@ -256,25 +363,36 @@ module BetterHtml
         </div>
       HTML
 
-      assert_equal s(:document,
+      assert_equal s(
+        :document,
         s(:text, "some text\n"),
         s(:comment, " a comment "),
-        s(:text,
+        s(
+          :text,
           "\nsome more text\n",
           s(:erb, s(:indicator, "="), nil, s(:code, " an erb tag "), s(:trim)),
-          "\n"),
-        s(:tag,
+          "\n",
+        ),
+        s(
+          :tag,
           nil,
           s(:tag_name, "div"),
-          s(:tag_attributes,
-            s(:attribute,
+          s(
+            :tag_attributes,
+            s(
+              :attribute,
               s(:attribute_name, "class"),
               s(:equal),
-              s(:attribute_value, s(:quote, "\""), "foo", s(:quote, "\"")))),
-          nil),
+              s(:attribute_value, s(:quote, "\""), "foo", s(:quote, "\"")),
+            ),
+          ),
+          nil,
+        ),
         s(:text, "\n  content\n"),
         s(:tag, s(:solidus), s(:tag_name, "div"), nil, nil),
-        s(:text, "\n"),), tree.ast
+        s(:text, "\n"),
+      ),
+        tree.ast
     end
   end
 end

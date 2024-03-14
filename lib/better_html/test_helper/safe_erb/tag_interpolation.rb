@@ -7,8 +7,18 @@ module BetterHtml
   module TestHelper
     module SafeErb
       class TagInterpolation < Base
-        NO_HTML_TAGS = ["title", "textarea", "script", "style", "xmp", "iframe", "noembed", "noframes", "listing",
-                        "plaintext",]
+        NO_HTML_TAGS = [
+          "title",
+          "textarea",
+          "script",
+          "style",
+          "xmp",
+          "iframe",
+          "noembed",
+          "noframes",
+          "listing",
+          "plaintext",
+        ]
 
         def validate
           @parser.nodes_with_type(:tag).each do |tag_node|
@@ -28,8 +38,8 @@ module BetterHtml
         def no_html_tag?(node)
           ast = @parser.ast.to_a
           index = ast.find_index(node)
-          return unless (previous_node = ast[index - 1])
-          return unless previous_node.type == :tag
+          return false unless (previous_node = ast[index - 1])
+          return false unless previous_node.type == :tag
 
           tag = BetterHtml::Tree::Tag.from_node(previous_node)
           NO_HTML_TAGS.include?(tag.name) && !tag.closing?
@@ -57,7 +67,7 @@ module BetterHtml
             elsif indicator == "=="
               add_error(
                 "erb interpolation with '<%==' inside html attribute is never safe",
-                location: erb_node.loc
+                location: erb_node.loc,
               )
             end
           end
@@ -122,14 +132,14 @@ module BetterHtml
           if method_calls.empty?
             add_error(
               "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-              location: nested_location(parent_node, ruby_node)
+              location: nested_location(parent_node, ruby_node),
             )
             true
           elsif unsafe_calls.any?
             unsafe_calls.each do |call_node|
               add_error(
                 "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-                location: nested_location(parent_node, call_node)
+                location: nested_location(parent_node, call_node),
               )
             end
             true
@@ -148,7 +158,7 @@ module BetterHtml
 
             add_error(
               "erb interpolation in javascript attribute must be wrapped in safe helper such as '(...).to_json'",
-              location: nested_location(parent_node, ruby_node)
+              location: nested_location(parent_node, ruby_node),
             )
           end
         end
@@ -158,12 +168,12 @@ module BetterHtml
             if call.method_name?(:raw)
               add_error(
                 "erb interpolation with '<%= raw(...) %>' in this context is never safe",
-                location: nested_location(parent_node, ruby_node)
+                location: nested_location(parent_node, ruby_node),
               )
             elsif call.method_name?(:html_safe)
               add_error(
                 "erb interpolation with '<%= (...).html_safe %>' in this context is never safe",
-                location: nested_location(parent_node, ruby_node)
+                location: nested_location(parent_node, ruby_node),
               )
             end
           end
@@ -173,7 +183,7 @@ module BetterHtml
           Tokenizer::Location.new(
             parent_node.loc.source_buffer,
             parent_node.loc.begin_pos + ruby_node.loc.expression.begin_pos,
-            parent_node.loc.begin_pos + ruby_node.loc.expression.end_pos
+            parent_node.loc.begin_pos + ruby_node.loc.expression.end_pos,
           )
         end
       end

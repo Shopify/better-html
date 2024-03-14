@@ -80,7 +80,7 @@ module BetterHtml
       def add_token(type, begin_pos, end_pos)
         token = Token.new(
           type: type,
-          loc: Location.new(@buffer, begin_pos, end_pos)
+          loc: Location.new(@buffer, begin_pos, end_pos),
         )
         @tokens << token
         token

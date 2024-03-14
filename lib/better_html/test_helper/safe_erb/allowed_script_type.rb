@@ -24,7 +24,7 @@ module BetterHtml
 
           add_error(
             "#{type_attribute.value} is not a valid type, valid types are #{VALID_JAVASCRIPT_TAG_TYPES.join(", ")}",
-            location: type_attribute.loc
+            location: type_attribute.loc,
           )
         end
       end

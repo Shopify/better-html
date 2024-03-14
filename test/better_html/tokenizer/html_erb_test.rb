@@ -13,7 +13,8 @@ module BetterHtml
         assert_attributes ({
           type: :text,
           loc: { begin_pos: 0, end_pos: 14, source: "just some text" },
-        }), scanner.tokens[0]
+        }),
+          scanner.tokens[0]
       end
 
       test "statement" do
@@ -74,7 +75,7 @@ module BetterHtml
           scanner.tokens[5]
         assert_attributes(
           { type: :attribute_quoted_value, loc: { begin_pos: 12, end_pos: 24, source: "your store’s" } },
-          scanner.tokens[6]
+          scanner.tokens[6],
         )
         assert_attributes ({ type: :attribute_quoted_value_end, loc: { begin_pos: 24, end_pos: 25, source: "'" } }),
           scanner.tokens[7]

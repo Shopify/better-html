@@ -35,18 +35,20 @@ module BetterHtml
           render("<a href=\"<%= value %>\">", locals: { value: ' \'">x '.html_safe })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a quoted attribute value. The value cannot contain the character \".", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a quoted attribute value. The value cannot contain the character \".",
+          e.message
       end
 
       test "interpolate html_safe inside single quoted attribute" do
         config = build_config(allow_single_quoted_attributes: true)
         e = assert_raises(ActionView::Template::Error) do
-          render("<a href=\'<%= value %>\'>", config: config, locals: { value: ' \'">x '.html_safe })
+          render("<a href='<%= value %>'>", config: config, locals: { value: ' \'">x '.html_safe })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a quoted attribute value. The value cannot contain the character '.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a quoted attribute value. The value cannot contain the character '.",
+          e.message
       end
 
       test "interpolate in attribute name" do
@@ -59,8 +61,9 @@ module BetterHtml
           render("<a data-<%= value %>-foo>", locals: { value: "un safe" })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a attribute name around 'data-<%= value %>'.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a attribute name around 'data-<%= value %>'.",
+          e.message
       end
 
       test "interpolate in attribute name with unsafe value with equal sign" do
@@ -68,8 +71,9 @@ module BetterHtml
           render("<a data-<%= value %>-foo>", locals: { value: "un=safe" })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the "\
-          "interpolation into a attribute name around 'data-<%= value %>'.", e.message
+        assert_equal "Detected invalid characters as part of the " \
+          "interpolation into a attribute name around 'data-<%= value %>'.",
+          e.message
       end
 
       test "interpolate in attribute name with unsafe value with quote" do
@@ -77,8 +81,9 @@ module BetterHtml
           render("<a data-<%= value %>-foo>", locals: { value: "un\"safe" })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the "\
-          "interpolation into a attribute name around 'data-<%= value %>'.", e.message
+        assert_equal "Detected invalid characters as part of the " \
+          "interpolation into a attribute name around 'data-<%= value %>'.",
+          e.message
       end
 
       test "interpolate after an attribute name without a value" do
@@ -92,8 +97,9 @@ module BetterHtml
           render("<a data-foo=<%= html_attributes(foo: 'bar') %>>", config: config)
         end
         assert_kind_of BetterHtml::DontInterpolateHere, e.cause
-        assert_equal "Do not interpolate without quotes after "\
-          "attribute around 'data-foo=<%= html_attributes(foo: 'bar') %>'.", e.message
+        assert_equal "Do not interpolate without quotes after " \
+          "attribute around 'data-foo=<%= html_attributes(foo: 'bar') %>'.",
+          e.message
       end
 
       test "interpolate after an attribute value" do
@@ -101,9 +107,10 @@ module BetterHtml
           render("<a foo=\"xx\"<%= html_attributes(foo: 'bar') %>>")
         end
         assert_kind_of BetterHtml::DontInterpolateHere, e.cause
-        assert_equal "Add a space after this attribute value. "\
-          "Instead of <a foo=\"xx\"<%= html_attributes(foo: 'bar') %>>"\
-          " try <a foo=\"xx\" <%= html_attributes(foo: 'bar') %>>.", e.message
+        assert_equal "Add a space after this attribute value. " \
+          "Instead of <a foo=\"xx\"<%= html_attributes(foo: 'bar') %>> " \
+          "try <a foo=\"xx\" <%= html_attributes(foo: 'bar') %>>.",
+          e.message
       end
 
       test "interpolate in attribute without quotes" do
@@ -112,8 +119,9 @@ module BetterHtml
           render("<a href=<%= value %>>", config: config, locals: { value: "un safe" })
         end
         assert_kind_of BetterHtml::DontInterpolateHere, e.cause
-        assert_equal "Do not interpolate without quotes after "\
-          "attribute around 'href=<%= value %>'.", e.message
+        assert_equal "Do not interpolate without quotes after " \
+          "attribute around 'href=<%= value %>'.",
+          e.message
       end
 
       test "interpolate in attribute after value" do
@@ -122,9 +130,10 @@ module BetterHtml
           render("<a href=something<%= value %>>", config: config, locals: { value: "" })
         end
         assert_kind_of BetterHtml::DontInterpolateHere, e.cause
-        assert_equal "Do not interpolate without quotes around this "\
-          "attribute value. Instead of <a href=something<%= value %>> "\
-          "try <a href=\"something<%= value %>\">.", e.message
+        assert_equal "Do not interpolate without quotes around this " \
+          "attribute value. Instead of <a href=something<%= value %>> " \
+          "try <a href=\"something<%= value %>\">.",
+          e.message
       end
 
       test "interpolate in tag name" do
@@ -137,8 +146,9 @@ module BetterHtml
           render("<tag-<%= value %>-foo>", locals: { value: "un safe" })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a tag name around: <tag-<%= value %>>.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a tag name around: <tag-<%= value %>>.",
+          e.message
       end
 
       test "interpolate in tag name with slash" do
@@ -146,8 +156,9 @@ module BetterHtml
           render("<tag-<%= value %>-foo>", locals: { value: "un/safe" })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a tag name around: <tag-<%= value %>>.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a tag name around: <tag-<%= value %>>.",
+          e.message
       end
 
       test "interpolate in tag name with end of tag" do
@@ -155,8 +166,9 @@ module BetterHtml
           render("<tag-<%= value %>-foo>", locals: { value: "><script>" })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a tag name around: <tag-<%= value %>>.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a tag name around: <tag-<%= value %>>.",
+          e.message
       end
 
       test "interpolate in comment" do
@@ -169,8 +181,9 @@ module BetterHtml
           render("<!-- <%= value %> -->", locals: { value: "-->".html_safe })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a html comment around: <!-- <%= value %>.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a html comment around: <!-- <%= value %>.",
+          e.message
       end
 
       test "non html_safe interpolation into comment tag" do
@@ -189,9 +202,10 @@ module BetterHtml
           render("<script> foo <%= value %> bar<script>", locals: { value: "<!--".html_safe })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a script tag around: <script> foo <%= value %>. "\
-          "A script tag cannot contain <script or </script anywhere inside of it.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a script tag around: <script> foo <%= value %>. " \
+          "A script tag cannot contain <script or </script anywhere inside of it.",
+          e.message
       end
 
       test "interpolate in script tag with start of script" do
@@ -199,9 +213,10 @@ module BetterHtml
           render("<script> foo <%= value %> bar</script>", locals: { value: "<script".html_safe })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a script tag around: <script> foo <%= value %>. "\
-          "A script tag cannot contain <script or </script anywhere inside of it.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a script tag around: <script> foo <%= value %>. " \
+          "A script tag cannot contain <script or </script anywhere inside of it.",
+          e.message
       end
 
       test "interpolate in script tag with raw interpolation" do
@@ -214,9 +229,10 @@ module BetterHtml
           render("<script> foo <%= value %> bar</script>", locals: { value: "<ScRIpT".html_safe })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a script tag around: <script> foo <%= value %>. "\
-          "A script tag cannot contain <script or </script anywhere inside of it.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a script tag around: <script> foo <%= value %>. " \
+          "A script tag cannot contain <script or </script anywhere inside of it.",
+          e.message
       end
 
       test "interpolate in script tag with end of script" do
@@ -224,9 +240,10 @@ module BetterHtml
           render("<script> foo <%= value %> bar</script>", locals: { value: "</script".html_safe })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a script tag around: <script> foo <%= value %>. "\
-          "A script tag cannot contain <script or </script anywhere inside of it.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a script tag around: <script> foo <%= value %>. " \
+          "A script tag cannot contain <script or </script anywhere inside of it.",
+          e.message
       end
 
       test "interpolate html_attributes" do
@@ -239,8 +256,9 @@ module BetterHtml
           render("<a <%= 'foo=\"bar\"' %>>")
         end
         assert_kind_of BetterHtml::DontInterpolateHere, e.cause
-        assert_equal "Do not interpolate String in a tag. Instead "\
-          "of <a <%= 'foo=\"bar\"' %>> please try <a <%= html_attributes(attr: value) %>>.", e.message
+        assert_equal "Do not interpolate String in a tag. Instead " \
+          "of <a <%= 'foo=\"bar\"' %>> please try <a <%= html_attributes(attr: value) %>>.",
+          e.message
       end
 
       test "non html_safe interpolation into rawtext tag" do
@@ -258,8 +276,9 @@ module BetterHtml
           render("<title><%= value %></title>", locals: { value: "</title>".html_safe })
         end
         assert_kind_of BetterHtml::UnsafeHtmlError, e.cause
-        assert_equal "Detected invalid characters as part of the interpolation "\
-          "into a title tag around: <title><%= value %>.", e.message
+        assert_equal "Detected invalid characters as part of the interpolation " \
+          "into a title tag around: <title><%= value %>.",
+          e.message
       end
 
       test "interpolate block in middle of tag" do
@@ -271,10 +290,11 @@ module BetterHtml
           HTML
         end
         assert_kind_of BetterHtml::DontInterpolateHere, e.cause
-        assert_equal "Ruby statement not allowed.\n"\
-          "In 'tag' on line 1 column 19:\n"\
-          "        <a href=\"\" <%= something do %>\n"\
-          "                   ^^^^^^^^^^^^^^^^^^^", e.message
+        assert_equal "Ruby statement not allowed.\n" \
+          "In 'tag' on line 1 column 19:\n        " \
+          "<a href=\"\" <%= something do %>\n                   " \
+          "^^^^^^^^^^^^^^^^^^^",
+          e.message
       end
 
       test "interpolate with output block is valid syntax" do
@@ -301,7 +321,7 @@ module BetterHtml
         assert_equal(
           "<div><input type=\"submit\" name=\"commit\" value=\"Save changes\" data-disable-with=\"Save changes\" />" \
             "</div>",
-          render("<div><%= send 'submit_tag' %></div>")
+          render("<div><%= send 'submit_tag' %></div>"),
         )
       end
 
@@ -310,10 +330,11 @@ module BetterHtml
           render("<foo~bar></foo~bar>")
         end
         assert_kind_of BetterHtml::HtmlError, e.cause
-        assert_equal "Invalid tag name \"foo~bar\" does not match regular expression /\\A[a-z0-9\\-\\:]+\\z/\n"\
-          "On line 1 column 1:\n"\
-          "<foo~bar></foo~bar>\n"\
-          " ^^^^^^^", e.message
+        assert_equal "Invalid tag name \"foo~bar\" does not match regular expression /\\A[a-z0-9\\-\\:]+\\z/\n" \
+          "On line 1 column 1:\n" \
+          "<foo~bar></foo~bar>\n " \
+          "^^^^^^^",
+          e.message
       end
 
       test "attribute names are validated against attribute_name_pattern regexp" do
@@ -324,8 +345,9 @@ module BetterHtml
         assert_equal "Invalid attribute name \"bar_baz\" does not match regular expression " \
           "#{build_config.partial_attribute_name_pattern.inspect}\n" \
           "On line 1 column 5:\n" \
-          "<foo bar_baz=\"1\">\n" \
-          "     ^^^^^^^", e.message
+          "<foo bar_baz=\"1\">\n     " \
+          "^^^^^^^",
+          e.message
       end
 
       test "single quotes are disallowed when allow_single_quoted_attributes=false" do
@@ -334,10 +356,11 @@ module BetterHtml
           render("<foo bar='1'>", config: config)
         end
         assert_kind_of BetterHtml::HtmlError, e.cause
-        assert_equal "Single-quoted attributes are not allowed\n"\
-          "On line 1 column 9:\n"\
-          "<foo bar='1'>\n"\
-          "         ^", e.message
+        assert_equal "Single-quoted attributes are not allowed\n" \
+          "On line 1 column 9:\n" \
+          "<foo bar='1'>\n         " \
+          "^",
+          e.message
       end
 
       test "single quotes are allowed when allow_single_quoted_attributes=true" do
@@ -353,10 +376,11 @@ module BetterHtml
           render("<foo bar=1>", config: config)
         end
         assert_kind_of BetterHtml::HtmlError, e.cause
-        assert_equal "Unquoted attribute values are not allowed\n"\
-          "On line 1 column 9:\n"\
-          "<foo bar=1>\n"\
-          "         ^", e.message
+        assert_equal "Unquoted attribute values are not allowed\n" \
+          "On line 1 column 9:\n" \
+          "<foo bar=1>\n         " \
+          "^",
+          e.message
       end
 
       test "unquoted values are allowed when allow_unquoted_attributes=true" do
@@ -415,11 +439,12 @@ module BetterHtml
         assert_equal "2 error(s) found in HTML document.\n" \
           "expected whitespace, '>' or '=' after attribute name\n" \
           "On line 1 column 8:\n" \
-          "<foo bar~baz=\"1\">\n" \
-          "        ^^^^^^^^^expected whitespace, '>', attribute name or value\n" \
+          "<foo bar~baz=\"1\">\n        " \
+          "^^^^^^^^^expected whitespace, '>', attribute name or value\n" \
           "On line 1 column 8:\n" \
-          "<foo bar~baz=\"1\">\n" \
-          "        ^^^^^^^^^", e.message
+          "<foo bar~baz=\"1\">\n        " \
+          "^^^^^^^^^",
+          e.message
       end
 
       private
@@ -444,7 +469,7 @@ module BetterHtml
           ActionView::Template::Handlers::ERB.new,
           virtual_path: "partial",
           format: :html,
-          locals: locals.keys
+          locals: locals.keys,
         ).render(ViewContext.with_empty_template_cache.empty, locals)
       ensure
         BetterHtml.config = old_config

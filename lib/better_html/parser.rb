@@ -53,7 +53,7 @@ module BetterHtml
       @erb.parser.errors.map do |error|
         Error.new(
           error.message,
-          location: Tokenizer::Location.new(@buffer, error.position, error.position + 1)
+          location: Tokenizer::Location.new(@buffer, error.position, error.position + 1),
         )
       end
     end
@@ -183,9 +183,13 @@ module BetterHtml
     end
 
     def build_attribute_value_node(tokens)
-      children = shift_all_with_interpolation(tokens,
-        :attribute_quoted_value_start, :attribute_quoted_value,
-        :attribute_quoted_value_end, :attribute_unquoted_value)
+      children = shift_all_with_interpolation(
+        tokens,
+        :attribute_quoted_value_start,
+        :attribute_quoted_value,
+        :attribute_quoted_value_end,
+        :attribute_unquoted_value,
+      )
 
       build_node(:attribute_value, children)
     end
@@ -199,7 +203,7 @@ module BetterHtml
       BetterHtml::AST::Node.new(
         type,
         tokens.present? ? wrap_tokens(tokens) : [],
-        loc: tokens.present? ? build_location([pre, *tokens, post]) : empty_location
+        loc: tokens.present? ? build_location([pre, *tokens, post]) : empty_location,
       )
     end
 
@@ -298,8 +302,13 @@ module BetterHtml
 
       if object.is_a?(::AST::Node)
         object
-      elsif [:text, :tag_name, :attribute_name, :attribute_quoted_value,
-             :attribute_unquoted_value,].include?(object.type)
+      elsif [
+        :text,
+        :tag_name,
+        :attribute_name,
+        :attribute_quoted_value,
+        :attribute_unquoted_value,
+      ].include?(object.type)
         object.loc.source
       elsif [:attribute_quoted_value_start, :attribute_quoted_value_end].include?(object.type)
         BetterHtml::AST::Node.new(:quote, [object.loc.source], loc: object.loc)
