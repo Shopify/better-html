@@ -52,10 +52,20 @@ module BetterHtml
         klass ||= self.class.erb_implementation
 
         escape = self.class.escape_ignore_list.include?(template.type)
+
+        options = {
+          escape: escape,
+          trim: (self.class.erb_trim_mode == "-"),
+        }
+        if BetterHtml.config.annotate_rendered_view_with_filenames && template.format == :html
+          options[:preamble] = "@output_buffer.safe_append='<!-- BEGIN #{template.short_identifier} -->';"
+          options[:postamble] = "@output_buffer.safe_append='<!-- END #{template.short_identifier} -->';" \
+            "@output_buffer.to_s"
+        end
+
         generator = klass.new(
           erb,
-          escape: escape,
-          trim: (self.class.erb_trim_mode == "-")
+          **options
         )
         generator.validate! if generator.respond_to?(:validate!)
         generator.src

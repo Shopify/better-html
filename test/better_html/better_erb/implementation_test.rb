@@ -366,6 +366,20 @@ module BetterHtml
         end
       end
 
+      if ActionView.version >= Gem::Version.new("6.1")
+        test "with ActionView 6.1 comments are added to show the filename when annotate_rendered_view_with_filenames=true" do
+          config = build_config(annotate_rendered_view_with_filenames: true)
+          assert_equal "<!-- BEGIN _better_test.html.erb --><foo>bar<foo><!-- END _better_test.html.erb -->",
+            render("<foo>bar<foo>", config: config, filename: "_better_test.html.erb")
+        end
+      else
+        test "with ActionView 6.0 annotate_rendered_view_with_filenames=true does not change the output" do
+          config = build_config(annotate_rendered_view_with_filenames: true)
+          assert_equal "<foo>bar<foo>",
+            render("<foo>bar<foo>", config: config, filename: "_better_test.html.erb")
+        end
+      end
+
       test "capture works as intended" do
         output = render(<<-HTML)
       <%- foo = capture do -%>
@@ -420,13 +434,13 @@ module BetterHtml
         BetterHtml::Config.new(**options)
       end
 
-      def render(source, config: build_config, locals: {})
+      def render(source, config: build_config, locals: {}, filename: "test.html.erb")
         old_config = BetterHtml.config
         BetterHtml.config = config
 
         ActionView::Template.new(
           source,
-          "test.html.erb",
+          filename,
           ActionView::Template::Handlers::ERB.new,
           virtual_path: "partial",
           format: :html,
