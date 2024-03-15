@@ -4,12 +4,11 @@ require "better_html/better_erb"
 
 module BetterHtml
   class Railtie < Rails::Railtie
-    initializer "better_html.better_erb.initialization" do
+    initializer "better_html.better_erb.initialization" do |app|
       BetterHtml::BetterErb.prepend!
 
-      ActiveSupport.on_load(:action_view) do
-        BetterHtml.config.annotate_rendered_view_with_filenames = ActionView::Base.annotate_rendered_view_with_filenames
-      end
+      action_view_config = app.config.action_view
+      BetterHtml.config.annotate_rendered_view_with_filenames = action_view_config.annotate_rendered_view_with_filenames
     end
   end
 end
