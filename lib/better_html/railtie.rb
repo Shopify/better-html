@@ -6,7 +6,9 @@ module BetterHtml
   class Railtie < Rails::Railtie
     initializer "better_html.better_erb.initialization" do
       BetterHtml::BetterErb.prepend!
+    end
 
+    config.after_initialize do
       ActiveSupport.on_load(:action_view) do
         BetterHtml.config.annotate_rendered_view_with_filenames = ActionView::Base.annotate_rendered_view_with_filenames
       end
