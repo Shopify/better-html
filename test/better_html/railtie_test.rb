@@ -9,9 +9,11 @@ require "better_html/railtie"
 
 module BetterHtml
   class RailtieTest < ActiveSupport::TestCase
-    test "configuration is copied from ActionView" do
-      _ = ActionView::Base
-      assert BetterHtml.config.annotate_rendered_view_with_filenames
+    if Rails::VERSION::STRING >= "6.1"
+      test "configuration is copied from ActionView" do
+        _ = ActionView::Base
+        assert BetterHtml.config.annotate_rendered_view_with_filenames
+      end
     end
   end
 end
