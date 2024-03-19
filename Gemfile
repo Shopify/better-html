@@ -5,6 +5,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "actionview"
+gem "railties"
 gem "minitest"
 gem "mocha"
 gem "rake"
