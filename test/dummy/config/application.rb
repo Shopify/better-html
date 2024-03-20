@@ -6,6 +6,7 @@ require "rails/all"
 
 Bundler.require(*Rails.groups)
 require "better_html"
+require "better_html/railtie"
 
 module Dummy
   class Application < Rails::Application
