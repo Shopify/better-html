@@ -4,6 +4,5 @@ inherit_gem:
   rubocop-shopify: rubocop.yml
 
 AllCops:
-  TargetRubyVersion: 3.0
   NewCops: disable
   SuggestExtensions: false

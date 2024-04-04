@@ -40,7 +40,6 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3
           bundler-cache: true
       - name: Install Valgrind
         run: sudo apt-get install valgrind
@@ -54,7 +53,6 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1
           bundler-cache: true
       - name: Run style checks
         run: bundle exec rubocop
