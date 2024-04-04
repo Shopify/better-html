@@ -5,7 +5,6 @@ require "test_helper"
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../dummy/config/environment"
 
-
 module BetterHtml
   class RailtieTest < ActiveSupport::TestCase
     if Rails::VERSION::STRING >= "6.1"
