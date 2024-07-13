@@ -38,7 +38,7 @@ or if you prefer storing the config elsewhere, in a yml file for example:
 
 ```ruby
 # config/initializers/better_html.rb
-BetterHtml.config = BetterHtml::Config.new(YAML.load(File.read('/path/to/.better-html.yml')))
+BetterHtml.config = BetterHtml::Config.new(YAML.unsafe_load_file('/path/to/.better-html.yml'))
 ```
 
 Available configuration options are:
