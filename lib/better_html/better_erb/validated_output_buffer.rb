@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "base64"
+
 module BetterHtml
   class BetterErb
     class ValidatedOutputBuffer
@@ -7,7 +9,7 @@ module BetterHtml
         def initialize(output, context, code, auto_escape)
           @output = output
           @context = context
-          @code = code
+          @code = Base64.urlsafe_decode64(code)
           @auto_escape = auto_escape
         end
 

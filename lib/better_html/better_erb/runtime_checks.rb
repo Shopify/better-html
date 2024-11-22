@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "base64"
 require "action_view"
 
 module BetterHtml
@@ -32,7 +33,7 @@ module BetterHtml
       def add_expr_auto_escaped(src, code, auto_escape)
         flush_newline_if_pending(src)
 
-        escaped_code = escape_text(code)
+        escaped_code = Base64.urlsafe_encode64(code)
 
         src << "#{wrap_method}(@output_buffer, (#{parser_context.inspect}), '#{escaped_code}'.freeze, #{auto_escape})"
         method_name = "safe_#{@parser.context}_append"
