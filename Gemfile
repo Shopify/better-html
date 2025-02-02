@@ -9,6 +9,7 @@ gem "railties"
 gem "minitest"
 gem "mocha"
 gem "rake-compiler"
+gem "ostruct"
 gem "ruby_memcheck"
 
 group :deployment, :test do
