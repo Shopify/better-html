@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gemspec path: ".."
 
-gem "actionview", "~> 6.1.0"
+gem "actionview", "~> 7.2.0"
 gem "railties"
 gem "rake-compiler"
 gem "minitest"

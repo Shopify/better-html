@@ -2,18 +2,15 @@
 
 source "https://rubygems.org"
 
-gemspec
+gemspec path: ".."
 
-gem "actionview", "~> 8.0.0"
+gem "actionview", "~> 7.0.0"
 gem "railties"
+gem "rake-compiler"
 gem "minitest"
 gem "mocha"
-gem "rake"
-gem "rake-compiler"
 gem "ruby_memcheck"
 
 group :deployment, :test do
   gem "pry-byebug"
 end
-
-gem "rubocop-shopify"
