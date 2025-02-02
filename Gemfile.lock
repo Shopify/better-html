@@ -159,7 +159,7 @@ DEPENDENCIES
   mocha
   pry-byebug
   railties
-  rake
+  rake (~> 13)
   rake-compiler
   rubocop-shopify
   ruby_memcheck

@@ -8,7 +8,6 @@ gem "actionview"
 gem "railties"
 gem "minitest"
 gem "mocha"
-gem "rake"
 gem "rake-compiler"
 gem "ruby_memcheck"
 
