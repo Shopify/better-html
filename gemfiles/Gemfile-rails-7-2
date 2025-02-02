@@ -4,14 +4,12 @@ source "https://rubygems.org"
 
 gemspec path: ".."
 
-gem "actionview", "~> 6.0.0"
+gem "actionview", "~> 7.2.0"
 gem "railties"
 gem "rake-compiler"
 gem "minitest"
 gem "mocha"
 gem "ruby_memcheck"
-gem "logger", "~> 1.6"
-gem "mutex_m", "~> 0.3"
 
 group :deployment, :test do
   gem "pry-byebug"

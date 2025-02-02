@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     better_html (2.1.1)
-      actionview (>= 6.0)
-      activesupport (>= 6.0)
+      actionview (>= 7.0)
+      activesupport (>= 7.0)
       ast (~> 2.0)
       erubi (~> 1.4)
       parser (>= 2.4)
@@ -166,7 +166,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  actionview
+  actionview (~> 8.0.0)
   better_html!
   minitest
   mocha
@@ -179,4 +179,4 @@ DEPENDENCIES
   ruby_memcheck
 
 BUNDLED WITH
-   2.6.2
+   2.6.3
