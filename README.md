@@ -56,7 +56,7 @@ Available configuration options are:
   by `SafeErbTester` when determining whether or not a given attribute value will be eval'ed as javascript.
   Defaults to `[/\Aon/i]` (matches `onclick` for example).
 * `template_exclusion_filter`: This is called when determining whether to apply runtime checks on a `.erb` template.
-  When this `Proc` returns false, no safety checks are applied and parsing is done using the default Rails erubi engine.
+  When this `Proc` returns true, no safety checks are applied and parsing is done using the default Rails erubi engine.
   For example, to exclude erb templates provided by libraries, use: `Proc.new { |filename| !filename.start_with?(Rails.root.to_s) }`.
   Defaults to `nil` (all html.erb templates are parsed).
 
