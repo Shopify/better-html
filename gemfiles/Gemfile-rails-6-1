@@ -10,6 +10,8 @@ gem "rake-compiler"
 gem "minitest"
 gem "mocha"
 gem "ruby_memcheck"
+gem "logger", "~> 1.6"
+gem "mutex_m", "~> 0.3"
 
 group :deployment, :test do
   gem "pry-byebug"

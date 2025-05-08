@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "logger"
 require "active_support/core_ext/hash/keys"
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/class/attribute_accessors"
