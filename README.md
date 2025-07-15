@@ -240,7 +240,7 @@ class ErbImplementationTest < ActiveSupport::TestCase
     pathname = Pathname.new(filename).relative_path_from(Rails.root)
     test "html errors in #{pathname}" do
       data = File.read(filename)
-      BetterHtml::BetterErb::ErubiImplementation.new(data, filename:).validate!
+      assert_nothing_raised { BetterHtml::BetterErb::ErubiImplementation.new(data, filename:).validate! }
     end
   end
 end
