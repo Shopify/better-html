@@ -120,7 +120,7 @@ GEM
     regexp_parser (2.9.0)
     reline (0.4.3)
       io-console (~> 0.5)
-    rexml (3.3.9)
+    rexml (3.4.2)
     rubocop (1.62.1)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
