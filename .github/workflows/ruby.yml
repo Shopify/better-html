@@ -31,7 +31,7 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
     - name: Run tests
-      run: bin/rake
+      run: bundle exec rake
   memcheck:
     name: Memcheck
     runs-on: ubuntu-latest
@@ -44,7 +44,7 @@ jobs:
       - name: Install Valgrind
         run: sudo apt-get install valgrind
       - name: Run tests
-        run: bin/rake test:valgrind
+        run: bundle exec rake test:valgrind
   lint:
     runs-on: ubuntu-latest
     name: Lint
@@ -55,7 +55,7 @@ jobs:
         with:
           bundler-cache: true
       - name: Run style checks
-        run: bin/rubocop
+        run: bundle exec rubocop
   buildall:
     if: ${{ always() }}
     runs-on: ubuntu-latest
