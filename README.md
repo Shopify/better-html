@@ -1,4 +1,3 @@
-double-quote character (`"`) at runtime, then the resulting HTML would be invalid,
 <h1 align="center">better_html (DEPRECATED)</h1>
 
 > This project is no longer actively maintained. It has been superseded by the tools and guidance available at **https://herb-tools.dev/**.
