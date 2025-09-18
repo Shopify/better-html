@@ -39,7 +39,7 @@ module BetterHtml
       def line_source_with_underline
         spaces = source_line.scan(/\A\s*/).first
         column_without_spaces = [column - spaces.length, 0].max
-        underscore_length = (end_pos - begin_pos).clamp(1, (source_line.length - column_without_spaces))
+        underscore_length = (end_pos - begin_pos).clamp(1, source_line.length - column_without_spaces)
         "#{source_line.gsub(/\A\s*/, "")}\n#{" " * column_without_spaces}#{"^" * underscore_length}"
       end
 

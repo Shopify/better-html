@@ -33,7 +33,7 @@ module BetterHtml
             captures = scan_pattern.match(scanned).captures
 
             if (pre_match = captures[0])
-              add_text(pre_match) if pre_match.present? # rubocop:disable Metrics/BlockNesting
+              add_text(pre_match) if pre_match.present?
             end
 
             match = captures[1]
