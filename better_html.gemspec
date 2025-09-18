@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.description = "Better HTML for Rails. Provides sane html helpers that make it easier to do the right thing."
   s.license     = "MIT"
 
-  s.required_ruby_version = ">= 3.0.0"
+  s.required_ruby_version = ">= 3.2.0"
 
   s.metadata = {
     "bug_tracker_uri" => "https://github.com/Shopify/better-html/issues",
@@ -29,8 +29,8 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib,ext}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.require_paths = ["lib"]
 
-  s.add_dependency("actionview", ">= 6.0")
-  s.add_dependency("activesupport", ">= 6.0")
+  s.add_dependency("actionview", ">= 7.0")
+  s.add_dependency("activesupport", ">= 7.0")
   s.add_dependency("ast", "~> 2.0")
   s.add_dependency("erubi", "~> 1.4")
   s.add_dependency("parser", ">= 2.4")
