@@ -74,6 +74,7 @@ GEM
     nokogiri (1.17.2)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
+    ostruct (0.6.1)
     parallel (1.24.0)
     parser (3.3.0.5)
       ast (~> 2.4.1)
@@ -158,12 +159,13 @@ DEPENDENCIES
   better_html!
   minitest
   mocha
+  ostruct
   pry-byebug
   railties
-  rake
+  rake (~> 13)
   rake-compiler
   rubocop-shopify
   ruby_memcheck
 
 BUNDLED WITH
-   2.2.22
+   2.6.2
