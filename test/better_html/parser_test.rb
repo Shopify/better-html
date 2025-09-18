@@ -248,6 +248,37 @@ module BetterHtml
         tree.ast
     end
 
+    test "consumes tag attributes without value" do
+      tree = Parser.new(buffer("<div foo=>bar</div>"))
+      assert_equal s(
+        :document,
+        s(
+          :tag,
+          nil,
+          s(:tag_name, "div"),
+          s(
+            :tag_attributes,
+            s(
+              :attribute,
+              s(:attribute_name, "foo"),
+              s(:equal),
+              nil,
+            ),
+          ),
+          nil,
+        ),
+        s(:text, "bar"),
+        s(
+          :tag,
+          s(:solidus),
+          s(:tag_name, "div"),
+          nil,
+          nil,
+        ),
+      ),
+        tree.ast
+    end
+
     test "consume tag attributes nodes interpolation in name and value" do
       tree = Parser.new(buffer("<div data-<%= foo %>=\"some <%= value %> foo\">"))
       assert_equal s(

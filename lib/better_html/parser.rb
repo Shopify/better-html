@@ -191,7 +191,7 @@ module BetterHtml
         :attribute_unquoted_value,
       )
 
-      build_node(:attribute_value, children)
+      build_node(:attribute_value, children) if children.any?
     end
 
     def build_text_node(tokens)
